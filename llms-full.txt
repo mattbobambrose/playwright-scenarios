@@ -1,0 +1,261 @@
+# playwright-scenarios
+
+> Claude Code plugin marketplace for scenario-driven Playwright testing — record scenarios by driving a browser, audit them against the live site, and generate tests in the configured language and framework (default: Kotlin + Kotest StringSpec with Playwright-for-Java).
+
+This repository is a Claude Code plugin marketplace (no application source). It ships a single plugin, `playwright-scenarios`, that lets JVM projects (and, over time, other stacks) author browser-driven test scenarios as flat markdown files, audit those scenarios against the live site, and translate them into test classes. Per-project behavior is driven by `.claude/playwright-scenarios.local.md`.
+
+## Docs
+
+### README (key sections)
+
+**Plugin purpose**
+Author browser-driven scenarios as markdown, audit them against the live site, and generate tests.
+
+**Commands**
+
+| Command | Description |
+|---------|-------------|
+| `/record-scenario [name]` | Launch Playwright codegen, capture a real user flow, and write a draft scenario markdown file to the configured scenario directory. Auto-chains into `/review-scenario`. |
+| `/review-scenario [names...]` | Audit scenarios against the live site and apply improvements to the markdown. |
+| `/scenario-to-tests [names...]` | Generate tests (defaults: Kotlin + Kotest StringSpec with Playwright-for-Java) from reviewed scenarios. |
+| `/playwright-scenarios-config` | View or update per-project settings in `.claude/playwright-scenarios.local.md`. |
+
+**Skills**
+
+| Skill | Description |
+|-------|-------------|
+| `loading-config` | Reads `.claude/playwright-scenarios.local.md` and bootstraps it on first use; invoked at the start of every command. |
+| `authoring-scenarios` | Flat-markdown format reference used whenever Claude hand-writes or edits a scenario markdown file. |
+
+**Host project setup (Kotlin + Kotest default)**
+1. `testImplementation("com.microsoft.playwright:playwright:...")` and `testImplementation("io.kotest:kotest-runner-junit5:...")` in `build.gradle.kts`.
+2. Gradle tasks `recordScenario` (wraps `com.microsoft.playwright.CLI codegen`, driven by `-Purl=` / `-Pout=` properties) and `installPlaywrightBrowsers` (runs `CLI install`, required once before first recording).
+3. Scenario directory — configured via `scenario_dir` (default `src/test/scenarios/`). Drafts live in a `drafts/` subdirectory and are skipped by `/review-scenario` and `/scenario-to-tests`.
+4. A base test class extending Kotest's `StringSpec` that owns the Playwright browser lifecycle. Its directory is captured in `test_dir` when the plugin is first configured.
+
+**Configuration** (`.claude/playwright-scenarios.local.md`)
+
+```markdown
+---
+scenario_dir: src/test/scenarios
+test_dir: src/test/kotlin/com/example/qa/scenarios
+test_language: kotlin
+test_framework: kotest-stringspec
+---
+```
+
+Currently supported combinations for `/scenario-to-tests`: `kotlin` + `kotest-stringspec` only. Other values are accepted and persisted but `/scenario-to-tests` aborts with a clear message until generation rules for that stack are added.
+
+**Workflow**
+1. Record: `/record-scenario checkout-flow` opens a browser, the user demonstrates the flow, a draft `<scenario_dir>/checkout-flow.md` is written.
+2. Review: `/review-scenario checkout-flow` validates claims against the live site and rewrites the markdown in place.
+3. Generate: `/scenario-to-tests checkout-flow` emits a test file in `<test_dir>`.
+
+---
+
+### CLAUDE.md
+
+```markdown
+# playwright-scenarios
+
+Claude Code plugin marketplace. No application source — just plugin definitions under `plugins/`.
+
+## Layout
+
+- `.claude-plugin/marketplace.json` — marketplace manifest (lists plugins, versions, metadata).
+- `plugins/<name>/.claude-plugin/plugin.json` — per-plugin manifest.
+- `plugins/<name>/commands/` — slash commands (markdown with YAML frontmatter).
+- `plugins/<name>/skills/<skill-name>/SKILL.md` — skills (auto-loaded by trigger description).
+
+## Version bumps
+
+When bumping a plugin version, update both `plugin.json` and the matching entry in `marketplace.json`, then add a `CHANGELOG.md` entry.
+
+## Testing plugin changes
+
+No automated tests. Validate by installing the plugin locally and running the commands against a real host project.
+
+## Plugin runtime config
+
+The `playwright-scenarios` plugin reads per-project settings from `.claude/playwright-scenarios.local.md` (YAML frontmatter: `scenario_dir`, `test_dir`, `test_language`, `test_framework`). Every command starts by invoking the `loading-config` skill, which prompts the user and creates the file on first use. Use `/playwright-scenarios-config` to re-prompt.
+```
+
+---
+
+## Plugin manifests
+
+### .claude-plugin/marketplace.json
+
+```json
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "playwright-scenarios",
+  "description": "Record, review, and generate Playwright tests from human-readable scenario markdown",
+  "owner": { "name": "mattbobambrose" },
+  "plugins": [
+    {
+      "name": "playwright-scenarios",
+      "source": "./plugins/playwright-scenarios",
+      "description": "Author browser-driven scenarios as markdown, audit them against the live site, and generate JVM Playwright + Kotest tests",
+      "version": "0.1.0",
+      "author": { "name": "mattbobambrose" },
+      "category": "testing",
+      "keywords": ["playwright", "testing", "kotest", "jvm", "kotlin", "e2e", "codegen"],
+      "license": "MIT",
+      "repository": "https://github.com/mattbobambrose/playwright-scenarios"
+    }
+  ]
+}
+```
+
+### plugins/playwright-scenarios/.claude-plugin/plugin.json
+
+```json
+{
+  "name": "playwright-scenarios",
+  "version": "0.1.0",
+  "description": "Author browser-driven scenarios as markdown, audit them against the live site, and generate JVM Playwright + Kotest tests",
+  "author": { "name": "mattbobambrose" }
+}
+```
+
+---
+
+## Commands
+
+### /record-scenario
+
+**Description:** Record a new website validation scenario by driving a real browser. Launches Playwright codegen, captures clicks/typing/assertions, then writes a draft scenario markdown file to the configured scenario directory.
+
+**Arguments:** optional `name` (kebab-case scenario filename; inferred from recorded actions if omitted).
+
+**Phases:**
+0. **Load config.** Invoke the `loading-config` skill to resolve `<SCENARIO_DIR>` (and the rest, for first-run bootstrap). Prompts the user if `.claude/playwright-scenarios.local.md` is missing.
+1. **Determine scenario name.** Validate kebab-case if supplied; otherwise defer inference to step 6. Always prompt for the start URL — no default.
+2. **Collision check.** If name is known and `<SCENARIO_DIR>/<name>.md` exists, ask before overwriting.
+3. **Brief the user on Playwright Inspector controls** (Assert visibility / text / value toolbar buttons).
+4. **Run the recorder.** `./gradlew recordScenario -Purl=<start-url> -Pout=build/recordings/<filename>.java` with a long timeout. If the browser binary is missing, prompt the user to run `./gradlew installPlaywrightBrowsers`.
+5. **Read the emitted Java recording file.**
+6. **Infer name** (if not supplied): 2–4 kebab-case words from the primary user intent; collision check; confirm with the user.
+7. **Convert to scenario markdown.** The `authoring-scenarios` skill is the authoritative reference for format, voice, selector rules, grouping, and known gotchas. Peek at an existing file under `<SCENARIO_DIR>` (if any) to match house style.
+8. **Write** `<SCENARIO_DIR>/<name>.md`.
+9. **Report** path and one-line summary.
+10. **Auto-chain** into `/review-scenario <name>` unless the user asked to skip review. Do not auto-run `/scenario-to-tests`.
+
+**Playwright Java API → scenario markdown:**
+
+- `page.navigate(url)` → first bullet: `- **Action:** Navigate to <url>` (or fold into the `**URL:**` header if it matches).
+- `page.getByRole(..., setName("X")).click()` → `- **Action:** Click "X"`.
+- `page.getByLabel("Email").fill("foo@bar")` → `- **Email:** foo@bar` then `- **Action:** Enter email …`.
+- `page.selectOption(...)` → `- **Action:** Select "<value>" from the <label> dropdown`.
+- `page.setViewportSize(w, h)` → `- **Viewport:** <w>x<h>`.
+- `assertThat(locator).isVisible()` → `- **Expected:** The <element description> is visible`.
+- `assertThat(locator).hasText("X")` → `- **Expected:** The <element description> shows "X"`.
+- `assertThat(locator).hasValue("X")` → `- **Expected:** The <field description> contains "X"`.
+
+---
+
+### /review-scenario
+
+**Description:** Audit website validation scenarios in the project's scenario directory against the live site and apply improvements to the markdown.
+
+**Arguments:** zero or more scenario names (without `.md`). Never generates tests.
+
+**Phases:**
+0. **Load config** via `loading-config`. Only `<SCENARIO_DIR>` is used, but bootstrap happens here if the config is missing.
+1. **Determine scenarios.** Zero args → all top-level `.md` files in `<SCENARIO_DIR>` (skip `SCENARIOS.md` and subdirectories). Named args → only those; warn and skip drafts unless overridden.
+2. **Live-site verification (main thread).** For each scenario, open the URL via the `playwright-cli` skill, walk the test cases, and collect findings tagged `broken` / `vague` / `missing-coverage` / `style`.
+3. **Improvement generation + auto-apply (parallel subagents).** One subagent per scenario, given the original markdown, its Phase 2 findings, and up to two style-reference scenarios from `<SCENARIO_DIR>` (or the `authoring-scenarios` skill if none exist). Rules: preserve title/URL unless broken, don't delete tests, fix broken claims, tighten vague expectations, at most one new test per missing-coverage finding, don't reformat for style unless flagged, don't emit test code.
+4. **Summary report.** Per-scenario findings counts, applied changes, deliberately-skipped findings with reasons. No build/test command.
+
+---
+
+### /scenario-to-tests
+
+**Description:** Generate tests in the project's configured language and framework from reviewed scenarios.
+
+**Arguments:** zero or more scenario names (without `.md`).
+
+**Phases:**
+0. **Load config** via `loading-config`. Resolve `<SCENARIO_DIR>`, `<TEST_DIR>`, `<TEST_LANGUAGE>`, `<TEST_FRAMEWORK>`. Derive `SCENARIOS_PACKAGE` (JVM: strip `src/test/<lang>/` from `<TEST_DIR>`, swap `/` for `.`) and `BASE_PACKAGE` (glob for a `BasePageTest`-style class). **Unsupported-combo guard:** if `<TEST_LANGUAGE>` ≠ `kotlin` or `<TEST_FRAMEWORK>` ≠ `kotest-stringspec`, abort with a clear message and write no files.
+1. **Determine scenarios** — same rules as `/review-scenario`.
+2. **Browser exploration (main thread).** Walk each scenario via the `playwright-cli` skill; record errors, selectors, URLs. Screenshots go in `screenshots/`.
+3. **Test generation (parallel subagents).** One subagent per scenario; receives scenario content, observations, and the resolved config. Subagents write the test file but don't run the build.
+4. **Run tests.** Named args → target specific test classes (`--tests "com.example.qa.scenarios.LoginInvalidCredentialsTest"`). Zero args → target the whole package (`--tests "<SCENARIOS_PACKAGE>.*"`). Fix failures sequentially.
+
+**Kotlin + Kotest StringSpec generation rules:**
+- Kotest StringSpec with `init` block.
+- Extend the base test class from `BASE_PACKAGE`.
+- Class in `SCENARIOS_PACKAGE`, named after the scenario file (`login-invalid-credentials.md` → `LoginInvalidCredentialsTest`).
+- Written to `<TEST_DIR>`.
+
+---
+
+### /playwright-scenarios-config
+
+**Description:** View or update the playwright-scenarios per-project settings stored in `.claude/playwright-scenarios.local.md`.
+
+**Steps:**
+1. Invoke `loading-config`. If the file didn't exist, the skill bootstrapped it and this command is done.
+2. Otherwise, show the current values in a compact table.
+3. Re-prompt each of the four fields (pre-filling current value as the first option).
+4. Write the YAML frontmatter back, preserving any hand-written markdown body below.
+5. Report which fields changed.
+
+---
+
+## Skills
+
+### loading-config
+
+**Description:** Load per-project configuration for the playwright-scenarios plugin from `.claude/playwright-scenarios.local.md`. Triggers automatically at the start of every playwright-scenarios command. Prompts the user for the four required fields (`scenario_dir`, `test_dir`, `test_language`, `test_framework`) on first run and persists them.
+
+**Config schema:** YAML frontmatter with four fields, plus a markdown body (free-form human notes).
+
+**Resolution procedure:**
+1. Read `.claude/playwright-scenarios.local.md`.
+2. If present and frontmatter parses cleanly → return the four values.
+3. If present but malformed → abort with a clear message pointing the user at `/playwright-scenarios-config`. Never silently overwrite.
+4. If missing → bootstrap: ensure `.claude/` exists, prompt each field via `AskUserQuestion` (defaults: `scenario_dir=src/test/scenarios`, `test_dir`=auto-detected from `BasePageTest` glob, `test_language=kotlin`, `test_framework=kotest-stringspec`), write the file, return the values.
+
+**Non-responsibilities:**
+- Does not validate that `test_dir` exists on disk.
+- Does not hot-reload; callers must re-invoke to pick up edits made mid-session.
+- Does not prompt for build tool or Playwright binding; those are derived internally from `test_language` (Kotlin/Java → Gradle + Playwright-for-Java; TypeScript → npm + Playwright Test; Python → pip + Playwright-Python).
+
+---
+
+### authoring-scenarios
+
+**Description:** Conventions for hand-writing or editing scenario markdown files in the project's scenario directory — the flat format that `/review-scenario` audits and `/scenario-to-tests` consumes. Scenario directory configured in `.claude/playwright-scenarios.local.md` (default `src/test/scenarios/`).
+
+**File structure:**
+
+```markdown
+# <Title Case Title>
+
+**URL:** <start path or full url>
+
+<Optional one-line description of the flow.>
+
+## Test 1: <short imperative description>
+
+- **Action:** <what the user does>
+- **Expected:** <what should be true after the action>
+```
+
+**Required:** top-level `# <Title>`, `**URL:**` line, one or more `## Test N:` sections numbered from 1, at least one Action and one Expected bullet per test.
+
+**Optional:** `**Viewport:** <w>x<h>`; input-data bullets (`- **Email:** foo@bar.com`) referenced by a later Action.
+
+**Voice:** imperative Actions, descriptive Expecteds.
+
+**Selectors:** preserve concrete role+name / labels / visible text so the auditor can match live DOM. Avoid abstract phrases when a role+name exists.
+
+**Grouping:** one continuous flow → one Test; same form with multiple inputs → one Test per input set; re-navigation usually marks a new Test.
+
+**Gotchas:**
+- Native HTML5 validation tooltips are not DOM — express as `- **Expected:** The email field reports a missing-value validation error`; the generator translates to `validity.valueMissing` / `validity.typeMismatch`.
+- New-tab / cross-origin links — express as `- **Expected:** The '<label>' link points to <url>`; the generator checks `getAttribute("href")` instead of clicking.
+
+**After editing:** for non-trivial changes, suggest the user run `/review-scenario <name>` to re-validate claims before regenerating tests.

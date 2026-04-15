@@ -1,0 +1,33 @@
+# playwright-scenarios
+
+> Claude Code plugin marketplace for scenario-driven Playwright testing — record scenarios by driving a browser, audit them against the live site, and generate JVM Playwright + Kotest tests from the reviewed markdown.
+
+This repository is a Claude Code plugin marketplace (no application source). It ships a single plugin, `playwright-scenarios`, that lets JVM projects author browser-driven test scenarios as flat markdown files, audit those scenarios against the live site, and translate them into Kotest + Playwright-for-Java test classes.
+
+## Docs
+
+- [README](README.md): Installation, host-project setup (Gradle tasks, dependencies, base test class), and the record → review → generate workflow.
+- [CLAUDE.md](CLAUDE.md): Repo orientation for Claude — layout, version-bump rule, and testing notes.
+- [CHANGELOG](CHANGELOG.md): Release notes.
+
+## Plugin manifests
+
+- [marketplace.json](.claude-plugin/marketplace.json): Marketplace manifest listing the `playwright-scenarios` plugin.
+- [plugin.json](plugins/playwright-scenarios/.claude-plugin/plugin.json): Plugin manifest (name, version, description, author).
+
+## Commands
+
+- [/record-scenario](plugins/playwright-scenarios/commands/record-scenario.md): Launch Playwright codegen, capture a real user flow, and write a draft scenario markdown file to the configured scenario directory. Auto-chains into `/review-scenario`.
+- [/review-scenario](plugins/playwright-scenarios/commands/review-scenario.md): Audit scenarios against the live site and apply improvements to the markdown.
+- [/scenario-to-tests](plugins/playwright-scenarios/commands/scenario-to-tests.md): Generate tests (Kotlin + Kotest StringSpec by default) from reviewed scenarios.
+- [/playwright-scenarios-config](plugins/playwright-scenarios/commands/config.md): View or update per-project settings stored in `.claude/playwright-scenarios.local.md`.
+
+## Skills
+
+- [loading-config](plugins/playwright-scenarios/skills/loading-config/SKILL.md): Reads `.claude/playwright-scenarios.local.md`; prompts the user and bootstraps it on first use. Invoked at the start of every playwright-scenarios command.
+- [authoring-scenarios](plugins/playwright-scenarios/skills/authoring-scenarios/SKILL.md): Flat-markdown scenario format reference; used whenever Claude hand-writes or edits a scenario markdown file.
+
+## Optional
+
+- [CHANGELOG](CHANGELOG.md)
+- [License](LICENSE)
