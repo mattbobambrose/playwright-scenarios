@@ -3,13 +3,21 @@ name: record-scenario
 description: Record a new website validation scenario by driving a real browser. Launches Playwright codegen, captures clicks/typing/assertions, then writes a draft scenario markdown file to the project's configured scenario directory.
 arguments:
   - name: name
-    description: Optional kebab-case scenario name. If omitted, the name is inferred from the recorded actions.
+    description: Optional kebab-case scenario name, optionally followed by flags. If the name is omitted, it is inferred from the recorded actions. Supported flag - --no-review (skip the auto-chain into /review-scenario at the end).
     required: false
 ---
 
 # Record Scenario
 
 Create a new scenario by *demonstrating* it in a browser instead of writing markdown from scratch. This command launches Playwright codegen, lets the user drive a real browser, captures their actions and marked assertions, and produces a draft `<SCENARIO_DIR>/<name>.md` file that feeds into the existing `/review-scenario` → `/scenario-to-tests` pipeline.
+
+## Argument parsing
+
+Split the argument string into **flags** (tokens starting with `--`) and a **name** (the first non-flag token, if any):
+
+- `--no-review` — skip the auto-chain into `/review-scenario` at step 10. Off by default (review runs automatically).
+
+Any unknown `--`-prefixed token should be reported as an error before doing any work.
 
 ## Prerequisites
 
@@ -91,7 +99,7 @@ If no name was supplied as an argument, infer a kebab-case name from the recorde
 
 Produce a short name (2–4 kebab-case words) that would make sense as a test filename. Examples: `login-invalid-credentials`, `email-signup-form`, `care-plan-intake-basics`.
 
-Then check for collisions: if `<SCENARIO_DIR>/<inferred-name>.md` already exists, append a disambiguator (`-v2`, `-alt`) or ask the user to confirm/rename before overwriting. Do not silently overwrite.
+Then check for collisions: if `<SCENARIO_DIR>/<inferred-name>.md` already exists, try `-v2`, `-v3`, etc. until a free name is found, or ask the user to pick a new name. Do not silently overwrite.
 
 Briefly tell the user the inferred name and give them a chance to override it before writing.
 
@@ -123,13 +131,14 @@ Write the converted markdown to `<SCENARIO_DIR>/<name>.md` using the Write tool,
 Tell the user:
 - The path of the draft file.
 - A one-line summary of what was recorded (e.g. "3 actions, 2 assertions across 1 test").
-- That you are about to chain into `/review-scenario <name>` automatically (next step).
-- That `/scenario-to-tests <name>` is still a manual follow-up they can run when ready.
+- If `--no-review` was **not** passed: that you are about to chain into `/review-scenario <name>` automatically (next step).
+- If `--no-review` **was** passed: that review is skipped; they can run `/review-scenario <name>` manually when ready.
+- That `/scenario-to-tests <name>` is always a manual follow-up.
 
 ### 10. Auto-chain into `/review-scenario`
 
-Immediately execute the `/review-scenario <name>` command inline — run its procedure (audit the just-written scenario against the live site and apply improvements) as a continuation of this turn. Do not wait for user confirmation. The newly written scenario almost always benefits from a live-site audit before tests are generated, and the previous manual hand-off was friction with no upside.
+**If `--no-review` was passed**, skip this step entirely.
+
+Otherwise, immediately execute the `/review-scenario <name>` command inline — run its procedure (audit the just-written scenario against the live site and apply improvements) as a continuation of this turn. Do not wait for user confirmation. The newly written scenario almost always benefits from a live-site audit before tests are generated.
 
 Do **not** auto-run `/scenario-to-tests` — test generation is a heavier step that the user should opt into explicitly.
-
-If the user has clearly indicated they want to skip review (e.g. they said "just record, don't review" when invoking the command), skip this step and let them know.

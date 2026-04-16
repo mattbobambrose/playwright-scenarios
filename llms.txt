@@ -2,7 +2,7 @@
 
 > Claude Code plugin marketplace for scenario-driven Playwright testing — record scenarios by driving a browser, audit them against the live site, and generate JVM Playwright + Kotest tests from the reviewed markdown.
 
-This repository is a Claude Code plugin marketplace (no application source). It ships a single plugin, `playwright-scenarios`, that lets JVM projects author browser-driven test scenarios as flat markdown files, audit those scenarios against the live site, and translate them into Kotest + Playwright-for-Java test classes.
+This repository is a Claude Code plugin marketplace (no application source). It ships a single plugin, `playwright-scenarios`, that lets projects author browser-driven test scenarios as flat markdown files (manually or via autonomous crawl), audit those scenarios against the live site, and translate them into test classes. Per-project behavior is driven by `.claude/playwright-scenarios.local.md` (default stack: Kotlin + Kotest StringSpec + Playwright-for-Java).
 
 ## Docs
 
@@ -17,10 +17,11 @@ This repository is a Claude Code plugin marketplace (no application source). It 
 
 ## Commands
 
-- [/record-scenario](plugins/playwright-scenarios/commands/record-scenario.md): Launch Playwright codegen, capture a real user flow, and write a draft scenario markdown file to the configured scenario directory. Auto-chains into `/review-scenario`.
-- [/review-scenario](plugins/playwright-scenarios/commands/review-scenario.md): Audit scenarios against the live site and apply improvements to the markdown.
-- [/scenario-to-tests](plugins/playwright-scenarios/commands/scenario-to-tests.md): Generate tests (Kotlin + Kotest StringSpec by default) from reviewed scenarios.
-- [/playwright-scenarios-config](plugins/playwright-scenarios/commands/config.md): View or update per-project settings stored in `.claude/playwright-scenarios.local.md`.
+- [/record-scenario](plugins/playwright-scenarios/commands/record-scenario.md): Launch Playwright codegen, capture a real user flow, and write a draft scenario markdown file. Auto-chains into `/review-scenario` unless `--no-review` is passed.
+- [/crawl-site](plugins/playwright-scenarios/commands/crawl-site.md): Read-only crawl starting from a URL; emits user-flow-oriented drafts to `<scenario_dir>/drafts/`. Accepts `--depth` and `--max-scenarios`. Complementary seed-generator to `/record-scenario`.
+- [/review-scenario](plugins/playwright-scenarios/commands/review-scenario.md): Audit scenarios against the live site and apply improvements to the markdown. Accepts `--include-drafts`.
+- [/scenario-to-tests](plugins/playwright-scenarios/commands/scenario-to-tests.md): Generate tests (Kotlin + Kotest StringSpec by default) from reviewed scenarios. Accepts `--include-drafts` and `--dry-run`.
+- [/playwright-scenarios-config](plugins/playwright-scenarios/commands/config.md): View or update per-project settings stored in `.claude/playwright-scenarios.local.md`. Also the recovery path for a malformed config file.
 
 ## Skills
 

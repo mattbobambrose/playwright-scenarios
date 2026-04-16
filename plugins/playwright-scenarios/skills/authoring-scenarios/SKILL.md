@@ -44,6 +44,11 @@ All three produce files that must conform to the format below, because `/scenari
 
 - **`**Viewport:** <w>x<h>`** as a top-level bullet sets the browser viewport (e.g. `**Viewport:** 390x844` for mobile).
 - **Input data bullets** like `- **Email:** foo@bar.com` or `- **Password:** hunter2` — these are referenced by a later `- **Action:** Enter email ...` bullet and get inlined into the generated test.
+- **`**Fixture:** <path>`** — References a typed fixture file (e.g. `fixtures/sarah-mitchell`). The test generator imports it rather than inlining data values. Place at the top of the scenario alongside `**URL:**`.
+- **`**Prerequisite:** <scenario-name> (Tests N-M)`** — Declares that this scenario depends on another scenario's flow as setup. The test generator emits a `beforeAll` (or setup test block) that runs the referenced scenario's flow, sharing the page across tests. Place at the top of the scenario.
+- **`**Assert throughout:** <assertion>`** — A flow-wide assertion checked across the entire test, not scoped to a single test case (e.g. "No application JS console errors"). The test generator wraps the flow in a listener and asserts at the end. Place at the top of the scenario.
+- **`**Expected failure:** <reason>`** — Marks a test as expected to fail today. Place as the first bullet inside a `## Test N:` section, before any Action/Expected bullets. The test generator emits `test.fail()` (Playwright TS) or the framework's equivalent. When the underlying bug is fixed, the test flips from "expected failure" to real failure, signaling the guard can be removed.
+- **`**Expected (regex):** <pattern>`** — Like `**Expected:**` but uses regex matching instead of exact substring. The test generator emits `toMatch(/<pattern>/i)` instead of `shouldContain`. Use for assertions where the content varies between runs (e.g. LLM-generated text) but should match a semantic pattern.
 
 ## Authoring rules
 
@@ -69,7 +74,9 @@ Avoid abstract descriptions like "the submit button" when a role+name exists. `/
 - **Native HTML5 validation tooltips** are not DOM elements. For a "required field" assertion, write `- **Expected:** The email field reports a missing-value validation error` — `/scenario-to-tests` translates this to `validity.valueMissing` / `validity.typeMismatch` checks, not text assertions.
 - **Links that open in a new tab** (e.g. `target="_blank"` to another origin) should be expressed as `- **Expected:** The '<label>' link points to <url>` — the generated test checks `getAttribute("href")` rather than clicking, which avoids cross-origin test pollution.
 
-## Example
+## Examples
+
+### Basic scenario
 
 ```markdown
 # Email Signup Form
@@ -93,6 +100,33 @@ A visitor subscribes to the newsletter from the homepage footer.
 - **Action:** Enter the email into the 'Email address' field.
 - **Action:** Click the 'Subscribe' button.
 - **Expected:** The email field reports a type-mismatch validation error.
+```
+
+### Extended tags
+
+```markdown
+# Care Plan Structure
+
+**URL:** https://app.eo.care/careplan
+**Fixture:** fixtures/sarah-mitchell
+**Prerequisite:** profiling-happy-path (Tests 1-4)
+
+Verify the rendered care plan structure after completing the profiling flow.
+
+## Test 1: Header renders with patient name
+
+- **Expected:** A heading containing "Sarah's Care Plan" is present
+
+## Test 2: Recommendation is personalized
+
+- **Action:** Locate the "Why this?" recommendation text
+- **Expected (regex):** The text matches /chemotherapy|cancer|carcinoma/i
+
+## Test 3: Email collision error grammar
+
+- **Expected failure:** Copy bug — "is" missing from error message
+- **Action:** Submit with duplicate email
+- **Expected:** Error reads "The email address is already taken."
 ```
 
 ## After editing

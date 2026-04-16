@@ -37,10 +37,11 @@ Author browser-driven scenarios as markdown, audit them against the live site, a
 
 | Command | Description |
 |---------|-------------|
-| `/record-scenario [name]` | Launch Playwright codegen, capture a real user flow, and write a draft scenario markdown file to the configured scenario directory |
-| `/review-scenario [names...]` | Audit scenarios against the live site and apply improvements to the markdown |
-| `/scenario-to-tests [names...]` | Generate tests (defaults: Kotlin + Kotest StringSpec with Playwright-for-Java) from reviewed scenarios |
-| `/playwright-scenarios-config` | View or update per-project settings in `.claude/playwright-scenarios.local.md` |
+| `/record-scenario [name] [--no-review]` | Launch Playwright codegen, capture a real user flow, and write a draft scenario markdown file to the configured scenario directory. Auto-chains into `/review-scenario` unless `--no-review` is passed. |
+| `/crawl-site <start-url> [--depth=N] [--max-scenarios=N]` | Read-only crawl of a site (start URL + same-origin links one hop out by default). Emits user-flow-oriented draft scenarios to `<scenario_dir>/drafts/`. Never submits forms or clicks destructive buttons — for that, use `/record-scenario`. |
+| `/review-scenario [names...] [--include-drafts]` | Audit scenarios against the live site and apply improvements to the markdown. Pass `--include-drafts` to include files under subdirectories. |
+| `/scenario-to-tests [names...] [--include-drafts] [--dry-run]` | Generate tests (defaults: Kotlin + Kotest StringSpec with Playwright-for-Java) from reviewed scenarios. `--dry-run` writes the files but skips the test run. |
+| `/playwright-scenarios-config` | View or update per-project settings in `.claude/playwright-scenarios.local.md`. Also the recovery path when that file is malformed. |
 
 **Skills**
 
@@ -99,13 +100,31 @@ Run the install task once after adding the Playwright dependency:
 ./gradlew installPlaywrightBrowsers
 ```
 
-### 3. Scenario directory
+### 3. `playwright-cli` (for `/review-scenario`, `/scenario-to-tests`, and `/crawl-site`)
+
+These three commands use the `playwright-cli` skill during their live-site exploration phase, which shells out to the `playwright-cli` binary. Install it globally:
+
+```
+npm install -g @playwright/cli@latest
+```
+
+Or verify a local copy via `npx`:
+
+```
+npx --no-install playwright-cli --version
+```
+
+If `npx playwright-cli --version` works, the commands will fall back to `npx playwright-cli` automatically — no global install needed.
+
+`/record-scenario` does not use `playwright-cli`; it launches Playwright codegen via the Gradle `recordScenario` task, so this step can be skipped if you only plan to record.
+
+### 4. Scenario directory
 
 Scenario markdown files live in the project's configured scenario directory (`scenario_dir` in `.claude/playwright-scenarios.local.md`). The default is `src/test/scenarios/`; `scenarios/` at the repo root is offered as a legacy alternative. You don't need to create the directory by hand — the first time you run `/record-scenario` the plugin will prompt you to pick a location and create it on demand.
 
-Work-in-progress scenarios can go in a `drafts/` subdirectory (e.g. `src/test/scenarios/drafts/`). `/review-scenario` and `/scenario-to-tests` skip files under subdirectories unless they're named explicitly.
+Work-in-progress scenarios can go in a `drafts/` subdirectory (e.g. `src/test/scenarios/drafts/`). `/review-scenario` and `/scenario-to-tests` skip files under subdirectories by default; pass `--include-drafts` to include them. `/crawl-site` writes its output here automatically.
 
-### 4. A base test class
+### 5. A base test class
 
 For the Kotlin + Kotest default, `/scenario-to-tests` generates tests that extend a project-provided base class (typically `BasePageTest`) which owns the Playwright browser lifecycle. The first time you run any plugin command you'll be asked where to emit these tests (`test_dir`); that path is saved to `.claude/playwright-scenarios.local.md` and reused thereafter. If your project doesn't have a base test class yet, a minimal starting point:
 
@@ -147,20 +166,26 @@ test_framework: kotest-stringspec
 ---
 ```
 
-| Field | Default | Purpose |
-|-------|---------|---------|
-| `scenario_dir` | `src/test/scenarios` | Where scenario markdown files live (relative to repo root). |
-| `test_dir` | prompted | Where generated test files go (relative to repo root). |
-| `test_language` | `kotlin` | Target language for generated tests. |
-| `test_framework` | `kotest-stringspec` | Target framework for generated tests. |
+| Field | Required? | Default | Purpose |
+|-------|-----------|---------|---------|
+| `scenario_dir` | yes | `src/test/scenarios` | Where scenario markdown files live (relative to repo root). |
+| `test_dir` | yes | prompted | Where generated test files go (relative to repo root). |
+| `test_language` | yes | `kotlin` | Target language for generated tests. |
+| `test_framework` | yes | `kotest-stringspec` | Target framework for generated tests. |
+| `source_root` | optional | inferred from `test_dir` | Source-set root above the test package (e.g. `src/test/kotlin`). Set this explicitly if `/scenario-to-tests` reports it couldn't infer the source root from your `test_dir`. |
+| `base_test_class` | optional | auto-detected | Fully-qualified name of the class generated tests should extend. Auto-detected on first run and persisted; set explicitly if multiple candidates exist or none are found. |
 
 **Currently supported combinations for `/scenario-to-tests`:** `kotlin` + `kotest-stringspec` only. Other values for `test_language` / `test_framework` are accepted and persisted but `/scenario-to-tests` will abort with a clear message until generation rules for that stack are added.
+
+The four required fields must all be present and non-empty. If the file is malformed, `/record-scenario`, `/review-scenario`, and `/scenario-to-tests` abort with a pointer to `/playwright-scenarios-config`, which has a dedicated recovery path that shows the broken content and offers to overwrite.
 
 The file is checked into git by default so contributors share the same layout. Add it to `.gitignore` if you prefer per-user settings.
 
 ## Workflow
 
-1. **Record**: `/record-scenario checkout-flow` opens a browser, you demonstrate the flow, and a draft `<scenario_dir>/checkout-flow.md` is written.
+1. **Seed scenarios** — two options:
+   - `/record-scenario checkout-flow` opens a browser, you demonstrate the flow, and a draft `<scenario_dir>/checkout-flow.md` is written. Best for interactive flows (form fills, logins).
+   - `/crawl-site https://example.com` autonomously crawls the site and writes user-flow-oriented drafts to `<scenario_dir>/drafts/`. Best for bootstrapping coverage of navigation and page structure. Promote drafts out of `drafts/` when they're ready.
 2. **Review**: `/review-scenario checkout-flow` validates the scenario's claims against the live site and rewrites the markdown in place.
 3. **Generate**: `/scenario-to-tests checkout-flow` emits a scenario test file in `<test_dir>` (e.g. `src/test/kotlin/com/example/qa/scenarios/CheckoutFlowTest.kt`).
 
