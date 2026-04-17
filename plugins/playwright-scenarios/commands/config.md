@@ -7,26 +7,26 @@ description: View or update the playwright-scenarios per-project settings stored
 
 Explicitly view and update the fields the `playwright-scenarios` plugin reads before every command: `scenario_dir`, `test_dir`, `test_language`, `test_framework`, and (optionally) `source_root`, `base_test_class`. The normal commands auto-prompt for the required four on first use — run this command when you want to *change* them afterwards, or when `.claude/playwright-scenarios.local.md` is malformed and other commands are refusing to load it.
 
-## Steps
+## Phases
 
-### 1. Probe the config file directly
+### Phase 1: Probe the config file directly
 
 Do **not** start by invoking the `loading-config` skill — if the file is malformed the skill returns `MALFORMED_CONFIG: ...` and bounces back here, creating a loop. Instead, read `.claude/playwright-scenarios.local.md` yourself and branch:
 
-- **File does not exist** → invoke the `loading-config` skill to run the normal interactive bootstrap. The skill writes the file and returns; this command is done and can skip to step 4.
-- **File exists and parses cleanly** (all four required fields present and non-empty) → continue to step 2.
-- **File exists but is malformed** (missing `---` fences, unparseable YAML, any required field missing or blank) → go to step 1a (malformed-recovery).
+- **File does not exist** → invoke the `loading-config` skill to run the normal interactive bootstrap. The skill writes the file and returns; this command is done and can skip to Phase 5.
+- **File exists and parses cleanly** (all four required fields present and non-empty) → continue to Phase 2.
+- **File exists but is malformed** (missing `---` fences, unparseable YAML, any required field missing or blank) → go to Phase 1a (malformed-recovery).
 
-#### 1a. Malformed-recovery path
+#### Phase 1a: Malformed-recovery path
 
 1. Print the existing file content to the user (wrapped in a code block) along with a one-line diagnosis of what's wrong (e.g., "`test_language` is missing" or "closing `---` fence not found").
 2. Use `AskUserQuestion` to confirm: "Overwrite `.claude/playwright-scenarios.local.md` with fresh config?" Options: `Yes, overwrite` (Recommended), `No, I'll fix it by hand`.
 3. If the user chose to fix it by hand, stop and report the diagnosis. Do not overwrite.
 4. If the user chose to overwrite, invoke the `loading-config` skill with the expectation that the file is gone — but the skill checks for existence, so first **delete the file** (or rename it to `.claude/playwright-scenarios.local.md.bak` for safety) before invoking the skill. After the skill bootstraps a fresh file, report success and stop; this command is done.
 
-### 2. Show current config
+### Phase 2: Show current config
 
-If step 1 produced a cleanly-parsed config, show the user a compact table of the current values:
+If Phase 1 produced a cleanly-parsed config, show the user a compact table of the current values:
 
 ```
 | Field            | Value                                             |
@@ -41,7 +41,7 @@ If step 1 produced a cleanly-parsed config, show the user a compact table of the
 
 For the optional fields, show the literal YAML value if set, or `(inferred)` / `(auto-detect)` if absent.
 
-### 3. Re-prompt each field (two rounds)
+### Phase 3: Re-prompt each field (two rounds)
 
 Mirror the `loading-config` skill's two-round pattern so the framework options are always valid for the chosen language.
 
@@ -51,7 +51,7 @@ Mirror the `loading-config` skill's two-round pattern so the framework options a
 
 Do not prompt for `source_root` or `base_test_class`. Those are advanced overrides — users who need them edit the YAML by hand. This command preserves their existing values if set.
 
-### 4. Write the file
+### Phase 4: Write the file
 
 Rewrite the YAML frontmatter in `.claude/playwright-scenarios.local.md` with the new values.
 
@@ -59,8 +59,8 @@ Rewrite the YAML frontmatter in `.claude/playwright-scenarios.local.md` with the
 - The optional fields (`source_root`, `base_test_class`) go in the frontmatter **only if they were present in the original file**. Preserve them verbatim; don't drop or add them.
 - **Preserve any hand-written markdown body** below the frontmatter — users sometimes add project-specific notes there. Only the frontmatter block (between the two `---` fences) is managed by this command.
 
-If the file didn't exist before step 1 (bootstrap case), the `loading-config` skill already wrote a fresh file; just confirm the write and stop.
+If the file didn't exist before Phase 1 (bootstrap case), the `loading-config` skill already wrote a fresh file; just confirm the write and stop.
 
-### 5. Report
+### Phase 5: Report
 
 List which fields changed (e.g., `scenario_dir: scenarios/ → src/test/scenarios`), or report "No changes — config unchanged" if every selected value matched the prior one. Do not suggest re-running other commands; the user knows what they came here to change.

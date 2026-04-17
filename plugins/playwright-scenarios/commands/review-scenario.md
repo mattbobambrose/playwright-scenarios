@@ -34,7 +34,7 @@ Phase 2 shells out to `playwright-cli` via the skill of the same name. Verify it
 3. If both fail, abort with:
    > `playwright-cli` is not available. Install it with `npm install -g @playwright/cli@latest` or make sure `npx playwright-cli` works in this project. See the README's "Host Project Setup" section for details.
 
-## Phase 1: Determine Scenarios
+## Phase 1: Select scenario files
 
 Using the scenario names parsed from the argument-parsing step:
 
@@ -78,7 +78,7 @@ Each subagent receives:
 Subagent rules:
 
 - **Preserve** the original title and URL unless a Phase 2 finding shows they're wrong.
-- **Preserve extended tags** (`**Fixture:**`, `**Prerequisite:**`, `**Assert throughout:**`, `**Expected failure:**`, `**Expected (regex):**`) — these are intentional. Do not remove or rewrite them unless a finding shows they're wrong.
+- **Preserve extended tags** (`**Fixture:**`, `**Prerequisite:**`, `**Assert throughout:**`, `**Expected failure:**`, `**Expected (regex):**`, `**Iframe:**`, `**Branch:**`, `**Intercept:**`, `**Cookie:**`, `**Storage:**`, `**Device:**`, `**Timeout:**`, `**Cleanup:**`) — these are intentional. Do not remove or rewrite them unless a finding shows they're wrong.
 - **Do not delete test cases** — only refine, reword, or add.
 - **Fix broken claims** by updating them to match observed behavior.
 - **Tighten vague expectations** into concrete, assertable outcomes.

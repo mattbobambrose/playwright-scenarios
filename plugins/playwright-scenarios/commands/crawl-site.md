@@ -26,7 +26,7 @@ Any unknown `--`-prefixed token → error before doing any work. Missing start U
 
 ### 0a. Load config
 
-Invoke `loading-config` to resolve `<SCENARIO_DIR>`. Abort on `MALFORMED_CONFIG` and point the user at `/playwright-scenarios-config`.
+Invoke `loading-config` to resolve `<SCENARIO_DIR>`. If `loading-config` returns `MALFORMED_CONFIG`, abort and tell the user to run `/playwright-scenarios-config` to repair.
 
 ### 0b. `playwright-cli` preflight
 
@@ -118,7 +118,7 @@ Generate kebab-case filenames from the flow. Examples:
 | Footer navigation inventory | `footer-nav-inventory.md` |
 | Nav to Login (auth gate) | `nav-to-login.md` |
 
-If a draft by that name already exists under `<SCENARIO_DIR>/drafts/`, append `-v2`, `-v3`, etc. — **do not overwrite**.
+If a draft by that name already exists under `<SCENARIO_DIR>/drafts/`, increment the numeric suffix (`-v2`, `-v3`, ...) until a free name is found. Do not silently overwrite.
 
 ### Format
 

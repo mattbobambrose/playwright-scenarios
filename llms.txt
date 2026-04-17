@@ -1,13 +1,13 @@
 # playwright-scenarios
 
-> Claude Code plugin marketplace for scenario-driven Playwright testing — record scenarios by driving a browser, audit them against the live site, and generate JVM Playwright + Kotest tests from the reviewed markdown.
+> Claude Code plugin marketplace for scenario-driven Playwright testing — record, crawl, evaluate, convert, review, and generate tests from human-readable scenario markdown.
 
-This repository is a Claude Code plugin marketplace (no application source). It ships a single plugin, `playwright-scenarios`, that lets projects author browser-driven test scenarios as flat markdown files (manually or via autonomous crawl), audit those scenarios against the live site, and translate them into test classes. Per-project behavior is driven by `.claude/playwright-scenarios.local.md` (default stack: Kotlin + Kotest StringSpec + Playwright-for-Java).
+This repository is a Claude Code plugin marketplace (no application source). It ships a single plugin, `playwright-scenarios`, that lets projects author browser-driven test scenarios as flat markdown files (manually, via autonomous crawl, or by converting existing QA specs), audit those scenarios against the live site, and translate them into test classes. 13 extended tags cover iframe boundaries, alternate paths, network mocking, state pre-seeding, device emulation, and test lifecycle. Per-project behavior is driven by `.claude/playwright-scenarios.local.md` (default stack: Kotlin + Kotest StringSpec + Playwright-for-Java).
 
 ## Docs
 
-- [README](README.md): Installation, host-project setup (Gradle tasks, dependencies, base test class), and the record → review → generate workflow.
-- [CLAUDE.md](CLAUDE.md): Repo orientation for Claude — layout, version-bump rule, and testing notes.
+- [README](README.md): Installation, host-project setup, workflow, capabilities/limitations, and input-spec guidance.
+- [CLAUDE.md](CLAUDE.md): Repo orientation for Claude — layout, version-bump rule, doc propagation checklist, external dependency, tag list.
 - [CHANGELOG](CHANGELOG.md): Release notes.
 
 ## Plugin manifests
@@ -17,16 +17,22 @@ This repository is a Claude Code plugin marketplace (no application source). It 
 
 ## Commands
 
-- [/record-scenario](plugins/playwright-scenarios/commands/record-scenario.md): Launch Playwright codegen, capture a real user flow, and write a draft scenario markdown file. Auto-chains into `/review-scenario` unless `--no-review` is passed.
-- [/crawl-site](plugins/playwright-scenarios/commands/crawl-site.md): Read-only crawl starting from a URL; emits user-flow-oriented drafts to `<scenario_dir>/drafts/`. Accepts `--depth` and `--max-scenarios`. Complementary seed-generator to `/record-scenario`.
-- [/review-scenario](plugins/playwright-scenarios/commands/review-scenario.md): Audit scenarios against the live site and apply improvements to the markdown. Accepts `--include-drafts`.
-- [/scenario-to-tests](plugins/playwright-scenarios/commands/scenario-to-tests.md): Generate tests (Kotlin + Kotest StringSpec by default) from reviewed scenarios. Accepts `--include-drafts` and `--dry-run`.
-- [/playwright-scenarios-config](plugins/playwright-scenarios/commands/config.md): View or update per-project settings stored in `.claude/playwright-scenarios.local.md`. Also the recovery path for a malformed config file.
+- [/record-scenario](plugins/playwright-scenarios/commands/record-scenario.md): Launch Playwright codegen, capture a real user flow, and write a draft scenario. Accepts `--no-review`.
+- [/crawl-site](plugins/playwright-scenarios/commands/crawl-site.md): Read-only site crawl; emits user-flow-oriented drafts to `<scenario_dir>/drafts/`. Accepts `--depth` and `--max-scenarios`.
+- [/spec-to-scenarios](plugins/playwright-scenarios/commands/spec-to-scenarios.md): Convert a QA spec into scenario markdown files with proper tag mapping. Accepts `--skip-evaluation` and `--promote`.
+- [/generate-fixture](plugins/playwright-scenarios/commands/generate-fixture.md): Scaffold a JSON fixture file from a scenario, spec, or interactively. Accepts `--name`.
+- [/review-scenario](plugins/playwright-scenarios/commands/review-scenario.md): Audit scenarios against the live site and apply improvements. Accepts `--include-drafts`.
+- [/scenario-to-tests](plugins/playwright-scenarios/commands/scenario-to-tests.md): Generate tests from reviewed scenarios. Accepts `--include-drafts` and `--dry-run`.
+- [/scenario-status](plugins/playwright-scenarios/commands/scenario-status.md): Health dashboard — review dates, test file status, pass/fail results, coverage gaps.
+- [/playwright-scenarios-config](plugins/playwright-scenarios/commands/config.md): View or update per-project settings. Recovery path for malformed config files.
 
 ## Skills
 
-- [loading-config](plugins/playwright-scenarios/skills/loading-config/SKILL.md): Reads `.claude/playwright-scenarios.local.md`; prompts the user and bootstraps it on first use. Invoked at the start of every playwright-scenarios command.
-- [authoring-scenarios](plugins/playwright-scenarios/skills/authoring-scenarios/SKILL.md): Flat-markdown scenario format reference; used whenever Claude hand-writes or edits a scenario markdown file.
+- [loading-config](plugins/playwright-scenarios/skills/loading-config/SKILL.md): Reads `.claude/playwright-scenarios.local.md`; bootstraps on first use. Invoked at the start of every command.
+- [authoring-scenarios](plugins/playwright-scenarios/skills/authoring-scenarios/SKILL.md): Flat-markdown scenario format reference with 13 extended tags. Used when hand-writing or editing scenario files.
+- [evaluate-spec](plugins/playwright-scenarios/skills/evaluate-spec/SKILL.md): Evaluates a QA document against the plugin's capabilities. Structured testability report.
+- [fixture-format](plugins/playwright-scenarios/skills/fixture-format/SKILL.md): Defines the canonical JSON fixture format shared across all test generators.
+- [debugging-scenarios](plugins/playwright-scenarios/skills/debugging-scenarios/SKILL.md): Guides troubleshooting when generated tests fail — iframe detection, selector drift, timing, stale fixtures.
 
 ## Optional
 

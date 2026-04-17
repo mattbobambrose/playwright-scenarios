@@ -15,7 +15,7 @@ Create a new scenario by *demonstrating* it in a browser instead of writing mark
 
 Split the argument string into **flags** (tokens starting with `--`) and a **name** (the first non-flag token, if any):
 
-- `--no-review` — skip the auto-chain into `/review-scenario` at step 10. Off by default (review runs automatically).
+- `--no-review` — skip the auto-chain into `/review-scenario` at Phase 10. Off by default (review runs automatically).
 
 Any unknown `--`-prefixed token should be reported as an error before doing any work.
 
@@ -24,26 +24,26 @@ Any unknown `--`-prefixed token should be reported as an error before doing any 
 - The Gradle task `recordScenario` must exist in `build.gradle.kts` (it should — if not, stop and tell the user).
 - This is a destructive UI operation: a real browser window will open. Do not run it inside a subagent or background task.
 
-## Steps
+## Phases
 
-### 0. Load project config
+### Phase 0: Load project config
 
-Invoke the `loading-config` skill to resolve `<SCENARIO_DIR>`, `<TEST_DIR>`, `<TEST_LANGUAGE>`, and `<TEST_FRAMEWORK>`. If `.claude/playwright-scenarios.local.md` is missing, the skill prompts the user and creates it before returning. Only `<SCENARIO_DIR>` is needed for this command, but the bootstrap happens here rather than later so the user sees the prompts before the browser window opens.
+Invoke the `loading-config` skill to resolve `<SCENARIO_DIR>`, `<TEST_DIR>`, `<TEST_LANGUAGE>`, and `<TEST_FRAMEWORK>`. If `.claude/playwright-scenarios.local.md` is missing, the skill prompts the user and creates it before returning. If `loading-config` returns `MALFORMED_CONFIG`, abort and tell the user to run `/playwright-scenarios-config` to repair. Only `<SCENARIO_DIR>` is needed for this command, but the bootstrap happens here rather than later so the user sees the prompts before the browser window opens.
 
-### 1. Determine scenario name
+### Phase 1: Determine scenario name
 
 - **If the user invoked the command with an argument**, treat it as the scenario name. Validate it is kebab-case (no spaces, uppercase, or extensions); reject and ask for a clean name if not.
-- **If no argument was provided**, defer naming. Do not ask the user for a name up front — you will infer it from the recorded actions in step 6. Use a temporary recording filename (e.g. `build/recordings/untitled-<timestamp>.java`) for step 4.
+- **If no argument was provided**, defer naming. Do not ask the user for a name up front — you will infer it from the recorded actions in Phase 6. Use a temporary recording filename (e.g. `build/recordings/untitled-<timestamp>.java`) for Phase 4.
 
 Always prompt for the **Start URL**. Do not supply a default — require the user to enter one.
 
-### 2. Check for collisions (only if name is known)
+### Phase 2: Check for collisions (only if name is known)
 
 If the name was supplied as an argument, check whether `<SCENARIO_DIR>/<name>.md` already exists. If it does, ask whether to overwrite, pick a new name, or cancel. Do not silently overwrite.
 
-If the name will be inferred, skip this step — collision handling happens in step 6.
+If the name will be inferred, skip this phase — collision handling happens in Phase 6.
 
-### 3. Brief the user on recording controls
+### Phase 3: Brief the user on recording controls
 
 Tell the user, verbatim-ish:
 
@@ -56,7 +56,7 @@ Tell the user, verbatim-ish:
 >
 > When you're done, close the browser window. I'll take it from there.
 
-### 4. Run the recorder
+### Phase 4: Run the recorder
 
 Run:
 
@@ -64,7 +64,7 @@ Run:
 ./gradlew recordScenario -Purl=<start-url> -Pout=build/recordings/<recording-filename>.java
 ```
 
-Where `<recording-filename>` is the supplied scenario name (if given) or the temporary `untitled-<timestamp>` filename from step 1.
+Where `<recording-filename>` is the supplied scenario name (if given) or the temporary `untitled-<timestamp>` filename from Phase 1.
 
 This blocks until the user closes the browser. Do not set a short timeout — the user may record for several minutes. Use a long Bash timeout (e.g. 600000 ms).
 
@@ -76,9 +76,9 @@ This blocks until the user closes the browser. Do not set a short timeout — th
 
 If that task also doesn't exist in the project, point the user at the README's "Host Project Setup" section — both tasks need to be added to their `build.gradle.kts`.
 
-### 5. Read the recording
+### Phase 5: Read the recording
 
-Read the recording file written in step 4. It will contain Playwright Java API calls like:
+Read the recording file written in Phase 4. It will contain Playwright Java API calls like:
 
 ```java
 page.navigate("https://example.com/home");
@@ -89,7 +89,7 @@ assertThat(page.getByText("Thank you!")).isVisible();
 
 If the file is empty or contains no `page.` calls, something went wrong — tell the user and stop.
 
-### 6. Infer the scenario name (only if not supplied)
+### Phase 6: Infer the scenario name (only if not supplied)
 
 If no name was supplied as an argument, infer a kebab-case name from the recorded actions. Use these signals, in order:
 
@@ -97,13 +97,13 @@ If no name was supplied as an argument, infer a kebab-case name from the recorde
 2. The most distinctive action sequence (e.g. clicking "Log In" and filling credentials → `login-…`).
 3. The terminal URL or page section if the flow ends somewhere meaningful.
 
-Produce a short name (2–4 kebab-case words) that would make sense as a test filename. Examples: `login-invalid-credentials`, `email-signup-form`, `care-plan-intake-basics`.
+Produce a short name (2–4 kebab-case words) that would make sense as a test filename. Examples: `login-invalid-credentials`, `email-signup-form`, `checkout-happy-path`.
 
-Then check for collisions: if `<SCENARIO_DIR>/<inferred-name>.md` already exists, try `-v2`, `-v3`, etc. until a free name is found, or ask the user to pick a new name. Do not silently overwrite.
+Then check for collisions: if `<SCENARIO_DIR>/<inferred-name>.md` already exists, increment the numeric suffix (`-v2`, `-v3`, ...) until a free name is found. Do not silently overwrite.
 
 Briefly tell the user the inferred name and give them a chance to override it before writing.
 
-### 7. Convert to scenario markdown
+### Phase 7: Convert to scenario markdown
 
 The `authoring-scenarios` skill is the authoritative reference for the flat-markdown format, voice, selector rules, test grouping, and known gotchas (HTML5 validation tooltips, cross-origin links). Follow it. If one or more `.md` files already exist directly under `<SCENARIO_DIR>` (excluding `SCENARIOS.md` and subdirectories), glance at one to match the host project's house style.
 
@@ -122,11 +122,15 @@ The `authoring-scenarios` skill is the authoritative reference for the flat-mark
 
 **Test grouping:** one continuous flow → one `## Test 1:` section; distinct sub-flows (same form with different inputs, or a sequence separated by re-navigation) → `## Test 1:`, `## Test 2:`, etc. Derive each Test title from the primary action in that group.
 
-### 8. Write the scenario
+### Phase 8: Write the scenario file
 
-Write the converted markdown to `<SCENARIO_DIR>/<name>.md` using the Write tool, creating `<SCENARIO_DIR>` if it doesn't yet exist. If the recording was saved under a temporary `untitled-<timestamp>.java` filename, leave it as-is in `build/recordings/` — do not rename it. The scenario markdown is the authoritative artifact.
+Write the converted markdown to `<SCENARIO_DIR>/<name>.md` using the Write tool, creating `<SCENARIO_DIR>` if it doesn't yet exist. Include a provenance blockquote after the description line:
 
-### 9. Report to the user
+> Recorded by `/record-scenario` from `<start-url>`. Review before feeding into `/scenario-to-tests`.
+
+If the recording was saved under a temporary `untitled-<timestamp>.java` filename, leave it as-is in `build/recordings/` — do not rename it. The scenario markdown is the authoritative artifact.
+
+### Phase 9: Report to the user
 
 Tell the user:
 - The path of the draft file.
@@ -135,7 +139,7 @@ Tell the user:
 - If `--no-review` **was** passed: that review is skipped; they can run `/review-scenario <name>` manually when ready.
 - That `/scenario-to-tests <name>` is always a manual follow-up.
 
-### 10. Auto-chain into `/review-scenario`
+### Phase 10: Auto-chain into `/review-scenario`
 
 **If `--no-review` was passed**, skip this step entirely.
 

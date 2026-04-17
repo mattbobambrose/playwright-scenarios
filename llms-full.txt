@@ -225,6 +225,53 @@ When adding or changing a command, skill, or config field, update all of: README
 
 ---
 
+### /spec-to-scenarios
+
+**Description:** Convert a QA spec, test plan, or user story document into scenario markdown files with proper tag mapping.
+
+**Arguments:** required `<source-path>`, plus flags: `--skip-evaluation` (skip the inline evaluate-spec pass), `--promote` (write to `<SCENARIO_DIR>` instead of `<SCENARIO_DIR>/drafts/`).
+
+**Phases:**
+0. Load config, resolve `<SCENARIO_DIR>`.
+1. Read the source doc. Unless `--skip-evaluation`, run `evaluate-spec` and pause for user approval before converting.
+2. For each `direct` / `needs-changes` / `extended-tag` test case: group by URL/fixture/flow into scenario files, map to Action/Expected pairs and extended tags, flag `needs-changes` items with inline warnings.
+3. Generate kebab-case filenames, check for collisions.
+4. Write scenario files (parallel subagents, batches of 5). Each includes a provenance blockquote.
+5. Report: scenario table, skipped out-of-scope items, next steps (generate fixtures, promote drafts, review, generate tests).
+
+---
+
+### /generate-fixture
+
+**Description:** Scaffold a JSON fixture file from a scenario's data bullets, a spec's persona table, or interactive prompts.
+
+**Arguments:** required `<source>` (scenario path, spec path, or `interactive`), plus `--name=<fixture-name>`.
+
+**Phases:**
+0. Load config, ensure `<SCENARIO_DIR>/fixtures/` exists.
+1. Extract data: from scenario (collect input data bullets), from spec (find persona tables), or interactively (prompt for groups and fields).
+2. Build JSON following the `fixture-format` skill schema (`_meta` + snake_case groups + leaf values matching DOM identifiers).
+3. Check for collisions — offer overwrite, merge, or rename.
+4. Write to `<SCENARIO_DIR>/fixtures/<name>.json`.
+5. Report path, field count, and suggest updating the scenario's `**Fixture:**` tag.
+
+---
+
+### /scenario-status
+
+**Description:** Health dashboard for all scenarios — review dates, test file status, pass/fail, coverage gaps.
+
+**Phases:**
+0. Load config.
+1. Inventory all scenarios (recursive, including drafts): file path, title, URL, test count, tags used.
+2. Check review status via `git log -1` per file.
+3. Check test file existence and staleness (scenario newer than test file = stale).
+4. Parse most recent Gradle test report for pass/fail (optional — skipped if no report found).
+5. Compare covered URLs against crawl inventory for coverage gaps (optional — skipped if no crawl inventory).
+6. Print dashboard table + summary stats + recommended actions.
+
+---
+
 ## Skills
 
 ### loading-config
@@ -287,6 +334,49 @@ When adding or changing a command, skill, or config field, update all of: README
 - New-tab / cross-origin links — express as `- **Expected:** The '<label>' link points to <url>`; the generator checks `getAttribute("href")` instead of clicking.
 
 **After editing:** for non-trivial changes, suggest the user run `/review-scenario <name>` to re-validate claims before regenerating tests.
+
+---
+
+### evaluate-spec
+
+**Description:** Evaluate a QA spec, test plan, user story document, or any structured test description against the playwright-scenarios plugin's capabilities. Reports what converts directly, what needs changes, and what's out of scope. Advisory only — reads and reports, never writes scenario files.
+
+**When to use:** User provides a doc and asks "can we test this?", "what would need to change?", or "evaluate this spec."
+
+**Analysis procedure:**
+1. **Inventory** — extract every discrete test case, acceptance criterion, or testable assertion from the document.
+2. **Classify** each as `direct` (converts to Action/Expected with no changes), `needs-changes` (expressible but spec needs modification), `extended-tag` (needs Fixture, Prerequisite, Assert throughout, Expected failure, or Expected (regex)), or `out-of-scope` (cross-run comparison, visual regression, a11y, performance, network-layer).
+3. **Flag spec-level issues** — missing iframe/architecture boundaries, display text without DOM identifiers, assumed behaviors needing live-site verification, phase-numbering drift risk, mixed test/toolchain concerns, missing fixture data, missing scope boundaries.
+4. **Map extended tags** — match spec patterns to the appropriate scenario tag.
+5. **Suggest fixes** — for each `needs-changes` item, produce a specific actionable suggestion.
+
+**Output:** Summary paragraph → test-case table (# | Summary | Category | Tag/Issue | Suggested change) → spec-level issues → out-of-scope items with alternatives → conversion roadmap (prioritized next steps).
+
+**Does not:** write scenario files, open a browser, generate test code, or modify the input document.
+
+---
+
+### fixture-format
+
+**Description:** Defines the standardized fixture file format (JSON) for typed test data shared across all test generators (Kotlin, TypeScript, Python). Triggered when Claude creates or modifies files under a `fixtures/` directory.
+
+**Format:** JSON files at `<SCENARIO_DIR>/fixtures/<name>.json`. Schema: `_meta` (name, description, created, source) + domain-specific groups (snake_case keys) + leaf values matching DOM identifiers. Arrays for multi-select fields, strings for text, numbers for numeric inputs. The `**Branch:**` tag overrides individual fields at runtime without modifying the fixture file.
+
+**Generator usage:** Kotlin reads via `kotlinx.serialization`, TypeScript uses `import fixture from '...'`, Python uses `json.load()`. All read the same `.json` file.
+
+---
+
+### debugging-scenarios
+
+**Description:** Troubleshoot failing tests generated by `/scenario-to-tests`. Triggered when the user says tests are failing or generated tests don't match expected behavior.
+
+**Diagnosis order (stop at first match):**
+1. **Iframe not declared** — every selector fails; check for missing `**Iframe:**` tag. Fix: add the tag.
+2. **Selector drift** — some selectors fail; element text/roles changed on the live site. Fix: update scenario, re-run `/review-scenario`.
+3. **Timing / race condition** — tests pass inconsistently; element exists but isn't interactable. Fix: add an Expected assertion before the failing Action, or add `**Timeout:**`.
+4. **Cross-origin / navigation boundary** — tests fail after an origin change. Fix: add `**Iframe:** none` or flag as needing manual test adjustment.
+5. **Stale fixture data** — form rejects entered data (email taken, wrong format). Fix: use timestamped emails, update fixture values.
+6. **Generated code structure wrong** — compile errors, wrong package. Fix: verify `test_dir`, `source_root`, `base_test_class` via `/playwright-scenarios-config`.
 
 ---
 
