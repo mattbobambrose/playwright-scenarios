@@ -53,6 +53,12 @@ Then review and generate:
 
 <div class="grid cards" markdown>
 
+-   :lucide-graduation-cap: **[Tutorial](tutorial.md)**
+
+    ---
+
+    Step-by-step walkthrough from installation to generated tests.
+
 -   :lucide-book-open: **[Terminology](terminology.md)**
 
     ---

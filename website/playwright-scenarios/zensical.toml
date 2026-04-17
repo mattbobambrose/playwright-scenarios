@@ -46,6 +46,7 @@ Copyright &copy; 2026 The authors
 # Read more: https://zensical.org/docs/setup/navigation/
 nav = [
   { "Home" = "index.md" },
+  { "Tutorial" = "tutorial.md" },
   { "Terminology" = "terminology.md" },
   { "Workflow" = "workflow.md" },
   { "Capabilities" = "capabilities.md" },

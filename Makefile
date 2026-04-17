@@ -34,11 +34,11 @@ kdocs:
 	./gradlew dokkaGeneratePublicationHtml
 
 clean-docs:
-	rm -rf website/website-validation/site
-	rm -rf website/website-validation/.cache
+	rm -rf website/playwright-scenarios/site
+	rm -rf website/playwright-scenarios/.cache
 
 site: clean-docs
-	cd website/website-validation && uv run zensical serve
+	cd website/playwright-scenarios && uv run zensical serve
 
 publish-local:
 	./gradlew publishToMavenLocal

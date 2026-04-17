@@ -4,9 +4,17 @@
 
 Claude Code marketplace for scenario-driven Playwright testing — record scenarios by driving a browser, audit them against the live site, and generate JVM Playwright + Kotest tests from the reviewed markdown.
 
-## LLM Usage Guide
+## Tutorial
 
-Once installed, add the [USAGE.md](plugins/playwright-scenarios/USAGE.md) contents to your project's CLAUDE.md (or pass it as context) so Claude knows how to use the plugin correctly. It's a compact reference covering: which command to use when, the scenario format, all 13 tags, do's and don'ts, and troubleshooting.
+Start with the **[step-by-step tutorial](https://mattbobambrose.github.io/playwright-scenarios/)** — it walks through the full workflow from installation to generated tests.
+
+## LLM Guides
+
+Two reference documents ship with the plugin for different stages of the workflow:
+
+- **[SPEC_GUIDE.md](plugins/playwright-scenarios/SPEC_GUIDE.md)** — Paste into any LLM's system prompt (ChatGPT, Claude, Gemini, Copilot) when writing QA specs or user stories. LLM-agnostic. Covers what the test framework can and can't handle, 10 authoring rules, a spec template, and a self-evaluation checklist. Use this *before* testing, when generating the specs that eventually become scenarios.
+
+- **[USAGE.md](plugins/playwright-scenarios/USAGE.md)** — Add to your project's CLAUDE.md so Claude Code knows how to use the plugin. Covers all 8 commands, 13 tags, workflow, do's/don'ts, and troubleshooting. Use this *during* testing, when running the plugin commands.
 
 ## Installation
 
