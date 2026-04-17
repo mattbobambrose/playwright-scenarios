@@ -62,9 +62,9 @@ Phase 2 shells out to `playwright-cli` via the skill of the same name. Verify it
 3. If both fail, abort with:
    > `playwright-cli` is not available. Install it with `npm install -g @playwright/cli@latest` or make sure `npx playwright-cli` works in this project. See the README's "Host Project Setup" section for details.
 
-## Phase 1: Determine Scenarios
+## Phase 1: Select scenario files
 
-Using the scenario names parsed from step 0:
+Using the scenario names parsed from the argument-parsing step:
 
 - **Zero scenario names:** read all `.md` files **directly inside `<SCENARIO_DIR>`** (non-recursive — do NOT descend into `<SCENARIO_DIR>/drafts/` or any other subdirectory, unless `--include-drafts` was passed) and process each one. Skip `<SCENARIO_DIR>/SCENARIOS.md`.
 - **One or more scenario names:** read `<SCENARIO_DIR>/<name>.md` for each. If a named scenario file is not found directly under `<SCENARIO_DIR>`, also check `<SCENARIO_DIR>/**/<name>.md` — if it's under a subdirectory and `--include-drafts` was not passed, warn and skip. With `--include-drafts`, include it.
@@ -145,7 +145,7 @@ Examples:
 | `2fa-setup.md` | `_2faSetupTest` |
 | `signup.md` | `SignupTest` |
 | `user-signup-v2.md` | `UserSignupV2Test` |
-| `care.plan.intake.md` | `CarePlanIntakeTest` |
+| `book.search.filters.md` | `BookSearchFiltersTest` |
 
 The filename for the generated Kotlin file is `<ClassName>.kt`.
 

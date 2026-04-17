@@ -32,4 +32,4 @@ When adding or changing a command, skill, or config field, update all of: README
 
 ## Scenario format extensions
 
-`authoring-scenarios` supports extended tags beyond the base Action/Expected format: `**Fixture:**`, `**Prerequisite:**`, `**Assert throughout:**`, `**Expected failure:**`, `**Expected (regex):**`. See the skill for semantics. `/review-scenario` preserves these during rewrites.
+`authoring-scenarios` supports extended tags beyond the base Action/Expected format: `**Fixture:**`, `**Prerequisite:**`, `**Assert throughout:**`, `**Expected failure:**`, `**Expected (regex):**`, `**Iframe:**`, `**Branch:**`, `**Intercept:**`, `**Cookie:**`, `**Storage:**`, `**Device:**`, `**Timeout:**`, `**Cleanup:**`. See the skill for semantics. `/review-scenario` preserves these during rewrites.

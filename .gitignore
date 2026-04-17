@@ -5,3 +5,12 @@
 
 ### macOS ###
 .DS_Store
+
+### Python ###
+__pycache__/
+*.pyc
+.venv/
+
+### Zensical (website build output) ###
+website/playwright-scenarios/site/
+website/playwright-scenarios/.cache/

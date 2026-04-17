@@ -1,6 +1,12 @@
 # playwright-scenarios
 
+[![GitHub Release](https://img.shields.io/github/v/release/mattbobambrose/playwright-scenarios)](https://github.com/mattbobambrose/playwright-scenarios/releases)
+
 Claude Code marketplace for scenario-driven Playwright testing — record scenarios by driving a browser, audit them against the live site, and generate JVM Playwright + Kotest tests from the reviewed markdown.
+
+## LLM Usage Guide
+
+Once installed, add the [USAGE.md](plugins/playwright-scenarios/USAGE.md) contents to your project's CLAUDE.md (or pass it as context) so Claude knows how to use the plugin correctly. It's a compact reference covering: which command to use when, the scenario format, all 13 tags, do's and don'ts, and troubleshooting.
 
 ## Installation
 
@@ -37,18 +43,24 @@ Author browser-driven scenarios as markdown, audit them against the live site, a
 
 | Command | Description |
 |---------|-------------|
-| `/record-scenario [name] [--no-review]` | Launch Playwright codegen, capture a real user flow, and write a draft scenario markdown file to the configured scenario directory. Auto-chains into `/review-scenario` unless `--no-review` is passed. |
-| `/crawl-site <start-url> [--depth=N] [--max-scenarios=N]` | Read-only crawl of a site (start URL + same-origin links one hop out by default). Emits user-flow-oriented draft scenarios to `<scenario_dir>/drafts/`. Never submits forms or clicks destructive buttons — for that, use `/record-scenario`. |
-| `/review-scenario [names...] [--include-drafts]` | Audit scenarios against the live site and apply improvements to the markdown. Pass `--include-drafts` to include files under subdirectories. |
-| `/scenario-to-tests [names...] [--include-drafts] [--dry-run]` | Generate tests (defaults: Kotlin + Kotest StringSpec with Playwright-for-Java) from reviewed scenarios. `--dry-run` writes the files but skips the test run. |
-| `/playwright-scenarios-config` | View or update per-project settings in `.claude/playwright-scenarios.local.md`. Also the recovery path when that file is malformed. |
+| `/record-scenario [name] [--no-review]` | Launch Playwright codegen, capture a real user flow, and write a draft scenario markdown file. Auto-chains into `/review-scenario` unless `--no-review` is passed. |
+| `/crawl-site <start-url> [--depth=N] [--max-scenarios=N]` | Read-only crawl of a site. Emits user-flow-oriented draft scenarios to `<scenario_dir>/drafts/`. |
+| `/spec-to-scenarios <path> [--skip-evaluation] [--promote]` | Convert a QA spec or test plan into scenario markdown files. Runs `evaluate-spec` first, then maps test cases to the scenario format with proper tags. |
+| `/generate-fixture <source \| interactive> [--name=N]` | Scaffold a fixture JSON file from a scenario's data bullets, a spec's persona table, or interactive prompts. |
+| `/review-scenario [names...] [--include-drafts]` | Audit scenarios against the live site and apply improvements to the markdown. |
+| `/scenario-to-tests [names...] [--include-drafts] [--dry-run]` | Generate tests (defaults: Kotlin + Kotest StringSpec with Playwright-for-Java) from reviewed scenarios. |
+| `/scenario-status` | Health dashboard showing scenario review dates, test file status, pass/fail results, and coverage gaps vs. site inventory. |
+| `/playwright-scenarios-config` | View or update per-project settings. Also the recovery path for malformed config files. |
 
 **Skills**
 
 | Skill | Description |
 |-------|-------------|
-| `loading-config` | Reads `.claude/playwright-scenarios.local.md` and bootstraps it on first use; invoked automatically at the start of every command |
-| `authoring-scenarios` | Flat-markdown format reference used whenever Claude hand-writes or edits a scenario markdown file |
+| `loading-config` | Reads `.claude/playwright-scenarios.local.md` and bootstraps it on first use; invoked at the start of every command |
+| `authoring-scenarios` | Flat-markdown format reference with 13 extended tags; used when hand-writing or editing scenario files |
+| `evaluate-spec` | Evaluates a QA spec against the plugin's capabilities; reports what converts directly, what needs changes, and what's out of scope |
+| `fixture-format` | Defines the standardized JSON fixture file format shared across all generators |
+| `debugging-scenarios` | Guides troubleshooting when generated tests fail — iframe detection, selector drift, timing, stale fixtures |
 
 ## Host Project Setup
 
@@ -177,19 +189,13 @@ test_framework: kotest-stringspec
 
 **Currently supported combinations for `/scenario-to-tests`:** `kotlin` + `kotest-stringspec` only. Other values for `test_language` / `test_framework` are accepted and persisted but `/scenario-to-tests` will abort with a clear message until generation rules for that stack are added.
 
-The four required fields must all be present and non-empty. If the file is malformed, `/record-scenario`, `/review-scenario`, and `/scenario-to-tests` abort with a pointer to `/playwright-scenarios-config`, which has a dedicated recovery path that shows the broken content and offers to overwrite.
+The four required fields must all be present and non-empty. If the file is malformed, commands abort with a pointer to `/playwright-scenarios-config`, which has a dedicated recovery path that shows the broken content and offers to overwrite.
 
 The file is checked into git by default so contributors share the same layout. Add it to `.gitignore` if you prefer per-user settings.
 
-## Workflow
+## Documentation
 
-1. **Seed scenarios** — two options:
-   - `/record-scenario checkout-flow` opens a browser, you demonstrate the flow, and a draft `<scenario_dir>/checkout-flow.md` is written. Best for interactive flows (form fills, logins).
-   - `/crawl-site https://example.com` autonomously crawls the site and writes user-flow-oriented drafts to `<scenario_dir>/drafts/`. Best for bootstrapping coverage of navigation and page structure. Promote drafts out of `drafts/` when they're ready.
-2. **Review**: `/review-scenario checkout-flow` validates the scenario's claims against the live site and rewrites the markdown in place.
-3. **Generate**: `/scenario-to-tests checkout-flow` emits a scenario test file in `<test_dir>` (e.g. `src/test/kotlin/com/example/qa/scenarios/CheckoutFlowTest.kt`).
-
-Scenarios use a flat markdown format (`# Title`, `**URL:** /path`, numbered `## Test N:` blocks with `- **Action:**` / `- **Expected:**` bullets). Generated tests extend your project's base test class, which owns the Playwright browser lifecycle.
+For detailed guides on terminology, workflow, capabilities, and writing effective specs, see the [project website](website/playwright-scenarios/docs/index.md).
 
 ## Changelog
 
