@@ -1,6 +1,6 @@
 {
   "name": "playwright-scenarios",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Author browser-driven scenarios as markdown, audit them against the live site, and generate JVM Playwright + Kotest tests",
   "author": {
     "name": "mattbobambrose"

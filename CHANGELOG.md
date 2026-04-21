@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-04-21
+
+### Added
+
+- `/crawl-site` accepts natural-language descriptions after the URL (e.g., "focus on the checkout flow"). Claude interprets the intent, shows a crawl plan for approval, and prioritizes matching flows. Flags still work as explicit overrides.
+- `/crawl-site` writes `.crawl-meta.json` with crawl history (URLs discovered/crawled/skipped, flow types, depth reached vs. available) for `/scenario-status`.
+- `/scenario-status` coverage dashboard expanded with four dimensions: crawl depth (reached vs. available), flow type coverage (discovered → drafted → promoted → tested), scenario-to-test conversion rate, and critical path coverage (from `.critical-paths.md`).
+- Language-aware config bootstrap: three-round prompting with project pre-scan. Test directory suggestions adapt to the chosen language.
+
+### Changed
+
+- `/spec-to-scenarios` renamed to `/doc-to-scenarios` — broadens input beyond QA specs to any document.
+- `evaluate-spec` skill renamed to `evaluate-doc`.
+- Terminology consolidated: "user story," "spec," and "user flow" → "doc."
+
 ## [0.3.0] - 2026-04-17
 
 ### Added
@@ -72,6 +87,7 @@ Initial release.
 - Host-project setup documentation covering the required Gradle `recordScenario` and `installPlaywrightBrowsers` tasks, Playwright / Kotest dependencies, `scenarios/` directory convention, and base test class pattern.
 - MIT license.
 
+[0.4.0]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.3.0...0.4.0
 [0.3.0]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.2.0...0.3.0
 [0.2.0]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.1.0...0.2.0
 [0.1.0]: https://github.com/mattbobambrose/playwright-scenarios/releases/tag/0.1.0
