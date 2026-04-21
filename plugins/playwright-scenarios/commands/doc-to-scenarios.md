@@ -1,15 +1,15 @@
 ---
-name: spec-to-scenarios
-description: Convert a QA spec, test plan, or user story document into scenario markdown files. Requires the evaluate-spec skill to have been run first (or runs it inline). The bridge between evaluation and the /review-scenario → /scenario-to-tests pipeline.
+name: doc-to-scenarios
+description: Convert any document (QA spec, test plan, user stories, requirements doc, meeting notes) into scenario markdown files. Requires the evaluate-doc skill to have been run first (or runs it inline). The bridge between evaluation and the /review-scenario → /scenario-to-tests pipeline.
 arguments:
   - name: source
-    description: Required. Path to the source document to convert. Optionally followed by flags. Supported flags - --skip-evaluation (assume the doc has already been evaluated; skip the evaluate-spec pass), --promote (write directly to <SCENARIO_DIR> instead of <SCENARIO_DIR>/drafts/).
+    description: Required. Path to the source document to convert. Optionally followed by flags. Supported flags - --skip-evaluation (assume the doc has already been evaluated; skip the evaluate-doc pass), --promote (write directly to <SCENARIO_DIR> instead of <SCENARIO_DIR>/drafts/).
     required: true
 ---
 
-# Spec To Scenarios
+# Doc To Scenarios
 
-Convert a structured test document into scenario markdown files that feed the existing `/review-scenario` → `/scenario-to-tests` pipeline. This is the automated counterpart to hand-writing scenarios from a spec.
+Convert any document into scenario markdown files that feed the existing `/review-scenario` → `/scenario-to-tests` pipeline. The input can be a QA spec, test plan, user stories, requirements doc, meeting notes, or any structured description of what to test. This is the automated counterpart to hand-writing scenarios.
 
 By default, output goes to `<SCENARIO_DIR>/drafts/` so the user can review before promoting. Pass `--promote` to write directly to `<SCENARIO_DIR>`.
 
@@ -17,7 +17,7 @@ By default, output goes to `<SCENARIO_DIR>/drafts/` so the user can review befor
 
 The first non-flag token is the **source document path** (required). Split remaining args into flags:
 
-- `--skip-evaluation` — skip the inline evaluate-spec pass. Use when the user already ran `evaluate-spec` on this document and reviewed the report. Without this flag, the command runs evaluation first and pauses for the user to review before converting.
+- `--skip-evaluation` — skip the inline evaluate-doc pass. Use when the user already ran `evaluate-doc` on this document and reviewed the report. Without this flag, the command runs evaluation first and pauses for the user to review before converting.
 - `--promote` — write scenario files directly to `<SCENARIO_DIR>` instead of `<SCENARIO_DIR>/drafts/`.
 
 Any unknown `--`-prefixed token → error before doing any work. Missing source path → error.
@@ -31,7 +31,7 @@ Ensure the output directory exists (`<SCENARIO_DIR>/drafts/` or `<SCENARIO_DIR>`
 ## Phase 1: Read and evaluate the source document
 
 1. Read the source document in full.
-2. Unless `--skip-evaluation` was passed, invoke the `evaluate-spec` skill to produce a testability report. Present the report to the user and pause with `AskUserQuestion`: "Proceed with conversion? Review the report above — items marked 'out-of-scope' will be skipped, and 'needs-changes' items will be converted with best-effort and flagged for review." Options: `Yes, convert` (Recommended), `No, I'll make changes first`.
+2. Unless `--skip-evaluation` was passed, invoke the `evaluate-doc` skill to produce a testability report. Present the report to the user and pause with `AskUserQuestion`: "Proceed with conversion? Review the report above — items marked 'out-of-scope' will be skipped, and 'needs-changes' items will be converted with best-effort and flagged for review." Options: `Yes, convert` (Recommended), `No, I'll make changes first`.
 3. If the user chose to stop, report the evaluation and exit.
 
 ## Phase 2: Extract and map test cases
@@ -79,7 +79,7 @@ For each scenario file to be written:
 Launch subagents in **batches of at most 5 concurrent**. Each subagent writes one scenario file following the `authoring-scenarios` skill format.
 
 Each file includes:
-- A provenance blockquote: `> Converted from \`<source-filename>\` by \`/spec-to-scenarios\`. Review before feeding into \`/scenario-to-tests\`.`
+- A provenance blockquote: `> Converted from \`<source-filename>\` by \`/doc-to-scenarios\`. Review before feeding into \`/scenario-to-tests\`.`
 - All mapped test cases for that scenario.
 - Any `needs-changes` warnings inline.
 

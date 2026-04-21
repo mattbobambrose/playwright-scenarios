@@ -38,7 +38,7 @@ Then seed your first scenario:
 === "Convert a spec"
 
     ```
-    /spec-to-scenarios path/to/spec.md
+    /doc-to-scenarios path/to/spec.md
     ```
     Evaluates and converts an existing QA document.
 

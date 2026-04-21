@@ -58,32 +58,70 @@ Currently only `kotlin` + `kotest-stringspec` has a fully wired test-generation 
 
    Do not silently overwrite from this skill.
 
-4. **If it doesn't exist**, create it via a **two-round interactive bootstrap**. Splitting the prompts into two rounds lets the framework options in round 2 be constrained to the language picked in round 1, so users never land on an invalid pairing like `typescript` + `kotest-stringspec`.
+4. **If it doesn't exist**, create it via a **three-round interactive bootstrap**. Before prompting, scan the project to inform suggestions. Then ask three rounds: language first, then language-aware directories, then framework.
 
    a. If `.claude/` does not exist at the repo root, create it.
 
-   b. **Round 1** — ask the three questions that don't depend on each other, in a single `AskUserQuestion` call. Present the default as the first (Recommended) option on each; users can always pick "Other" for a free-form value.
+   b. **Pre-scan the project** to inform suggestions across all three rounds. Run these checks before any prompting:
 
-      - **`scenario_dir`** — question: "Where should scenario markdown files live?" Options: `src/test/scenarios` (Recommended — default), `scenarios/` (legacy, at repo root).
-      - **`test_dir`** — before prompting, run the base-test-class discovery (see "Base test class discovery" below) to suggest a likely test-output directory. Question: "Where should generated tests go?" Options: the auto-detected path (if any, Recommended), `src/test/kotlin/<package>/scenarios` (generic fallback). Always accept "Other" for a custom path.
-      - **`test_language`** — question: "What language should generated tests use?" Options: `kotlin` (Recommended), `java`, `typescript`, `python`.
+      - **Detect existing test directories.** Glob for common test roots: `src/test/kotlin/`, `src/test/java/`, `tests/`, `test/`, `src/__tests__/`, `Tests/`. Record which ones exist on disk.
+      - **Detect existing scenario-like directories.** Glob for `**/scenarios/`, `**/test-scenarios/`, `**/e2e/`. Record any that already contain `.md` files.
+      - **Detect build/config files.** Check for: `build.gradle.kts` or `build.gradle` (JVM/Gradle), `pom.xml` (JVM/Maven), `package.json` (Node.js), `tsconfig.json` (TypeScript), `pyproject.toml` or `setup.py` (Python), `*.csproj` or `*.sln` (.NET). These signal the project's language even before the user answers.
+      - **Detect existing test files.** Glob for `**/*Test.kt`, `**/*Test.java`, `**/*.spec.ts`, `**/*.test.ts`, `**/test_*.py`, `**/*_test.py`, `**/*Tests.cs`. This confirms the language and reveals the directory structure the project already uses.
+      - **Detect base test classes (JVM only).** Run the base-test-class discovery glob (see "Base test class discovery" below) under any detected JVM source root.
 
-   c. **Round 2** — now that `test_language` is known, ask the framework question with options scoped to that language. Use a separate `AskUserQuestion` call.
+      The scan results don't override the user's choices — they inform the **recommended defaults** and the **order of options** in each round.
 
-      | `test_language` | Options offered (in order) |
-      |-----------------|----------------------------|
-      | `kotlin` | `kotest-stringspec` (Recommended), `junit5` |
-      | `java` | `junit5` (Recommended) |
-      | `typescript` | `playwright-test` (Recommended), `jest` |
-      | `python` | `pytest` (Recommended) |
+   c. **Round 1** — ask two questions in a single `AskUserQuestion` call.
 
-      For languages with a single viable framework (`java`, `python`), still ask — the user might want to pick "Other" for a framework not in the list. Do not silently assign the default.
+      - **`scenario_dir`** — question: "Where should scenario markdown files live?"
+        - If the scan found an existing directory with `.md` scenario files, offer it as the first (Recommended) option.
+        - Otherwise, offer `src/test/scenarios` as the default for JVM-detected projects, or `tests/scenarios` for Node.js/Python-detected projects.
+        - Always include `scenarios/` (legacy, at repo root) as an alternative.
+      - **`test_language`** — question: "What language should generated tests use?"
+        - If the scan detected the project language (e.g., found `build.gradle.kts` → suggest `kotlin` first, found `package.json` + `tsconfig.json` → suggest `typescript` first, found `pyproject.toml` → suggest `python` first), order that language as the first (Recommended) option.
+        - If the scan found existing test files (e.g., `*.spec.ts`), use that to confirm the suggestion.
+        - If the scan couldn't determine the language, present all options in alphabetical order: `.net`, `java`, `javascript`, `kotlin`, `python`, `typescript`.
 
-      If the user picked a `test_language` via "Other" (not one of the four known values), skip the scoped list and ask an open framework question: "What test framework should generated tests use?" with a single "Enter framework" option plus "Other". The `/scenario-to-tests` unsupported-combo guard will handle unknown pairings at generation time.
+   d. **Round 2** — now that `test_language` is known, ask `test_dir` with suggestions informed by both the language and the project scan.
 
-   d. Write `.claude/playwright-scenarios.local.md` with the four chosen values as YAML frontmatter, followed by the standard markdown body (see "Config file format" above). Do *not* write `source_root` or `base_test_class` at bootstrap — they're added later, only when disambiguation is needed.
+      - **If the scan found existing test files in the chosen language**, suggest the directory they're in (or a sibling `scenarios` directory) as the first (Recommended) option.
+      - **If no existing tests were found**, fall back to the idiomatic default for the language:
 
-   e. Report the path and the chosen values to the user in a compact table, then return the four values.
+        | `test_language` | Idiomatic default | Alternative |
+        |-----------------|-------------------|-------------|
+        | `kotlin` | `src/test/kotlin/<package>/scenarios` (from base-test-class if found) | `src/test/kotlin/scenarios` |
+        | `java` | `src/test/java/<package>/scenarios` (from base-test-class if found) | `src/test/java/scenarios` |
+        | `typescript` | `tests/scenarios` | `src/__tests__/scenarios` |
+        | `javascript` | `tests/scenarios` | `src/__tests__/scenarios` |
+        | `python` | `tests/scenarios` | `test/scenarios` |
+        | `.net` | `Tests/Scenarios` | `tests/scenarios` |
+
+      - For JVM languages, the base-test-class glob searches `src/test/<test_language>/` (not hardcoded `src/test/kotlin/`). If a base test class was found in the pre-scan, suggest a sibling `scenarios` directory in the same package as the Recommended option.
+      - If the user picked a `test_language` via "Other" (not one of the known values), skip the suggestion table and ask an open `test_dir` question with free-text only.
+      - Always accept "Other" for a custom path.
+
+   e. **Round 3** — ask the framework question with options scoped to the language and informed by the project scan.
+
+      - **If the scan found existing test files that indicate a framework** (e.g., imports of `kotest` in `.kt` files, `@playwright/test` in `.spec.ts` files, `pytest` markers in `.py` files), offer that framework as the first (Recommended) option.
+      - **Otherwise**, use the idiomatic default for the language:
+
+        | `test_language` | Options offered (in order) |
+        |-----------------|----------------------------|
+        | `kotlin` | `kotest-stringspec` (Recommended), `junit5` |
+        | `java` | `junit5` (Recommended) |
+        | `typescript` | `playwright-test` (Recommended), `jest` |
+        | `javascript` | `playwright-test` (Recommended), `jest` |
+        | `python` | `pytest` (Recommended) |
+        | `.net` | `nunit` (Recommended), `mstest` |
+
+      For languages with a single viable framework, still ask — the user might want to pick "Other" for a framework not in the list. Do not silently assign the default.
+
+      If the user picked a `test_language` via "Other" (not one of the known values), skip the scoped list and ask an open framework question: "What test framework should generated tests use?" with a single "Enter framework" option plus "Other". The `/scenario-to-tests` unsupported-combo guard will handle unknown pairings at generation time.
+
+   f. Write `.claude/playwright-scenarios.local.md` with the four chosen values as YAML frontmatter, followed by the standard markdown body (see "Config file format" above). Do *not* write `source_root` or `base_test_class` at bootstrap — they're added later, only when disambiguation is needed.
+
+   g. Report the path and the chosen values to the user in a compact table, then return the four values.
 
 5. **Return the resolved values** to the caller. Callers reference them as `<SCENARIO_DIR>`, `<TEST_DIR>`, `<TEST_LANGUAGE>`, `<TEST_FRAMEWORK>` (plus `<SOURCE_ROOT>` and `<BASE_TEST_CLASS>` when set).
 

@@ -30,7 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Per-project configuration via `.claude/playwright-scenarios.local.md` — required fields `scenario_dir`, `test_dir`, `test_language`, `test_framework`; optional advanced fields `source_root` and `base_test_class` for projects whose layout doesn't match standard source-set patterns. Two-round `AskUserQuestion` bootstrap prevents invalid language/framework pairings.
+- Per-project configuration via `.claude/playwright-scenarios.local.md` — required fields `scenario_dir`, `test_dir`, `test_language`, `test_framework`; optional advanced fields `source_root` and `base_test_class` for projects whose layout doesn't match standard source-set patterns. Three-round `AskUserQuestion` bootstrap: language first, then language-aware directory suggestions, then framework scoped to language.
 - New `loading-config` skill — invoked at the start of every command. Source-root inference and base-test-class discovery with auto-persist on first resolve.
 - New `/crawl-site` command — read-only traversal that seeds `<scenario_dir>/drafts/` with user-flow-oriented scenarios. Starts from a URL, walks same-origin links one hop out by default, never fills forms or clicks destructive buttons. Groups discoveries into plausible user journeys (primary nav, hero CTAs, auth-gate entry points, footer aggregate). Supports `--depth` and `--max-scenarios` flags.
 - New `/playwright-scenarios-config` command — view/update config fields with a dedicated malformed-config recovery path.
@@ -48,10 +48,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `**Timeout:** <ms>` — per-scenario or per-test timeout override.
   - `**Cleanup:** <action>` — teardown action for test isolation.
   - Plus existing: `**Fixture:**`, `**Prerequisite:**`, `**Assert throughout:**`, `**Expected failure:**`, `**Expected (regex):**`.
-- New `/spec-to-scenarios` command — converts evaluated QA specs into scenario markdown with proper tag mapping.
+- New `/doc-to-scenarios` command — converts evaluated QA specs into scenario markdown with proper tag mapping.
 - New `/generate-fixture` command — scaffolds standardized JSON fixture files from specs, scenarios, or interactively.
 - New `/scenario-status` command — health dashboard (review dates, test status, coverage gaps).
-- New `evaluate-spec` skill — reads a QA document and produces a structured testability report.
+- New `evaluate-doc` skill — reads a QA document and produces a structured testability report.
 - New `fixture-format` skill — defines canonical JSON fixture format shared across all generators.
 - New `debugging-scenarios` skill — guides troubleshooting when generated tests fail.
 - Default scenario directory changed from `scenarios/` to `src/test/scenarios/`; legacy location offered as an alternative.

@@ -1,9 +1,9 @@
 ---
 name: crawl-site
-description: Crawl a website starting from a URL to discover user flows, and write draft scenarios (read-only traversal; never fills forms or clicks destructive buttons). Complementary seed-generator to /record-scenario — useful when you want Claude to explore a site autonomously and propose scenarios for a human to refine.
+description: Crawl a website starting from a URL to discover user flows, and write draft scenarios (read-only traversal; never fills forms or clicks destructive buttons). Accepts an optional natural-language description of what to focus on or how thorough to be. Complementary seed-generator to /record-scenario.
 arguments:
   - name: start-url
-    description: Required. The URL to start crawling from. Optionally followed by flags. Supported flags - --depth=N (override the default 1-hop same-origin traversal; max 3), --max-scenarios=N (cap emitted draft scenarios; default 10).
+    description: Required. The URL to start crawling from. Optionally followed by a natural-language description of what to crawl and/or flags. Supported flags - --depth=N (override interpreted depth; max 3), --max-scenarios=N (cap emitted draft scenarios; default 10).
     required: true
 ---
 
@@ -15,12 +15,27 @@ This command is strictly **read-only**: it navigates, scrolls, and observes, but
 
 ## Argument parsing
 
-The first non-flag token is the **start URL** (required). Split the remaining args into **flags**:
+Split the argument string into three parts:
 
-- `--depth=N` — how many same-origin hops to traverse from the start page. Default `1` (start page + its direct links). Clamp to `[1, 3]`.
-- `--max-scenarios=N` — cap on the number of draft scenarios emitted. Default `10`. If the crawl discovers more candidate flows than the cap, keep the highest-ranked ones (see "Flow ranking" below).
+- **Start URL** (required) — the first token that starts with `http://` or `https://`.
+- **Flags** (optional) — tokens starting with `--`:
+  - `--depth=N` — explicit depth override. Clamp to `[1, 3]`.
+  - `--max-scenarios=N` — explicit cap on draft scenarios emitted.
+- **Description** (optional) — everything else, joined into one string. This is a natural-language instruction describing what to focus on or how thorough to be.
 
 Any unknown `--`-prefixed token → error before doing any work. Missing start URL → error.
+
+**Examples:**
+
+```
+/crawl-site https://bookstore.example.com
+/crawl-site https://bookstore.example.com --depth=3
+/crawl-site https://bookstore.example.com focus on the checkout flow for a first-time buyer
+/crawl-site https://bookstore.example.com thorough crawl of all product-related pages --max-scenarios=15
+/crawl-site https://bookstore.example.com shallow overview of the main navigation
+```
+
+If no description is provided, fall back to the default behavior: structural crawl, depth 1, max 10 scenarios, no filtering.
 
 ## Phase 0: Load project config and preflight
 
@@ -54,6 +69,42 @@ Ensure `<SCENARIO_DIR>/drafts/` exists; create it if not.
    - **different origin** → skip.
    - **`mailto:` / `tel:` / `javascript:`** → skip.
 
+## Phase 1.5: Interpret the description (if provided)
+
+If no description was given, skip this phase — use defaults (depth 1, max 10, no filtering).
+
+If a description was provided, interpret it in the context of the Phase 1 inventory:
+
+### Classify the intent
+
+- **Goal-oriented** — the user wants specific flows covered. Examples: "map the checkout flow", "find all forms", "focus on auth pages", "explore the product catalog". Filter the Phase 1 inventory to links/elements matching the goal.
+- **Intensity-oriented** — the user wants a certain thoroughness. Examples: "shallow overview", "deep dive", "cover everything", "just the main pages". Adjust the effective depth and max-scenarios values.
+- **Hybrid** — the user describes both. Example: "thorough crawl of the checkout flow". Apply both goal filtering and intensity adjustment.
+
+### Determine effective parameters
+
+Based on the interpretation, set:
+
+- **Effective depth** — "shallow" / "overview" → 1; "moderate" / no intensity signal → 2; "deep" / "thorough" / "everything" → 3.
+- **Effective max-scenarios** — "just the main ones" → 5; no signal → 10; "comprehensive" / "everything" → 20.
+- **Focus filter** — a list of keywords/concepts extracted from the goal (e.g., "checkout", "cart", "payment", "shipping" for "focus on the checkout flow"). Used to rank and filter in Phase 2.
+
+If `--depth` or `--max-scenarios` flags were explicitly set, they override the interpreted values. The description informs, the flags constrain.
+
+### Show the crawl plan
+
+Before proceeding, show the user a summary of the interpreted plan:
+
+> Based on your description "*focus on the checkout flow for a first-time buyer*", I'll:
+> - Follow links related to: cart, checkout, shipping, payment, confirmation
+> - Deprioritize: blog, about, careers, support pages
+> - Depth: 3 (enough to cover cart → checkout → payment → confirmation)
+> - Max scenarios: 8
+>
+> Proceed?
+
+Use `AskUserQuestion` with options: `Yes, proceed` (Recommended), `No, let me adjust`. If the user adjusts, they can provide a revised description or explicit flags, and the interpretation runs again.
+
 ## Phase 2: Identify candidate user flows
 
 A **flow** is a sequence of actions ending on a destination page. For this read-only crawl, each flow is:
@@ -76,7 +127,16 @@ If multiple links on the page point to the same destination, merge them into one
 
 ### Flow ranking
 
-Rank flows for the `--max-scenarios` cap (descending priority):
+When a description with a **focus filter** is active, ranking changes:
+
+1. Flows matching the focus filter keywords (regardless of DOM position).
+2. Primary-nav items (not already matched above).
+3. Hero / primary CTAs (not already matched above).
+4. Auth-gate entry points.
+5. In-content feature links.
+6. Footer (capped at one aggregate scenario).
+
+When no description is provided, use the default ranking:
 
 1. Primary-nav items.
 2. Hero / primary CTAs.
@@ -84,13 +144,15 @@ Rank flows for the `--max-scenarios` cap (descending priority):
 4. In-content feature links.
 5. Footer (capped at one aggregate scenario).
 
+Flows not matching the focus filter are **deprioritized, not dropped** — they still appear if the max-scenarios cap has room after the focused flows.
+
 If the start page is behind an auth gate (detected by a prominent login form or redirect to `/login`), emit a single scenario naming the gate and **stop crawling** — don't attempt to proceed.
 
 ## Phase 3: Walk each selected flow (parallel subagents)
 
 Each flow is an independent same-origin navigation with no shared state. Launch subagents in **batches of at most 5 concurrent** — the same pattern used by `/review-scenario` and `/scenario-to-tests`. If there are more than 5 flows, process them in sequential batches.
 
-Each subagent receives one flow and performs these steps (only when `--depth >= 1`):
+Each subagent receives one flow and performs these steps (only when effective depth >= 1):
 
 1. Navigate to the flow's destination via `playwright-cli goto <destination-url>` (don't synthesize the click; direct navigation is more reliable and still read-only).
 2. Take a snapshot of the destination.
@@ -98,8 +160,8 @@ Each subagent receives one flow and performs these steps (only when `--depth >= 
    - Destination URL after redirects (matches expected? differs?).
    - Page title / main heading text.
    - One or two prominent visible elements (a hero heading, a form label, a banner).
-4. If `--depth >= 2`, repeat the inventory-and-rank process on the destination, but do not recurse beyond `--depth`.
-5. Return the observations to the main thread.
+4. If effective depth >= 2, repeat the inventory-and-rank process on the destination (applying the same focus filter if present), but do not recurse beyond the effective depth.
+5. Return the observations to the main thread. Include: URLs discovered at this level, URLs crawled, URLs skipped, and the maximum depth seen in outbound links (for the "max_depth_available" estimate).
 
 Do **not** fill forms. Do **not** click buttons. If a page obviously requires login to proceed (login wall, 401 / 403), record that fact as the scenario's expected outcome and move on.
 
@@ -131,7 +193,7 @@ Use the flat scenario format documented in the `authoring-scenarios` skill. A re
 
 Navigating from the homepage to the Pricing page via the primary nav.
 
-> Draft generated by `/crawl-site` — no interactions performed. Review and edit before feeding into `/scenario-to-tests`.
+> Draft generated by `/crawl-site` — "focus on the checkout flow for a first-time buyer". Review and edit before feeding into `/scenario-to-tests`.
 
 ## Test 1: Click the 'Pricing' nav link
 
@@ -144,21 +206,70 @@ Rules for the generated content:
 
 - Preserve **concrete selector text** (exact link text, exact heading text) — `/review-scenario` needs this to verify against the live site.
 - Use the imperative/descriptive voice the `authoring-scenarios` skill mandates.
-- Always include the "Draft generated by `/crawl-site`" blockquote so a reviewer knows the provenance.
+- Always include a provenance blockquote. If a description was provided, include it: `> Draft generated by /crawl-site — "<description>"`. If no description, use: `> Draft generated by /crawl-site`.
 - For footer-aggregate scenarios, include a minimal Action bullet (`- **Action:** Scroll to the page footer`) followed by the observed links as Expected bullets (`- **Expected:** The footer contains a link to "About"`, etc.) — every test requires at least one Action and one Expected per the `authoring-scenarios` format.
 - Auth-gate scenarios should have a single Expected asserting the user is redirected to or sees the login form — not a speculative login flow.
 
-## Phase 5: Report
+## Phase 5: Write crawl metadata
+
+After all drafts are written, write (or append to) a metadata file at `<SCENARIO_DIR>/drafts/.crawl-meta.json`. This file records crawl history so `/scenario-status` can report coverage completeness.
+
+If the file exists, read it, append the new crawl entry to the `crawls` array, and write it back. If it doesn't exist, create it with a single-entry array.
+
+```json
+{
+  "crawls": [
+    {
+      "timestamp": "2026-04-21T14:30:00Z",
+      "start_url": "https://bookstore.example.com",
+      "description": "focus on the checkout flow for a first-time buyer",
+      "effective_depth": 3,
+      "effective_max_scenarios": 8,
+      "urls_discovered": 22,
+      "urls_crawled": 15,
+      "urls_skipped": 7,
+      "scenarios_written": 6,
+      "flow_types": {
+        "nav": 2,
+        "hero_cta": 1,
+        "content": 2,
+        "footer": 1,
+        "auth": 0
+      },
+      "max_depth_reached": 3,
+      "max_depth_available": 5
+    }
+  ]
+}
+```
+
+Fields:
+- `description` — the user's natural-language description, or `null` if none was given.
+- `effective_depth` / `effective_max_scenarios` — the values used (after interpretation + flag overrides).
+- `urls_discovered` — total same-origin links found across all levels.
+- `urls_crawled` — links actually navigated to.
+- `urls_skipped` — links deprioritized or cut by the cap.
+- `flow_types` — count of flows per type that were written as drafts.
+- `max_depth_reached` — deepest level the crawl actually visited.
+- `max_depth_available` — estimated maximum depth of the site based on outbound links seen at the deepest level crawled (if the deepest pages still had outbound links, the site goes deeper).
+
+## Phase 6: Report
 
 Print a summary table listing every draft written:
 
 | Draft | Flow type | Destination | Notes |
 |-------|-----------|-------------|-------|
 
-Finish with three next-step pointers for the user:
+If a description was given, also report:
+- What the description was interpreted as (goal, intensity, or hybrid).
+- Which focus keywords were used.
+- How many flows matched vs. didn't match the filter.
+
+Finish with next-step pointers for the user:
 
 1. Review a draft: `cat <SCENARIO_DIR>/drafts/<name>.md`
 2. Promote a draft out of drafts: `mv <SCENARIO_DIR>/drafts/<name>.md <SCENARIO_DIR>/<name>.md`
 3. Run `/review-scenario <name>` once promoted (it will auto-audit against the live site).
+4. Run `/scenario-status` to see overall coverage including this crawl's contribution.
 
 Do **not** auto-chain into `/review-scenario` — drafts deserve a human pass first, which is why they live under `drafts/`.

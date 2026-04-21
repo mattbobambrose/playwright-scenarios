@@ -19,7 +19,7 @@ This repository is a Claude Code plugin marketplace (no application source). It 
 
 - [/record-scenario](plugins/playwright-scenarios/commands/record-scenario.md): Launch Playwright codegen, capture a real user flow, and write a draft scenario. Accepts `--no-review`.
 - [/crawl-site](plugins/playwright-scenarios/commands/crawl-site.md): Read-only site crawl; emits user-flow-oriented drafts to `<scenario_dir>/drafts/`. Accepts `--depth` and `--max-scenarios`.
-- [/spec-to-scenarios](plugins/playwright-scenarios/commands/spec-to-scenarios.md): Convert a QA spec into scenario markdown files with proper tag mapping. Accepts `--skip-evaluation` and `--promote`.
+- [/doc-to-scenarios](plugins/playwright-scenarios/commands/doc-to-scenarios.md): Convert a QA spec into scenario markdown files with proper tag mapping. Accepts `--skip-evaluation` and `--promote`.
 - [/generate-fixture](plugins/playwright-scenarios/commands/generate-fixture.md): Scaffold a JSON fixture file from a scenario, spec, or interactively. Accepts `--name`.
 - [/review-scenario](plugins/playwright-scenarios/commands/review-scenario.md): Audit scenarios against the live site and apply improvements. Accepts `--include-drafts`.
 - [/scenario-to-tests](plugins/playwright-scenarios/commands/scenario-to-tests.md): Generate tests from reviewed scenarios. Accepts `--include-drafts` and `--dry-run`.
@@ -30,7 +30,7 @@ This repository is a Claude Code plugin marketplace (no application source). It 
 
 - [loading-config](plugins/playwright-scenarios/skills/loading-config/SKILL.md): Reads `.claude/playwright-scenarios.local.md`; bootstraps on first use. Invoked at the start of every command.
 - [authoring-scenarios](plugins/playwright-scenarios/skills/authoring-scenarios/SKILL.md): Flat-markdown scenario format reference with 13 extended tags. Used when hand-writing or editing scenario files.
-- [evaluate-spec](plugins/playwright-scenarios/skills/evaluate-spec/SKILL.md): Evaluates a QA document against the plugin's capabilities. Structured testability report.
+- [evaluate-doc](plugins/playwright-scenarios/skills/evaluate-doc/SKILL.md): Evaluates a QA document against the plugin's capabilities. Structured testability report.
 - [fixture-format](plugins/playwright-scenarios/skills/fixture-format/SKILL.md): Defines the canonical JSON fixture format shared across all test generators.
 - [debugging-scenarios](plugins/playwright-scenarios/skills/debugging-scenarios/SKILL.md): Guides troubleshooting when generated tests fail — iframe detection, selector drift, timing, stale fixtures.
 

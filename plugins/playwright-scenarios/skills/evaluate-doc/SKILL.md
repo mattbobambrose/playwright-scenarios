@@ -1,9 +1,9 @@
 ---
-name: evaluate-spec
-description: Evaluate a QA spec, test plan, user story document, or any structured test description against the playwright-scenarios plugin's capabilities. Reports what can be directly converted to scenarios, what needs modification, and what is out of scope entirely. Use when the user provides a document and wants to know how well it maps to the scenario pipeline, or when the user asks "can we test this?" or "what would need to change?" about an existing spec.
+name: evaluate-doc
+description: Evaluate any document (QA spec, test plan, user stories, requirements doc, meeting notes) against the playwright-scenarios plugin's capabilities. Reports what can be directly converted to scenarios, what needs modification, and what is out of scope entirely. Use when the user provides a document and wants to know how well it maps to the scenario pipeline, or when the user asks "can we test this?" or "what would need to change?" about an existing document.
 ---
 
-# Evaluate Spec
+# Evaluate Doc
 
 Read a user-provided document (QA spec, test plan, user stories, acceptance criteria — any format) and produce a structured testability report. This skill is advisory: it reads and reports, but never writes scenario files. The user decides what to act on.
 

@@ -52,12 +52,12 @@ Author browser-driven scenarios as markdown, audit them against the live site, a
 | Command | Description |
 |---------|-------------|
 | `/record-scenario [name] [--no-review]` | Launch Playwright codegen, capture a real user flow, and write a draft scenario markdown file. Auto-chains into `/review-scenario` unless `--no-review` is passed. |
-| `/crawl-site <start-url> [--depth=N] [--max-scenarios=N]` | Read-only crawl of a site. Emits user-flow-oriented draft scenarios to `<scenario_dir>/drafts/`. |
-| `/spec-to-scenarios <path> [--skip-evaluation] [--promote]` | Convert a QA spec or test plan into scenario markdown files. Runs `evaluate-spec` first, then maps test cases to the scenario format with proper tags. |
+| `/crawl-site <url> [description] [--depth=N] [--max-scenarios=N]` | Read-only crawl of a site. Accepts natural-language descriptions ("focus on checkout flow") to guide scope. Emits draft scenarios to `<scenario_dir>/drafts/`. |
+| `/doc-to-scenarios <path> [--skip-evaluation] [--promote]` | Convert a QA spec or test plan into scenario markdown files. Runs `evaluate-doc` first, then maps test cases to the scenario format with proper tags. |
 | `/generate-fixture <source \| interactive> [--name=N]` | Scaffold a fixture JSON file from a scenario's data bullets, a spec's persona table, or interactive prompts. |
 | `/review-scenario [names...] [--include-drafts]` | Audit scenarios against the live site and apply improvements to the markdown. |
 | `/scenario-to-tests [names...] [--include-drafts] [--dry-run]` | Generate tests (defaults: Kotlin + Kotest StringSpec with Playwright-for-Java) from reviewed scenarios. |
-| `/scenario-status` | Health dashboard showing scenario review dates, test file status, pass/fail results, and coverage gaps vs. site inventory. |
+| `/scenario-status` | Health dashboard: review dates, test status, pass/fail, plus coverage completeness (crawl depth, flow types, conversion rate, critical paths). |
 | `/playwright-scenarios-config` | View or update per-project settings. Also the recovery path for malformed config files. |
 
 **Skills**
@@ -66,7 +66,7 @@ Author browser-driven scenarios as markdown, audit them against the live site, a
 |-------|-------------|
 | `loading-config` | Reads `.claude/playwright-scenarios.local.md` and bootstraps it on first use; invoked at the start of every command |
 | `authoring-scenarios` | Flat-markdown format reference with 13 extended tags; used when hand-writing or editing scenario files |
-| `evaluate-spec` | Evaluates a QA spec against the plugin's capabilities; reports what converts directly, what needs changes, and what's out of scope |
+| `evaluate-doc` | Evaluates a QA spec against the plugin's capabilities; reports what converts directly, what needs changes, and what's out of scope |
 | `fixture-format` | Defines the standardized JSON fixture file format shared across all generators |
 | `debugging-scenarios` | Guides troubleshooting when generated tests fail — iframe detection, selector drift, timing, stale fixtures |
 

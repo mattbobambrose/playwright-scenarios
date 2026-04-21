@@ -23,7 +23,7 @@ Verify it's installed — you should see the commands when you type `/`:
 /review-scenario
 /scenario-to-tests
 /playwright-scenarios-config
-/spec-to-scenarios
+/doc-to-scenarios
 /generate-fixture
 /scenario-status
 ```
@@ -84,11 +84,12 @@ The first time you run any plugin command, it prompts you for four settings. You
 /playwright-scenarios-config
 ```
 
-You'll be asked:
+The setup asks four questions across three rounds. Before prompting, the plugin scans your project to inform its suggestions — it looks for build files (`build.gradle.kts`, `package.json`, `pyproject.toml`, etc.), existing test directories, test files, and base test classes. The scan doesn't make decisions for you; it just puts the most likely option first.
 
-1. **Where should scenario files live?** — Default: `src/test/scenarios`
-2. **Where should generated tests go?** — e.g., `src/test/kotlin/com/example/bookstore/scenarios`
-3. **What language?** — Playwright supports five languages:
+**Round 1** — scenario location and language:
+
+1. **Where should scenario files live?** — If the scan found an existing scenarios directory, it's offered first. Otherwise defaults to `src/test/scenarios` for JVM projects or `tests/scenarios` for Node.js/Python.
+2. **What language?** — If the scan detected your project's language (e.g., found `build.gradle.kts` → Kotlin, `tsconfig.json` → TypeScript), that's offered first. Playwright supports six languages:
 
     | Language | Playwright binding |
     |----------|--------------------|
@@ -99,7 +100,24 @@ You'll be asked:
     | TypeScript | `@playwright/test` (npm) |
     | .NET | `Microsoft.Playwright` (NuGet) |
 
-4. **What test framework?** — Options depend on the language you chose:
+**Round 2** — test directory, informed by your language and project structure:
+
+3. **Where should generated tests go?** — If the scan found existing test files in your chosen language, it suggests their directory (or a sibling `scenarios` directory). Otherwise it falls back to idiomatic defaults:
+
+    | Language | Recommended default | Alternative |
+    |----------|---------------------|-------------|
+    | Kotlin | `src/test/kotlin/<package>/scenarios` (auto-detected) | `src/test/kotlin/scenarios` |
+    | Java | `src/test/java/<package>/scenarios` (auto-detected) | `src/test/java/scenarios` |
+    | TypeScript | `tests/scenarios` | `src/__tests__/scenarios` |
+    | JavaScript | `tests/scenarios` | `src/__tests__/scenarios` |
+    | Python | `tests/scenarios` | `test/scenarios` |
+    | .NET | `Tests/Scenarios` | `tests/scenarios` |
+
+    For Kotlin and Java, the plugin searches your project for an existing base test class and suggests a sibling `scenarios` directory in the same package.
+
+**Round 3** — framework, scoped to your language:
+
+4. **What test framework?** — If the scan detected a framework from existing test files (e.g., Kotest imports in `.kt` files), it's offered first. Otherwise, options are scoped to your language:
 
     | Language | Framework options |
     |----------|-------------------|
@@ -302,13 +320,19 @@ Test error states that can't be triggered through the UI:
 
 ## 9. Crawl a site for coverage
 
-If you're not sure what flows to test, let the plugin discover them:
+If you're not sure what flows to test, let the plugin discover them. You can give it a natural-language description of what to focus on:
+
+```
+/crawl-site https://bookstore.example.com focus on the checkout flow for a first-time buyer
+```
+
+Or do a broad crawl with no description:
 
 ```
 /crawl-site https://bookstore.example.com
 ```
 
-This navigates the site (read-only — never fills forms or clicks destructive buttons), identifies user flows grouped by type (navigation, hero CTAs, auth gates, footer), and writes draft scenarios to `src/test/scenarios/drafts/`.
+The command navigates the site (read-only — never fills forms or clicks destructive buttons), interprets your description to prioritize relevant flows, shows you a crawl plan for approval, then writes draft scenarios to `src/test/scenarios/drafts/`.
 
 Review the drafts and promote the ones you want to keep:
 
@@ -328,12 +352,12 @@ mv src/test/scenarios/drafts/nav-to-bestsellers.md src/test/scenarios/nav-to-bes
 
 If you have a QA spec or test plan document, evaluate it first:
 
-Ask Claude to evaluate your spec — the `evaluate-spec` skill classifies each test case as direct (converts cleanly), needs changes (fixable), or out of scope (needs a different tool).
+Ask Claude to evaluate your spec — the `evaluate-doc` skill classifies each test case as direct (converts cleanly), needs changes (fixable), or out of scope (needs a different tool).
 
 Then convert:
 
 ```
-/spec-to-scenarios path/to/checkout-spec.md
+/doc-to-scenarios path/to/checkout-spec.md
 ```
 
 !!! tip "Write better specs upfront"
@@ -352,7 +376,10 @@ This shows:
 - Which scenarios have been reviewed recently
 - Which test files are stale (scenario changed since tests were generated)
 - Pass/fail status from the latest test run
-- Coverage gaps vs. the crawl inventory
+- **Crawl depth** — how deep the crawl went vs. how deep the site goes
+- **Flow type coverage** — which flow types (nav, forms, auth, etc.) have scenarios vs. were only discovered
+- **Conversion rate** — what percentage of scenarios have generated tests
+- **Critical path coverage** — whether your most important user journeys are fully tested (requires a `.critical-paths.md` file listing your key flows)
 
 ## What's next
 
