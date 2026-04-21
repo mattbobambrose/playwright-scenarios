@@ -6,15 +6,13 @@ LLM-optimized reference for using the `playwright-scenarios` plugin in a host pr
 
 ## Terminology
 
-**Inputs** (what enters the plugin)
-- **User story** — stakeholder-facing description of desired behavior. Not our format.
-- **Spec** — structured test document (QA spec, user stories, acceptance criteria). Not yet in scenario format. Input to `/spec-to-scenarios`.
-- **User flow** — sequence of actions a real user takes to accomplish a goal. One user flow = one scenario.
+**Input** (what enters the plugin)
+- **Doc** — any document describing what to test: QA spec, user stories, requirements doc, test plan, meeting notes, acceptance criteria. Not in scenario format yet. Input to `evaluate-doc` and `/doc-to-scenarios`. One doc typically contains multiple user flows, each of which becomes one scenario.
 
 **Plugin artifacts** (what the plugin works with)
 - **Scenario** — a flat markdown file (`# Title`, `**URL:**`, `## Test N:` blocks with Action/Expected pairs). The central artifact.
 - **Test case** — a single `## Test N:` section inside a scenario. Each becomes one test function.
-- **Draft** — a scenario under `<scenario_dir>/drafts/`. Ignored unless `--include-drafts` is passed. Created by `/crawl-site` and `/spec-to-scenarios`.
+- **Draft** — a scenario under `<scenario_dir>/drafts/`. Ignored unless `--include-drafts` is passed. Created by `/crawl-site` and `/doc-to-scenarios`.
 - **Fixture** — a JSON file (`<scenario_dir>/fixtures/<name>.json`) with structured test data. Referenced via `**Fixture:** fixtures/<name>`.
 - **Tag** — a bold-label directive (`**Iframe:**`, `**Intercept:**`, etc.) that controls test generation beyond Action/Expected.
 
@@ -26,19 +24,19 @@ LLM-optimized reference for using the `playwright-scenarios` plugin in a host pr
 | If you want to... | Use | Notes |
 |---|---|---|
 | Record a user flow by driving a browser | `/record-scenario [name] [--no-review]` | Opens Playwright codegen. Auto-reviews unless `--no-review`. |
-| Auto-discover flows on a site | `/crawl-site <url> [--depth=N] [--max-scenarios=N]` | Read-only. Writes drafts. Never fills forms. |
-| Check if a spec is testable | `/evaluate-spec` (skill, not command — invoke by asking Claude to evaluate) | Advisory. Reports what converts, what needs changes, what's out of scope. |
-| Convert a spec into scenarios | `/spec-to-scenarios <path> [--skip-evaluation] [--promote]` | Runs evaluate-spec first. Writes drafts by default. |
+| Auto-discover flows on a site | `/crawl-site <url> [description] [--depth=N] [--max-scenarios=N]` | Read-only. Accepts natural-language scope ("focus on checkout"). Writes drafts. |
+| Check if a spec is testable | `/evaluate-doc` (skill, not command — invoke by asking Claude to evaluate) | Advisory. Reports what converts, what needs changes, what's out of scope. |
+| Convert a spec into scenarios | `/doc-to-scenarios <path> [--skip-evaluation] [--promote]` | Runs evaluate-doc first. Writes drafts by default. |
 | Create a fixture file | `/generate-fixture <source \| interactive> [--name=N]` | From a scenario, spec, or interactive prompts. |
 | Audit scenarios against the live site | `/review-scenario [names...] [--include-drafts]` | Verifies claims, tightens vague assertions, adds missing coverage. |
 | Generate test code | `/scenario-to-tests [names...] [--include-drafts] [--dry-run]` | Currently: Kotlin + Kotest only. |
-| Check scenario health | `/scenario-status` | Dashboard: review dates, test staleness, pass/fail, coverage gaps. |
+| Check scenario health | `/scenario-status` | Dashboard: review dates, test staleness, pass/fail, crawl depth, flow type coverage, conversion rate, critical paths. |
 | View or change config | `/playwright-scenarios-config` | Also the recovery path for malformed config. |
 
 ## Workflow
 
 ```
-Spec/stories ──→ /evaluate-spec ──→ /spec-to-scenarios ──→ drafts/
+Spec/stories ──→ /evaluate-doc ──→ /doc-to-scenarios ──→ drafts/
                                                               │
 Browser recording ──→ /record-scenario ─────────────────→ scenario
                                                               │
@@ -52,7 +50,7 @@ Site crawl ──→ /crawl-site ───────────────�
 ```
 
 **Decision tree:**
-- Have a written spec? → `/spec-to-scenarios`
+- Have a written spec? → `/doc-to-scenarios`
 - Know the flow but no spec? → `/record-scenario`
 - Don't know what flows exist? → `/crawl-site`
 - Have a scenario, want to verify it? → `/review-scenario`
@@ -165,7 +163,7 @@ Stored in `.claude/playwright-scenarios.local.md`. Created on first command run.
 | Field | Required | Default | Purpose |
 |-------|----------|---------|---------|
 | `scenario_dir` | yes | `src/test/scenarios` | Scenario markdown location |
-| `test_dir` | yes | prompted | Generated test file location |
+| `test_dir` | yes | language-aware (e.g., `tests/scenarios` for Python/TS, `src/test/kotlin/.../scenarios` for Kotlin) | Generated test file location |
 | `test_language` | yes | `kotlin` | Target language |
 | `test_framework` | yes | `kotest-stringspec` | Target framework |
 | `source_root` | no | inferred | Source-set root for package derivation |

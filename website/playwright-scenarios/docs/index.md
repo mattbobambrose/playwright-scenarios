@@ -38,7 +38,7 @@ Then seed your first scenario:
 === "Convert a spec"
 
     ```
-    /spec-to-scenarios path/to/spec.md
+    /doc-to-scenarios path/to/spec.md
     ```
     Evaluates and converts an existing QA document.
 
@@ -52,6 +52,12 @@ Then review and generate:
 ## Learn more
 
 <div class="grid cards" markdown>
+
+-   :lucide-graduation-cap: **[Tutorial](tutorial.md)**
+
+    ---
+
+    Step-by-step walkthrough from installation to generated tests.
 
 -   :lucide-book-open: **[Terminology](terminology.md)**
 

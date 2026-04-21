@@ -97,4 +97,4 @@ Tell the user:
 - The path of the written fixture file.
 - The number of groups and fields.
 - If the source was a scenario, suggest updating it to use `**Fixture:** fixtures/<name>` instead of inline data bullets.
-- If the source was a spec, suggest running `/spec-to-scenarios` to convert the spec's test cases using this fixture.
+- If the source was a spec, suggest running `/doc-to-scenarios` to convert the spec's test cases using this fixture.

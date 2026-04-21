@@ -219,21 +219,21 @@ When adding or changing a command, skill, or config field, update all of: README
 1. **Probe the config file directly** (don't start with `loading-config`, which would bounce back on malformed files and loop). Branch: missing → delegate to `loading-config` bootstrap; clean → continue; malformed → go to recovery.
    - **Malformed-recovery path**: print the broken file and a diagnosis, ask the user to confirm overwrite, delete (or back up) the file, then invoke `loading-config` to bootstrap a fresh one.
 2. Show current values in a compact table (four required fields plus `source_root` / `base_test_class` if present).
-3. Re-prompt each field in two rounds (round 1: `scenario_dir`, `test_dir`, `test_language`; round 2: `test_framework` scoped to the chosen language), pre-filling the current value as the first option. Don't re-prompt for `source_root` or `base_test_class`.
+3. Re-prompt each field in three rounds (round 1: `scenario_dir`, `test_language`; round 2: `test_dir` with language-aware suggestions; round 3: `test_framework` scoped to the chosen language), pre-filling the current value as the first option. Don't re-prompt for `source_root` or `base_test_class`.
 4. Rewrite the YAML frontmatter, preserving any hand-written markdown body below and preserving the optional fields if they were present.
 5. Report which fields changed.
 
 ---
 
-### /spec-to-scenarios
+### /doc-to-scenarios
 
 **Description:** Convert a QA spec, test plan, or user story document into scenario markdown files with proper tag mapping.
 
-**Arguments:** required `<source-path>`, plus flags: `--skip-evaluation` (skip the inline evaluate-spec pass), `--promote` (write to `<SCENARIO_DIR>` instead of `<SCENARIO_DIR>/drafts/`).
+**Arguments:** required `<source-path>`, plus flags: `--skip-evaluation` (skip the inline evaluate-doc pass), `--promote` (write to `<SCENARIO_DIR>` instead of `<SCENARIO_DIR>/drafts/`).
 
 **Phases:**
 0. Load config, resolve `<SCENARIO_DIR>`.
-1. Read the source doc. Unless `--skip-evaluation`, run `evaluate-spec` and pause for user approval before converting.
+1. Read the source doc. Unless `--skip-evaluation`, run `evaluate-doc` and pause for user approval before converting.
 2. For each `direct` / `needs-changes` / `extended-tag` test case: group by URL/fixture/flow into scenario files, map to Action/Expected pairs and extended tags, flag `needs-changes` items with inline warnings.
 3. Generate kebab-case filenames, check for collisions.
 4. Write scenario files (parallel subagents, batches of 5). Each includes a provenance blockquote.
@@ -284,9 +284,10 @@ When adding or changing a command, skill, or config field, update all of: README
 1. Read `.claude/playwright-scenarios.local.md`.
 2. Present and parses cleanly with all four required fields → return resolved values.
 3. Present but malformed → return the structured error `MALFORMED_CONFIG: <problem>` to the caller; never overwrite from this skill. `/playwright-scenarios-config` has a dedicated recovery path that bypasses this skill.
-4. Missing → bootstrap in two rounds:
-   - **Round 1** (one `AskUserQuestion` call): `scenario_dir`, `test_dir` (auto-suggested from base-test-class glob), `test_language`.
-   - **Round 2** (second call): `test_framework` scoped to the language picked in round 1 — e.g. `kotlin` → `kotest-stringspec` / `junit5`; `typescript` → `playwright-test` / `jest`. Prevents invalid pairings.
+4. Missing → bootstrap in three rounds:
+   - **Round 1** (one `AskUserQuestion` call): `scenario_dir`, `test_language`.
+   - **Round 2** (second call): `test_dir` with language-aware suggestions — e.g. `kotlin` → `src/test/kotlin/.../scenarios`; `typescript`/`python` → `tests/scenarios`.
+   - **Round 3** (third call): `test_framework` scoped to the language — e.g. `kotlin` → `kotest-stringspec` / `junit5`; `typescript` → `playwright-test` / `jest`. Prevents invalid pairings.
 
 **Source-root inference (used by `/scenario-to-tests`):** if `source_root` is set, use it verbatim; otherwise match `<test_dir>` against known prefixes in order (`src/test/kotlin`, `src/test/java`, `src/test/scala`, `src/test/groovy`, `src/test/<lang>`, `test/kotlin`, `test/java`, `test/<lang>`, `tests/<lang>`, `src/test`). No match → abort asking the user to set `source_root`.
 
@@ -337,7 +338,7 @@ When adding or changing a command, skill, or config field, update all of: README
 
 ---
 
-### evaluate-spec
+### evaluate-doc
 
 **Description:** Evaluate a QA spec, test plan, user story document, or any structured test description against the playwright-scenarios plugin's capabilities. Reports what converts directly, what needs changes, and what's out of scope. Advisory only — reads and reports, never writes scenario files.
 

@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-04-21
+
+### Added
+
+- `/crawl-site` accepts natural-language descriptions after the URL (e.g., "focus on the checkout flow"). Claude interprets the intent, shows a crawl plan for approval, and prioritizes matching flows. Flags still work as explicit overrides.
+- `/crawl-site` writes `.crawl-meta.json` with crawl history (URLs discovered/crawled/skipped, flow types, depth reached vs. available) for `/scenario-status`.
+- `/scenario-status` coverage dashboard expanded with four dimensions: crawl depth (reached vs. available), flow type coverage (discovered → drafted → promoted → tested), scenario-to-test conversion rate, and critical path coverage (from `.critical-paths.md`).
+- Language-aware config bootstrap: three-round prompting with project pre-scan. Test directory suggestions adapt to the chosen language.
+
+### Changed
+
+- `/spec-to-scenarios` renamed to `/doc-to-scenarios` — broadens input beyond QA specs to any document.
+- `evaluate-spec` skill renamed to `evaluate-doc`.
+- Terminology consolidated: "user story," "spec," and "user flow" → "doc."
+
 ## [0.3.0] - 2026-04-17
 
 ### Added
@@ -30,7 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Per-project configuration via `.claude/playwright-scenarios.local.md` — required fields `scenario_dir`, `test_dir`, `test_language`, `test_framework`; optional advanced fields `source_root` and `base_test_class` for projects whose layout doesn't match standard source-set patterns. Two-round `AskUserQuestion` bootstrap prevents invalid language/framework pairings.
+- Per-project configuration via `.claude/playwright-scenarios.local.md` — required fields `scenario_dir`, `test_dir`, `test_language`, `test_framework`; optional advanced fields `source_root` and `base_test_class` for projects whose layout doesn't match standard source-set patterns. Three-round `AskUserQuestion` bootstrap: language first, then language-aware directory suggestions, then framework scoped to language.
 - New `loading-config` skill — invoked at the start of every command. Source-root inference and base-test-class discovery with auto-persist on first resolve.
 - New `/crawl-site` command — read-only traversal that seeds `<scenario_dir>/drafts/` with user-flow-oriented scenarios. Starts from a URL, walks same-origin links one hop out by default, never fills forms or clicks destructive buttons. Groups discoveries into plausible user journeys (primary nav, hero CTAs, auth-gate entry points, footer aggregate). Supports `--depth` and `--max-scenarios` flags.
 - New `/playwright-scenarios-config` command — view/update config fields with a dedicated malformed-config recovery path.
@@ -48,10 +63,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `**Timeout:** <ms>` — per-scenario or per-test timeout override.
   - `**Cleanup:** <action>` — teardown action for test isolation.
   - Plus existing: `**Fixture:**`, `**Prerequisite:**`, `**Assert throughout:**`, `**Expected failure:**`, `**Expected (regex):**`.
-- New `/spec-to-scenarios` command — converts evaluated QA specs into scenario markdown with proper tag mapping.
+- New `/doc-to-scenarios` command — converts evaluated QA specs into scenario markdown with proper tag mapping.
 - New `/generate-fixture` command — scaffolds standardized JSON fixture files from specs, scenarios, or interactively.
 - New `/scenario-status` command — health dashboard (review dates, test status, coverage gaps).
-- New `evaluate-spec` skill — reads a QA document and produces a structured testability report.
+- New `evaluate-doc` skill — reads a QA document and produces a structured testability report.
 - New `fixture-format` skill — defines canonical JSON fixture format shared across all generators.
 - New `debugging-scenarios` skill — guides troubleshooting when generated tests fail.
 - Default scenario directory changed from `scenarios/` to `src/test/scenarios/`; legacy location offered as an alternative.
@@ -72,6 +87,7 @@ Initial release.
 - Host-project setup documentation covering the required Gradle `recordScenario` and `installPlaywrightBrowsers` tasks, Playwright / Kotest dependencies, `scenarios/` directory convention, and base test class pattern.
 - MIT license.
 
+[0.4.0]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.3.0...0.4.0
 [0.3.0]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.2.0...0.3.0
 [0.2.0]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.1.0...0.2.0
 [0.1.0]: https://github.com/mattbobambrose/playwright-scenarios/releases/tag/0.1.0

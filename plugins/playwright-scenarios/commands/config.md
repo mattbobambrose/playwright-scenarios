@@ -41,13 +41,15 @@ If Phase 1 produced a cleanly-parsed config, show the user a compact table of th
 
 For the optional fields, show the literal YAML value if set, or `(inferred)` / `(auto-detect)` if absent.
 
-### Phase 3: Re-prompt each field (two rounds)
+### Phase 3: Re-prompt each field (three rounds)
 
-Mirror the `loading-config` skill's two-round pattern so the framework options are always valid for the chosen language.
+Mirror the `loading-config` skill's three-round pattern. Before prompting, run the same project pre-scan described in `loading-config` step 4b (detect existing test directories, build/config files, test files, and base test classes) so suggestions reflect the project's current state — not just the stored config.
 
-**Round 1** — one `AskUserQuestion` call with three questions: `scenario_dir`, `test_dir`, `test_language`. Pre-fill the *current* value as the first (Recommended) option for each, followed by the skill's standard alternatives. Users who want to keep a value untouched just pick the first option.
+**Round 1** — one `AskUserQuestion` call with two questions: `scenario_dir` and `test_language`. Pre-fill the *current* value as the first (Recommended) option for each. If the project scan detected a language or an existing scenario directory that differs from the stored value, include it as a second option with a note (e.g., "Detected from project: `typescript`"). Users who want to keep a value untouched just pick the first option.
 
-**Round 2** — after round 1 resolves, issue a second `AskUserQuestion` call asking only `test_framework`. Options are scoped to the `test_language` chosen in round 1 (see the language→framework table in `loading-config`). If the current `test_framework` is valid for the new language, pre-fill it as the first (Recommended) option; otherwise, use that language's default as the first option and note in the question that the framework is being reset because the language changed.
+**Round 2** — after round 1 resolves, issue a second `AskUserQuestion` call asking `test_dir`. Suggestions are informed by both the language chosen in round 1 and what the project scan found on disk (see the language→test_dir table and project-scan logic in `loading-config`). If the language changed and the current `test_dir` doesn't match the new language's conventions, use the scan-informed or idiomatic default as the first option and note in the question that the directory suggestion is changing because the language changed. If the language didn't change, pre-fill the current `test_dir` as the first option.
+
+**Round 3** — issue a third `AskUserQuestion` call asking only `test_framework`. If the project scan detected a framework from existing test files, offer it as the first option. Otherwise, options are scoped to the `test_language` chosen in round 1 (see the language→framework table in `loading-config`). If the current `test_framework` is valid for the new language, pre-fill it as the first (Recommended) option; otherwise, use the detected or idiomatic default and note that the framework is being reset because the language changed.
 
 Do not prompt for `source_root` or `base_test_class`. Those are advanced overrides — users who need them edit the YAML by hand. This command preserves their existing values if set.
 
