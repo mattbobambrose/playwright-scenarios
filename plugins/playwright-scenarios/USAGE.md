@@ -23,7 +23,7 @@ LLM-optimized reference for using the `playwright-scenarios` plugin in a host pr
 
 | If you want to... | Use | Notes |
 |---|---|---|
-| Record a user flow by driving a browser | `/record-scenario [name] [--no-review]` | Opens Playwright codegen. Auto-reviews unless `--no-review`. |
+| Record a user flow by driving a browser | `/record-scenario [name] [--promote] [--no-review]` | Opens Playwright codegen. Writes to `drafts/` by default; `--promote` writes directly and auto-reviews. |
 | Auto-discover flows on a site | `/crawl-site <url> [description] [--depth=N] [--max-scenarios=N]` | Read-only. Accepts natural-language scope ("focus on checkout"). Writes drafts. |
 | Check if a spec is testable | `/evaluate-doc` (skill, not command — invoke by asking Claude to evaluate) | Advisory. Reports what converts, what needs changes, what's out of scope. |
 | Convert a spec into scenarios | `/doc-to-scenarios <path> [--skip-evaluation] [--promote]` | Runs evaluate-doc first. Writes drafts by default. |
@@ -38,7 +38,7 @@ LLM-optimized reference for using the `playwright-scenarios` plugin in a host pr
 ```
 Spec/stories ──→ /evaluate-doc ──→ /doc-to-scenarios ──→ drafts/
                                                               │
-Browser recording ──→ /record-scenario ─────────────────→ scenario
+Browser recording ──→ /record-scenario ─────────────────→ drafts/
                                                               │
 Site crawl ──→ /crawl-site ──────────────────────────→ drafts/ │
                                                               │
