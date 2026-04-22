@@ -51,7 +51,7 @@ Author browser-driven scenarios as markdown, audit them against the live site, a
 
 | Command | Description |
 |---------|-------------|
-| `/record-scenario [name] [--no-review]` | Launch Playwright codegen, capture a real user flow, and write a draft scenario markdown file. Auto-chains into `/review-scenario` unless `--no-review` is passed. |
+| `/record-scenario [name] [--promote] [--no-review]` | Launch Playwright codegen, capture a real user flow, and write a draft scenario to `drafts/`. Pass `--promote` to write directly to the scenario directory and auto-review. |
 | `/crawl-site <url> [description] [--depth=N] [--max-scenarios=N]` | Read-only crawl of a site. Accepts natural-language descriptions ("focus on checkout flow") to guide scope. Emits draft scenarios to `<scenario_dir>/drafts/`. |
 | `/doc-to-scenarios <path> [--skip-evaluation] [--promote]` | Convert a QA spec or test plan into scenario markdown files. Runs `evaluate-doc` first, then maps test cases to the scenario format with proper tags. |
 | `/generate-fixture <source \| interactive> [--name=N]` | Scaffold a fixture JSON file from a scenario's data bullets, a spec's persona table, or interactive prompts. |

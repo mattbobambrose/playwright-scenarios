@@ -86,9 +86,9 @@ graph LR
     A[Start URL] --> B["/record-scenario"]
     B --> C[Playwright codegen opens]
     C --> D[You drive the browser]
-    D --> E[scenario]
-    E -->|auto-chains| F["/review-scenario"]
-    F --> G[reviewed scenario]
+    D --> E["drafts/"]
+    E -->|promote| F[scenario]
+    F -->|"/review-scenario"| G[reviewed scenario]
 ```
 
 ```
@@ -97,10 +97,16 @@ graph LR
 
 1. Prompts for a start URL.
 2. Opens Playwright codegen — you drive the browser.
-3. Converts the recording into a scenario file.
-4. Auto-chains into `/review-scenario` (unless `--no-review`).
+3. Converts the recording into a draft scenario file under `drafts/`.
+4. Promote and review when ready.
 
-Best for interactive flows (form fills, logins) where watching the flow is faster than writing it. This is the fastest path to a reviewed scenario — no drafts, no promotion step.
+Or use `--promote` to skip the drafts step and auto-review:
+
+```
+/record-scenario checkout-flow --promote
+```
+
+Best for interactive flows (form fills, logins) where watching the flow is faster than writing it.
 
 ---
 
@@ -143,8 +149,8 @@ Best for bootstrapping coverage. The description lets you steer toward specific 
 | **Who writes the spec** | Your LLM | A human (already written) | You (in a browser) | Claude (autonomous) |
 | **Key tool** | SPEC_GUIDE.md | evaluate-doc | /record-scenario | /crawl-site |
 | **Feedback loop** | Minimal | Iterative | None | None |
-| **Produces drafts?** | Yes | Yes | No (direct scenario) | Yes |
-| **Fastest to reviewed scenario** | Medium | Slow (iteration) | Fastest | Medium |
+| **Produces drafts?** | Yes | Yes | Yes (or direct with `--promote`) | Yes |
+| **Fastest to reviewed scenario** | Medium | Slow (iteration) | Fastest (with `--promote`) | Medium |
 
 ## Common steps
 

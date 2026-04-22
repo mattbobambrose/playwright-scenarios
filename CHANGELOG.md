@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-04-22
+
+### Changed
+
+- `/record-scenario` now writes to `drafts/` by default, consistent with `/crawl-site` and `/doc-to-scenarios`. Pass `--promote` to write directly to the scenario directory and auto-chain into `/review-scenario`. `--no-review` is only meaningful with `--promote`.
+
 ## [0.4.0] - 2026-04-21
 
 ### Added
@@ -87,6 +93,7 @@ Initial release.
 - Host-project setup documentation covering the required Gradle `recordScenario` and `installPlaywrightBrowsers` tasks, Playwright / Kotest dependencies, `scenarios/` directory convention, and base test class pattern.
 - MIT license.
 
+[0.5.0]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.4.0...0.5.0
 [0.4.0]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.3.0...0.4.0
 [0.3.0]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.2.0...0.3.0
 [0.2.0]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.1.0...0.2.0

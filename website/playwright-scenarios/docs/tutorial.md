@@ -223,7 +223,11 @@ Instead of hand-writing a scenario, you can record one by driving a browser:
 4. Use the Inspector toolbar to mark assertions (assert visibility, assert text, assert value).
 5. Close the browser when done.
 
-The plugin converts your recording into a scenario file and automatically runs `/review-scenario` on it.
+The plugin converts your recording into a draft scenario file under `drafts/`. To promote it and auto-review in one step, use `--promote`:
+
+```
+/record-scenario add-to-cart --promote
+```
 
 ## 8. Use extended tags
 
