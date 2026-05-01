@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1] - 2026-05-01
+
+### Added
+
+- Documentation site: new "Commands & Skills" reference page covering all 8 commands and 5 skills (signatures, arguments, flags, examples).
+- Documentation site: new "Troubleshooting" page for setup-time and operational failures, using a Symptom → Cause → Fix shape. Pairs with the existing `debugging-scenarios` skill, which covers generated-test failures.
+
+### Changed
+
+- `tutorial.md` replaced with a placeholder sketch oriented around language-template repos (template links and demo image to be filled in).
+- `CLAUDE.md`: doc-propagation rule extended to include the website docs; new "Website docs (Zensical)" section noting the `zensical.toml` nav requirement and a slug-fragility warning for headings.
+- `README.md`, `llms.txt`, and `llms-full.txt` synced with the new pages and the updated `CLAUDE.md`.
+
+### Renamed
+
+- `plugins/playwright-scenarios/SPEC_GUIDE.md` → `DOC_GUIDE.md`.
+- `website/playwright-scenarios/docs/writing-specs.md` → `writing-docs.md`.
+
 ## [0.5.0] - 2026-04-22
 
 ### Changed
@@ -22,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- `/spec-to-scenarios` renamed to `/doc-to-scenarios` — broadens input beyond QA specs to any document.
+- `/spec-to-scenarios` renamed to `/doc-to-scenarios` — broadens input beyond specific formats to any document.
 - `evaluate-spec` skill renamed to `evaluate-doc`.
 - Terminology consolidated: "user story," "spec," and "user flow" → "doc."
 
@@ -31,13 +49,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `USAGE.md` — LLM-optimized reference card for host projects. Covers commands, workflow, all 13 tags, do's/don'ts, troubleshooting, and config. README points users at it.
-- Documentation website (Zensical) at `website/playwright-scenarios/`. Covers terminology, workflow (with Mermaid diagram), capabilities, and spec-writing guidance.
+- Documentation website (Zensical) at `website/playwright-scenarios/`. Covers terminology, workflow (with Mermaid diagram), capabilities, and document-writing guidance.
 - GitHub Actions workflow (`.github/workflows/docs.yml`) to build and deploy the documentation site to GitHub Pages on push.
 - GitHub release badge in README.
 
 ### Changed
 
-- README slimmed from ~340 lines to ~205 lines. Conceptual/guidance content (terminology, workflow details, capabilities, spec-writing guidance) moved to the documentation website. Operational content (installation, host setup, configuration, plugin catalog) stays in README.
+- README slimmed from ~340 lines to ~205 lines. Conceptual/guidance content (terminology, workflow details, capabilities, document-writing guidance) moved to the documentation website. Operational content (installation, host setup, configuration, plugin catalog) stays in README.
 - Terminology grouped into three categories: Inputs, Plugin artifacts, Output (both README and USAGE.md).
 - All medical/clinical examples replaced with bookstore examples (fixtures, scenarios, selectors, branches, iframes, regex patterns) across all commands, skills, and docs.
 - Consistency fixes across all 8 commands:
@@ -69,8 +87,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `**Timeout:** <ms>` — per-scenario or per-test timeout override.
   - `**Cleanup:** <action>` — teardown action for test isolation.
   - Plus existing: `**Fixture:**`, `**Prerequisite:**`, `**Assert throughout:**`, `**Expected failure:**`, `**Expected (regex):**`.
-- New `/doc-to-scenarios` command — converts evaluated QA specs into scenario markdown with proper tag mapping.
-- New `/generate-fixture` command — scaffolds standardized JSON fixture files from specs, scenarios, or interactively.
+- New `/doc-to-scenarios` command — converts evaluated documents into scenario markdown with proper tag mapping.
+- New `/generate-fixture` command — scaffolds standardized JSON fixture files from documents, scenarios, or interactively.
 - New `/scenario-status` command — health dashboard (review dates, test status, coverage gaps).
 - New `evaluate-doc` skill — reads a QA document and produces a structured testability report.
 - New `fixture-format` skill — defines canonical JSON fixture format shared across all generators.

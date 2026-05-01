@@ -12,7 +12,7 @@ Start with the **[step-by-step tutorial](https://mattbobambrose.github.io/playwr
 
 Two reference documents ship with the plugin for different stages of the workflow:
 
-- **[SPEC_GUIDE.md](plugins/playwright-scenarios/SPEC_GUIDE.md)** — Paste into any LLM's system prompt (ChatGPT, Claude, Gemini, Copilot) when writing QA specs or user stories. LLM-agnostic. Covers what the test framework can and can't handle, 10 authoring rules, a spec template, and a self-evaluation checklist. Use this *before* testing, when generating the specs that eventually become scenarios.
+- **[DOC_GUIDE.md](plugins/playwright-scenarios/DOC_GUIDE.md)** — Paste into any LLM's system prompt (ChatGPT, Claude, Gemini, Copilot) when writing test documents. LLM-agnostic. Covers what the test framework can and can't handle, 10 authoring rules, a document template, and a self-evaluation checklist. Use this *before* testing, when generating the docs that eventually become scenarios.
 
 - **[USAGE.md](plugins/playwright-scenarios/USAGE.md)** — Add to your project's CLAUDE.md so Claude Code knows how to use the plugin. Covers all 8 commands, 13 tags, workflow, do's/don'ts, and troubleshooting. Use this *during* testing, when running the plugin commands.
 
@@ -53,8 +53,8 @@ Author browser-driven scenarios as markdown, audit them against the live site, a
 |---------|-------------|
 | `/record-scenario [name] [--promote] [--no-review]` | Launch Playwright codegen, capture a real user flow, and write a draft scenario to `drafts/`. Pass `--promote` to write directly to the scenario directory and auto-review. |
 | `/crawl-site <url> [description] [--depth=N] [--max-scenarios=N]` | Read-only crawl of a site. Accepts natural-language descriptions ("focus on checkout flow") to guide scope. Emits draft scenarios to `<scenario_dir>/drafts/`. |
-| `/doc-to-scenarios <path> [--skip-evaluation] [--promote]` | Convert a QA spec or test plan into scenario markdown files. Runs `evaluate-doc` first, then maps test cases to the scenario format with proper tags. |
-| `/generate-fixture <source \| interactive> [--name=N]` | Scaffold a fixture JSON file from a scenario's data bullets, a spec's persona table, or interactive prompts. |
+| `/doc-to-scenarios <path> [--skip-evaluation] [--promote]` | Convert any document into scenario markdown files. Runs `evaluate-doc` first, then maps test cases to the scenario format with proper tags. |
+| `/generate-fixture <source \| interactive> [--name=N]` | Scaffold a fixture JSON file from a scenario's data bullets, a document's persona table, or interactive prompts. |
 | `/review-scenario [names...] [--include-drafts]` | Audit scenarios against the live site and apply improvements to the markdown. |
 | `/scenario-to-tests [names...] [--include-drafts] [--dry-run]` | Generate tests (defaults: Kotlin + Kotest StringSpec with Playwright-for-Java) from reviewed scenarios. |
 | `/scenario-status` | Health dashboard: review dates, test status, pass/fail, plus coverage completeness (crawl depth, flow types, conversion rate, critical paths). |
@@ -66,7 +66,7 @@ Author browser-driven scenarios as markdown, audit them against the live site, a
 |-------|-------------|
 | `loading-config` | Reads `.claude/playwright-scenarios.local.md` and bootstraps it on first use; invoked at the start of every command |
 | `authoring-scenarios` | Flat-markdown format reference with 13 extended tags; used when hand-writing or editing scenario files |
-| `evaluate-doc` | Evaluates a QA spec against the plugin's capabilities; reports what converts directly, what needs changes, and what's out of scope |
+| `evaluate-doc` | Evaluates any document against the plugin's capabilities; reports what converts directly, what needs changes, and what's out of scope |
 | `fixture-format` | Defines the standardized JSON fixture file format shared across all generators |
 | `debugging-scenarios` | Guides troubleshooting when generated tests fail — iframe detection, selector drift, timing, stale fixtures |
 
@@ -203,7 +203,7 @@ The file is checked into git by default so contributors share the same layout. A
 
 ## Documentation
 
-For detailed guides on terminology, workflow, capabilities, and writing effective specs, see the [project website](website/playwright-scenarios/docs/index.md).
+For detailed guides — terminology, workflow, the full command and skill reference, capabilities, writing effective docs, and troubleshooting — see the [project website](website/playwright-scenarios/docs/index.md).
 
 ## Changelog
 

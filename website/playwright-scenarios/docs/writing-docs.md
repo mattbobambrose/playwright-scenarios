@@ -2,9 +2,9 @@
 icon: lucide/pencil
 ---
 
-# Writing Effective Input Specs
+# Writing Effective Input Documents
 
-If you're writing a QA spec or test plan that will feed into this plugin (either hand-authored as scenario markdown or used as a reference for `/record-scenario`), these patterns produce the best results.
+If you're writing a document that will feed into this plugin (either hand-authored as scenario markdown or used as a reference for `/record-scenario`), these patterns produce the best results.
 
 ## What works well
 
@@ -16,13 +16,13 @@ If you're writing a QA spec or test plan that will feed into this plugin (either
 
 ## What doesn't work well
 
-- **Assumed behaviors not verified against the live site.** Specs written from memory or design docs often contain claims that don't match reality (e.g., predicting a silent swap when the actual behavior is a validation error). Always run `/review-scenario` to ground-truth claims against the live site before generating tests.
-- **Display text instead of DOM identifiers.** If your spec says "Science Fiction & Fantasy" but the actual selector is `data-category="sci-fi-fantasy"`, every value needs translation during implementation. Include `data-*` attributes or other DOM identifiers alongside display text when possible.
-- **Missing iframe/architecture notes.** If the form lives inside a cross-origin iframe, or the flow transitions between separate apps, note this in the spec. Implementation-critical architecture should be documented even if it's not a test assertion — one line like "The checkout form is hosted inside a cross-origin Stripe iframe" saves hours of debugging.
-- **Phase numbers that drift from reality.** If your spec numbers 23 phases but the live flow has interstitials, intro screens, or pages outside the expected container, the mapping between spec phases and actual screens requires careful reconciliation. Verify phase numbering against the live site.
+- **Assumed behaviors not verified against the live site.** Documents written from memory or design mockups often contain claims that don't match reality (e.g., predicting a silent swap when the actual behavior is a validation error). Always run `/review-scenario` to ground-truth claims against the live site before generating tests.
+- **Display text instead of DOM identifiers.** If your document says "Science Fiction & Fantasy" but the actual selector is `data-category="sci-fi-fantasy"`, every value needs translation during implementation. Include `data-*` attributes or other DOM identifiers alongside display text when possible.
+- **Missing iframe/architecture notes.** If the form lives inside a cross-origin iframe, or the flow transitions between separate apps, note this in the document. Implementation-critical architecture should be documented even if it's not a test assertion — one line like "The checkout form is hosted inside a cross-origin Stripe iframe" saves hours of debugging.
+- **Phase numbers that drift from reality.** If your document numbers 23 phases but the live flow has interstitials, intro screens, or pages outside the expected container, the mapping between document phases and actual screens requires careful reconciliation. Verify phase numbering against the live site.
 - **Mixing test definitions with toolchain recommendations.** Keep the *what to test* separate from the *how to implement*. Suggested file structures, config snippets, and framework choices are helpful context but shouldn't be interleaved with test case definitions — the plugin handles implementation decisions via its config.
 
-## Example: good vs. bad spec snippets
+## Example: good vs. bad snippets
 
 ### Bad
 
@@ -56,7 +56,7 @@ Exact selector text, DOM identifiers alongside display text, concrete expected o
 
 ## Cross-origin iframes and app boundaries
 
-If any part of the flow under test lives inside a cross-origin iframe or transitions between separate applications, **document this prominently in the spec** — not buried in an architecture appendix, but right next to the URL or the first test case that enters the iframe.
+If any part of the flow under test lives inside a cross-origin iframe or transitions between separate applications, **document this prominently** — not buried in an architecture appendix, but right next to the URL or the first test case that enters the iframe.
 
 !!! warning "Why this matters"
     - Playwright requires an explicit `frameLocator()` call to interact with iframe content. Without it, every selector silently fails to match.
@@ -78,6 +78,6 @@ All payment-related actions below target elements inside that iframe.
 ...
 ```
 
-The generated test code will use `page.frameLocator('#stripe-payment-iframe')` instead of `page` for all selectors inside the boundary. If the spec doesn't mention the iframe, the generated tests will target the top-level page and fail on every assertion.
+The generated test code will use `page.frameLocator('#stripe-payment-iframe')` instead of `page` for all selectors inside the boundary. If the document doesn't mention the iframe, the generated tests will target the top-level page and fail on every assertion.
 
 When the flow exits the iframe (e.g., a confirmation page outside the payment form), add `**Iframe:** none` at the transition point.

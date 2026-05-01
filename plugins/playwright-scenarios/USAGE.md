@@ -7,7 +7,7 @@ LLM-optimized reference for using the `playwright-scenarios` plugin in a host pr
 ## Terminology
 
 **Input** (what enters the plugin)
-- **Doc** — any document describing what to test: QA spec, user stories, requirements doc, test plan, meeting notes, acceptance criteria. Not in scenario format yet. Input to `evaluate-doc` and `/doc-to-scenarios`. One doc typically contains multiple user flows, each of which becomes one scenario.
+- **Doc** — any document describing what to test: requirements doc, test plan, meeting notes, acceptance criteria, Jira tickets. Not in scenario format yet. Input to `evaluate-doc` and `/doc-to-scenarios`. One doc typically contains multiple user flows, each of which becomes one scenario.
 
 **Plugin artifacts** (what the plugin works with)
 - **Scenario** — a flat markdown file (`# Title`, `**URL:**`, `## Test N:` blocks with Action/Expected pairs). The central artifact.
@@ -25,9 +25,9 @@ LLM-optimized reference for using the `playwright-scenarios` plugin in a host pr
 |---|---|---|
 | Record a user flow by driving a browser | `/record-scenario [name] [--promote] [--no-review]` | Opens Playwright codegen. Writes to `drafts/` by default; `--promote` writes directly and auto-reviews. |
 | Auto-discover flows on a site | `/crawl-site <url> [description] [--depth=N] [--max-scenarios=N]` | Read-only. Accepts natural-language scope ("focus on checkout"). Writes drafts. |
-| Check if a spec is testable | `/evaluate-doc` (skill, not command — invoke by asking Claude to evaluate) | Advisory. Reports what converts, what needs changes, what's out of scope. |
-| Convert a spec into scenarios | `/doc-to-scenarios <path> [--skip-evaluation] [--promote]` | Runs evaluate-doc first. Writes drafts by default. |
-| Create a fixture file | `/generate-fixture <source \| interactive> [--name=N]` | From a scenario, spec, or interactive prompts. |
+| Check if a doc is testable | `/evaluate-doc` (skill, not command — invoke by asking Claude to evaluate) | Advisory. Reports what converts, what needs changes, what's out of scope. |
+| Convert a doc into scenarios | `/doc-to-scenarios <path> [--skip-evaluation] [--promote]` | Runs evaluate-doc first. Writes drafts by default. |
+| Create a fixture file | `/generate-fixture <source \| interactive> [--name=N]` | From a scenario, document, or interactive prompts. |
 | Audit scenarios against the live site | `/review-scenario [names...] [--include-drafts]` | Verifies claims, tightens vague assertions, adds missing coverage. |
 | Generate test code | `/scenario-to-tests [names...] [--include-drafts] [--dry-run]` | Currently: Kotlin + Kotest only. |
 | Check scenario health | `/scenario-status` | Dashboard: review dates, test staleness, pass/fail, crawl depth, flow type coverage, conversion rate, critical paths. |
@@ -36,7 +36,7 @@ LLM-optimized reference for using the `playwright-scenarios` plugin in a host pr
 ## Workflow
 
 ```
-Spec/stories ──→ /evaluate-doc ──→ /doc-to-scenarios ──→ drafts/
+Document ──→ /evaluate-doc ──→ /doc-to-scenarios ──→ drafts/
                                                               │
 Browser recording ──→ /record-scenario ─────────────────→ drafts/
                                                               │
@@ -50,8 +50,8 @@ Site crawl ──→ /crawl-site ───────────────�
 ```
 
 **Decision tree:**
-- Have a written spec? → `/doc-to-scenarios`
-- Know the flow but no spec? → `/record-scenario`
+- Have a written document? → `/doc-to-scenarios`
+- Know the flow but no document? → `/record-scenario`
 - Don't know what flows exist? → `/crawl-site`
 - Have a scenario, want to verify it? → `/review-scenario`
 - Have a reviewed scenario, want tests? → `/scenario-to-tests`
@@ -137,9 +137,9 @@ Optional one-line description.
 ## Don't
 
 - Don't write scenarios for things the plugin can't test: cross-run comparison, visual regression, accessibility, performance, network-layer testing, or stateful branching logic (use one scenario per branch instead).
-- Don't assume behaviors — verify against the live site via `/review-scenario`. Specs written from memory often contain claims that don't match reality.
+- Don't assume behaviors — verify against the live site via `/review-scenario`. Documents written from memory often contain claims that don't match reality.
 - Don't use display text as data values — use DOM identifiers (`data-category="sci-fi"`, not "Science Fiction & Fantasy").
-- Don't mix test definitions with implementation recommendations in specs — the plugin handles implementation decisions via its config.
+- Don't mix test definitions with implementation recommendations in documents — the plugin handles implementation decisions via its config.
 - Don't skip `**Iframe:**` for cross-origin iframes — this is the #1 cause of "all tests fail with element not found."
 - Don't use raw "test" without qualification — say "test case" (a `## Test N:` section), "test file" (the generated code), or "test run" (executing the tests).
 - Don't put production secrets in fixtures — use test-only credentials and flag them clearly.

@@ -1,7 +1,3 @@
----
-icon: lucide/graduation-cap
----
-
 # Tutorial
 ## Setup:
 1. Install Git, Docker, and Claude
@@ -47,4 +43,4 @@ demonstrate it, with playwright marking each action. Claude then translates the 
 a scenario markdown file.
 
 /doc-to-scenario: User has pre-existing idea for what they want to test and uses plugin to convert doc
-making it more optimized format
+into optimized format

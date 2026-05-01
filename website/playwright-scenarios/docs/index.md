@@ -35,12 +35,12 @@ Then seed your first scenario:
     ```
     Claude explores the site and writes draft scenarios.
 
-=== "Convert a spec"
+=== "Convert a document"
 
     ```
-    /doc-to-scenarios path/to/spec.md
+    /doc-to-scenarios path/to/checkout-doc.md
     ```
-    Evaluates and converts an existing QA document.
+    Evaluates and converts an existing document.
 
 Then review and generate:
 
@@ -69,7 +69,7 @@ Then review and generate:
 
     ---
 
-    The full pipeline from spec to generated tests, with decision points.
+    The full pipeline from document to generated tests, with decision points.
 
 -   :lucide-check-circle: **[Capabilities](capabilities.md)**
 
@@ -77,10 +77,10 @@ Then review and generate:
 
     What the plugin can test, what it can't, and where gaps live instead.
 
--   :lucide-pencil: **[Writing Specs](writing-specs.md)**
+-   :lucide-pencil: **[Writing Docs](writing-docs.md)**
 
     ---
 
-    Guidance for writing QA specs that convert cleanly into scenarios.
+    Guidance for writing documents that convert cleanly into scenarios.
 
 </div>

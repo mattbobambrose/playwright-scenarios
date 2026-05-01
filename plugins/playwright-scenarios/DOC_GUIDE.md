@@ -1,14 +1,14 @@
-# Writing Testable QA Specs
+# Writing Testable Documents
 
-Rules for writing QA specs, user stories, or test plans that can be converted into automated Playwright tests. Paste this into your LLM's system prompt, custom instructions, or at the start of a conversation when generating test specifications.
+Rules for writing documents that can be converted into automated Playwright tests. Paste this into your LLM's system prompt, custom instructions, or at the start of a conversation when generating test documents.
 
 ---
 
 ## What the test framework can handle
 
-The test generator translates human-readable specs into Playwright browser automation. It supports:
+The test generator translates human-readable documents into Playwright browser automation. It supports:
 
-| Capability | How to express it in your spec |
+| Capability | How to express it in your document |
 |------------|-------------------------------|
 | Multi-page flows | Numbered steps through a wizard, checkout, or onboarding sequence |
 | Form interactions | "Enter 'alex@example.com' into the Email field," "Click the 'Submit' button" |
@@ -26,7 +26,7 @@ The test generator translates human-readable specs into Playwright browser autom
 
 ## What the test framework cannot handle
 
-Do **not** write specs for these — they need different tools:
+Do **not** write documents for these — they need different tools:
 
 | Category | Example | Why | What to use instead |
 |----------|---------|-----|---------------------|
@@ -37,7 +37,7 @@ Do **not** write specs for these — they need different tools:
 | API testing | "The endpoint returns a 200 with these fields" | It tests the UI, not the API | Postman, REST Assured |
 | Conditional branching | "If the user picks X, show screen A; if Y, show screen B" | Each test is a single linear flow | Write one test per branch |
 
-## Rules for writing specs
+## Rules for writing documents
 
 ### 1. One flow per test case
 
@@ -95,7 +95,7 @@ If the flow exits the iframe at any point (e.g., a confirmation page outside the
 
 ### 6. Use fixture tables for shared test data
 
-When multiple test cases use the same persona or input data, define it once in a table at the top of the spec instead of repeating values in every test case.
+When multiple test cases use the same persona or input data, define it once in a table at the top of the document instead of repeating values in every test case.
 
 **Example:**
 
@@ -123,7 +123,7 @@ This creates a regression guard: when the bug is fixed, the test flips from "exp
 
 ### 8. Define scope boundaries
 
-At the top of the spec, state what is in scope and what is out:
+At the top of the document, state what is in scope and what is out:
 
 **Example:**
 - In scope: checkout happy path (5 screens), one customer persona, desktop viewport
@@ -154,7 +154,7 @@ in `playwright.config.ts`. Then test that the user can log in with valid credent
 
 ### 10. Verify claims against the live site
 
-If you're writing from memory, design docs, or mockups, note which claims are assumed vs. verified. Specs often contain predictions that don't match reality:
+If you're writing from memory, design docs, or mockups, note which claims are assumed vs. verified. Documents often contain predictions that don't match reality:
 
 - A form might accept different input formats than expected
 - A page might have extra interstitial screens not in the design
@@ -162,7 +162,7 @@ If you're writing from memory, design docs, or mockups, note which claims are as
 
 Mark unverified claims: "Assumed: the phone field accepts formatted input — verify against the live site."
 
-## Spec template
+## Document template
 
 ```markdown
 # [Flow Name]
@@ -196,7 +196,7 @@ Mark unverified claims: "Assumed: the phone field accepts formatted input — ve
 
 ## Checklist
 
-Before finalizing a spec, verify:
+Before finalizing a document, verify:
 
 - [ ] Each test case describes one linear flow (no branching)
 - [ ] Every action uses exact DOM text (not paraphrased labels)
