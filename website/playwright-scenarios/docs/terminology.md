@@ -8,7 +8,7 @@ icon: lucide/book-open
 
 | Term | Definition |
 |------|------------|
-| **Doc** | Any document describing what to test — QA specs, user stories, requirements docs, test plans, meeting notes, acceptance criteria, Jira tickets. Not in scenario format yet. Input to `evaluate-doc` and `/doc-to-scenarios`. A doc typically contains multiple user flows (e.g., "search for a book and add it to the cart," "navigate from homepage to bestsellers"), each of which becomes one scenario. |
+| **Doc** | Any document describing what to test — requirements docs, test plans, meeting notes, acceptance criteria, Jira tickets. Not in scenario format yet. Input to `evaluate-doc` and `/doc-to-scenarios`. A doc typically contains multiple user flows (e.g., "search for a book and add it to the cart," "navigate from homepage to bestsellers"), each of which becomes one scenario. |
 
 ## Plugin artifacts (what the plugin works with)
 

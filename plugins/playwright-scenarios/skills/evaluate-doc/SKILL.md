@@ -1,17 +1,17 @@
 ---
 name: evaluate-doc
-description: Evaluate any document (QA spec, test plan, user stories, requirements doc, meeting notes) against the playwright-scenarios plugin's capabilities. Reports what can be directly converted to scenarios, what needs modification, and what is out of scope entirely. Use when the user provides a document and wants to know how well it maps to the scenario pipeline, or when the user asks "can we test this?" or "what would need to change?" about an existing document.
+description: Evaluate any document (test plan, requirements doc, meeting notes, acceptance criteria) against the playwright-scenarios plugin's capabilities. Reports what can be directly converted to scenarios, what needs modification, and what is out of scope entirely. Use when the user provides a document and wants to know how well it maps to the scenario pipeline, or when the user asks "can we test this?" or "what would need to change?" about an existing document.
 ---
 
 # Evaluate Doc
 
-Read a user-provided document (QA spec, test plan, user stories, acceptance criteria — any format) and produce a structured testability report. This skill is advisory: it reads and reports, but never writes scenario files. The user decides what to act on.
+Read a user-provided document (test plan, requirements doc, acceptance criteria, meeting notes — any format) and produce a structured testability report. This skill is advisory: it reads and reports, but never writes scenario files. The user decides what to act on.
 
 ## When to use
 
-- User says "evaluate this spec" / "can we test this?" / "what can we cover?" / "review this doc for testability"
+- User says "evaluate this doc" / "can we test this?" / "what can we cover?" / "review this doc for testability"
 - User provides or references a QA document and asks how it maps to the scenario pipeline
-- Before converting a large spec into scenarios, to identify gaps upfront
+- Before converting a large document into scenarios, to identify gaps upfront
 
 ## Inputs
 
@@ -34,27 +34,27 @@ For each test case, assign one of these categories:
 | Category | Meaning |
 |----------|---------|
 | **direct** | Can be expressed as a scenario Action/Expected pair with no modification. The test case describes a UI interaction and a DOM-observable outcome. |
-| **needs-changes** | Expressible as a scenario, but the spec needs modification first — e.g., display text needs DOM identifiers, vague selectors need concretizing, assumed behavior needs live-site verification. |
-| **extended-tag** | Expressible using one of the extended scenario tags (`Fixture`, `Prerequisite`, `Assert throughout`, `Expected failure`, `Expected (regex)`) but the spec doesn't use scenario format yet. |
+| **needs-changes** | Expressible as a scenario, but the document needs modification first — e.g., display text needs DOM identifiers, vague selectors need concretizing, assumed behavior needs live-site verification. |
+| **extended-tag** | Expressible using one of the extended scenario tags (`Fixture`, `Prerequisite`, `Assert throughout`, `Expected failure`, `Expected (regex)`) but the document doesn't use scenario format yet. |
 | **out-of-scope** | Cannot be expressed in the scenario format at all — e.g., cross-run comparison, visual regression, a11y, performance, network-layer, or requires capabilities Playwright doesn't have. |
 
-### Step 3: Identify spec-level issues
+### Step 3: Identify document-level issues
 
 Beyond individual test cases, flag document-wide problems that will cause friction during conversion:
 
-- **Missing iframe / architecture boundaries.** Does the spec mention cross-origin iframes, app transitions, or embedded third-party widgets? If not but the URL suggests them (Stripe, PayPal, OAuth providers), flag it as a likely omission.
-- **Display text without DOM identifiers.** Does the spec use human-readable labels ("Science Fiction & Fantasy") without corresponding `data-*`, `aria-label`, or `role` identifiers? Count how many test cases are affected.
-- **Assumed behaviors.** Does the spec assert behaviors that sound like predictions rather than observations ("the system will swap the oldest selection")? Flag these for live-site verification via `/review-scenario`.
-- **Phase/step numbering drift risk.** Does the spec number screens or steps sequentially? If so, note that these often drift from the live site due to interstitials, intro screens, or pages outside the expected container.
-- **Mixed concerns.** Does the spec interleave test definitions with implementation recommendations (file structures, config settings, framework choices)? Note which sections are test cases vs. toolchain guidance.
-- **Missing fixture data.** Does the spec reference specific input values (names, emails, addresses) without a consolidated fixture table? If values are scattered across test cases, suggest a fixture table.
-- **Scope boundaries.** Does the spec define what's in and out of scope? If not, flag the risk of scope creep.
+- **Missing iframe / architecture boundaries.** Does the document mention cross-origin iframes, app transitions, or embedded third-party widgets? If not but the URL suggests them (Stripe, PayPal, OAuth providers), flag it as a likely omission.
+- **Display text without DOM identifiers.** Does the document use human-readable labels ("Science Fiction & Fantasy") without corresponding `data-*`, `aria-label`, or `role` identifiers? Count how many test cases are affected.
+- **Assumed behaviors.** Does the document assert behaviors that sound like predictions rather than observations ("the system will swap the oldest selection")? Flag these for live-site verification via `/review-scenario`.
+- **Phase/step numbering drift risk.** Does the document number screens or steps sequentially? If so, note that these often drift from the live site due to interstitials, intro screens, or pages outside the expected container.
+- **Mixed concerns.** Does the document interleave test definitions with implementation recommendations (file structures, config settings, framework choices)? Note which sections are test cases vs. toolchain guidance.
+- **Missing fixture data.** Does the document reference specific input values (names, emails, addresses) without a consolidated fixture table? If values are scattered across test cases, suggest a fixture table.
+- **Scope boundaries.** Does the document define what's in and out of scope? If not, flag the risk of scope creep.
 
 ### Step 4: Map extended tags
 
 For test cases classified as `extended-tag`, identify which tag applies:
 
-| Spec pattern | Scenario tag |
+| Document pattern | Scenario tag |
 |-------------|--------------|
 | "This test is expected to fail because..." / known bug | `**Expected failure:** <reason>` |
 | "Text should contain one of X, Y, or Z" / nondeterministic content | `**Expected (regex):** <pattern>` |
@@ -71,13 +71,13 @@ For test cases classified as `extended-tag`, identify which tag applies:
 | "This flow takes a long time" / slow operation | `**Timeout:** <ms>` |
 | "Delete the test account afterwards" / cleanup step | `**Cleanup:** <action>` |
 
-### Step 5: Suggest spec improvements
+### Step 5: Suggest document improvements
 
 For test cases classified as `needs-changes`, produce a specific suggestion:
 
 - If the selector is vague → "Add the exact button/link text or `data-qa-*` attribute"
 - If the expected behavior is assumed → "Verify against the live site with `/review-scenario`"
-- If the spec uses display text as a data value → "Add the DOM identifier alongside: `'Science Fiction' (data-category=\"sci-fi\")`"
+- If the document uses display text as a data value → "Add the DOM identifier alongside: `'Science Fiction' (data-category=\"sci-fi\")`"
 - If an iframe boundary is missing → "Note the iframe host element and origin at the top of the relevant section"
 - If a test case mixes what-to-test with how-to-implement → "Move the implementation detail to a separate section"
 
@@ -87,7 +87,7 @@ Produce a report with these sections, in this order:
 
 ### 1. Summary
 
-One paragraph: how many test cases were found, how many are direct/needs-changes/extended-tag/out-of-scope, and an overall assessment ("this spec converts cleanly" or "significant rework needed" or "good coverage but N items are out of scope").
+One paragraph: how many test cases were found, how many are direct/needs-changes/extended-tag/out-of-scope, and an overall assessment ("this document converts cleanly" or "significant rework needed" or "good coverage but N items are out of scope").
 
 ### 2. Test case table
 
@@ -96,7 +96,7 @@ One paragraph: how many test cases were found, how many are direct/needs-changes
 
 One row per test case. The "Tag / Issue" column names the extended tag for `extended-tag` items, or the specific issue for `needs-changes` items. The "Suggested change" column is blank for `direct` items.
 
-### 3. Spec-level issues
+### 3. Document-level issues
 
 Bulleted list of document-wide problems from Step 3, each with a one-line recommendation.
 
@@ -108,7 +108,7 @@ For each `out-of-scope` test case, explain *why* it's out of scope and *where* i
 
 A numbered list of recommended next steps, ordered by priority:
 
-1. Fix spec-level issues (iframe notes, fixture table, etc.)
+1. Fix document-level issues (iframe notes, fixture table, etc.)
 2. Resolve `needs-changes` items (add DOM identifiers, verify assumptions)
 3. Convert `direct` items to scenario markdown (hand-write or use `/record-scenario`)
 4. Convert `extended-tag` items using the appropriate tags

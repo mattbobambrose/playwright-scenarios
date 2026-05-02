@@ -30,37 +30,37 @@ The question is: **how do you get a reviewed scenario?** Four paths, depending o
 
 ---
 
-## Path A: Generate specs with an LLM
+## Path A: Generate documents with an LLM
 
-You're starting from scratch and using an LLM (ChatGPT, Claude, Gemini, etc.) to write your QA specs.
+You're starting from scratch and using an LLM (ChatGPT, Claude, Gemini, etc.) to write your test documents.
 
 ``` mermaid
 graph LR
-    A[Paste SPEC_GUIDE\ninto your LLM] --> B[LLM writes spec]
+    A[Paste DOC_GUIDE\ninto your LLM] --> B[LLM writes document]
     B --> C["/doc-to-scenarios"]
     C --> D["drafts/"]
     D -->|promote| E[scenario]
     E -->|"/review-scenario"| F[reviewed scenario]
 ```
 
-1. **Paste [SPEC_GUIDE.md](https://github.com/mattbobambrose/playwright-scenarios/blob/master/plugins/playwright-scenarios/SPEC_GUIDE.md) into your LLM's context** — system prompt, custom GPT instructions, or the start of a conversation. This teaches the LLM the rules *before* it writes anything.
-2. **Ask the LLM to write your spec.** Because it already knows what the test framework can handle, what format to use, and what pitfalls to avoid, the output should be clean on the first pass.
-3. **Run `/doc-to-scenarios`** to convert. The evaluation step will mostly confirm the spec is already well-formed.
+1. **Paste [DOC_GUIDE.md](https://github.com/mattbobambrose/playwright-scenarios/blob/master/plugins/playwright-scenarios/DOC_GUIDE.md) into your LLM's context** — system prompt, custom GPT instructions, or the start of a conversation. This teaches the LLM the rules *before* it writes anything.
+2. **Ask the LLM to write your document.** Because it already knows what the test framework can handle, what format to use, and what pitfalls to avoid, the output should be clean on the first pass.
+3. **Run `/doc-to-scenarios`** to convert. The evaluation step will mostly confirm the document is already well-formed.
 4. **Promote** drafts out of `drafts/` and **run `/review-scenario`** to verify against the live site.
 
 This path is **front-loaded**: you invest in the LLM's instructions once, and the output needs little to no revision. The `evaluate-doc` step becomes a rubber stamp rather than a feedback loop.
 
 ---
 
-## Path B: Migrate existing specs
+## Path B: Migrate existing documents
 
-You already have QA documents or user stories that weren't written with this framework in mind.
+You already have documents that weren't written with this framework in mind.
 
 ``` mermaid
 graph LR
-    A[Existing spec] --> B["evaluate-doc"]
+    A[Existing document] --> B["evaluate-doc"]
     B --> C{Issues?}
-    C -->|Yes| D[Fix spec in place]
+    C -->|Yes| D[Fix document in place]
     D --> A
     C -->|No| E["/doc-to-scenarios"]
     E --> F["drafts/"]
@@ -146,8 +146,8 @@ Best for bootstrapping coverage. The description lets you steer toward specific 
 | | Path A | Path B | Path C | Path D |
 |---|---|---|---|---|
 | **Starting from** | Nothing | Existing docs | Known flow | Unknown site |
-| **Who writes the spec** | Your LLM | A human (already written) | You (in a browser) | Claude (autonomous) |
-| **Key tool** | SPEC_GUIDE.md | evaluate-doc | /record-scenario | /crawl-site |
+| **Who writes the document** | Your LLM | A human (already written) | You (in a browser) | Claude (autonomous) |
+| **Key tool** | DOC_GUIDE.md | evaluate-doc | /record-scenario | /crawl-site |
 | **Feedback loop** | Minimal | Iterative | None | None |
 | **Produces drafts?** | Yes | Yes | Yes (or direct with `--promote`) | Yes |
 | **Fastest to reviewed scenario** | Medium | Slow (iteration) | Fastest (with `--promote`) | Medium |
@@ -177,7 +177,7 @@ Or pass `--include-drafts` to process them in place.
 5. Reports a summary table of what changed.
 
 !!! tip
-    Always review before generating tests. Scenarios written from specs or recordings often contain claims that don't match the live site.
+    Always review before generating tests. Scenarios written from documents or recordings often contain claims that don't match the live site.
 
 ## Fixture workflow
 
@@ -193,7 +193,7 @@ Fixtures are JSON files under `<scenario_dir>/fixtures/`. See the `fixture-forma
 
 | If you... | Path |
 |-----------|------|
-| Are writing specs from scratch with an LLM | **A** — give the LLM `SPEC_GUIDE.md`, then `/doc-to-scenarios` |
-| Have an existing spec that might not be testable | **B** — `evaluate-doc` → fix → `/doc-to-scenarios` |
+| Are writing docs from scratch with an LLM | **A** — give the LLM `DOC_GUIDE.md`, then `/doc-to-scenarios` |
+| Have an existing document that might not be testable | **B** — `evaluate-doc` → fix → `/doc-to-scenarios` |
 | Know the flow and want to record it | **C** — `/record-scenario` |
 | Don't know what flows exist | **D** — `/crawl-site` |

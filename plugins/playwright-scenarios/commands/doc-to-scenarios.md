@@ -1,6 +1,6 @@
 ---
 name: doc-to-scenarios
-description: Convert any document (QA spec, test plan, user stories, requirements doc, meeting notes) into scenario markdown files. Requires the evaluate-doc skill to have been run first (or runs it inline). The bridge between evaluation and the /review-scenario → /scenario-to-tests pipeline.
+description: Convert any document (test plan, requirements doc, meeting notes, acceptance criteria) into scenario markdown files. Requires the evaluate-doc skill to have been run first (or runs it inline). The bridge between evaluation and the /review-scenario → /scenario-to-tests pipeline.
 arguments:
   - name: source
     description: Required. Path to the source document to convert. Optionally followed by flags. Supported flags - --skip-evaluation (assume the doc has already been evaluated; skip the evaluate-doc pass), --promote (write directly to <SCENARIO_DIR> instead of <SCENARIO_DIR>/drafts/).
@@ -9,7 +9,7 @@ arguments:
 
 # Doc To Scenarios
 
-Convert any document into scenario markdown files that feed the existing `/review-scenario` → `/scenario-to-tests` pipeline. The input can be a QA spec, test plan, user stories, requirements doc, meeting notes, or any structured description of what to test. This is the automated counterpart to hand-writing scenarios.
+Convert any document into scenario markdown files that feed the existing `/review-scenario` → `/scenario-to-tests` pipeline. The input can be a test plan, requirements doc, meeting notes, acceptance criteria, or any structured description of what to test. This is the automated counterpart to hand-writing scenarios.
 
 By default, output goes to `<SCENARIO_DIR>/drafts/` so the user can review before promoting. Pass `--promote` to write directly to `<SCENARIO_DIR>`.
 
@@ -45,7 +45,7 @@ For each test case the evaluation classified as `direct`, `needs-changes`, or `e
    - Independent flows on the same page → separate scenarios.
 
 2. **Map to scenario format.** For each test case:
-   - Extract the URL from the spec. If the spec uses relative paths, preserve them.
+   - Extract the URL from the document. If the document uses relative paths, preserve them.
    - Convert assertions to `- **Action:**` and `- **Expected:**` pairs following the `authoring-scenarios` skill's voice and selector rules.
    - Map extended elements to the correct tags:
      - Known bugs → `**Expected failure:** <reason>` on the relevant test.
@@ -63,7 +63,7 @@ For each test case the evaluation classified as `direct`, `needs-changes`, or `e
      - Teardown → `**Cleanup:** <action>`.
 
 3. **Handle `needs-changes` items.** Convert with best effort and add a blockquote warning inside the scenario:
-   > ⚠️ Converted from spec with known issues: <list issues from evaluation>. Review and fix before using with `/scenario-to-tests`.
+   > ⚠️ Converted from document with known issues: <list issues from evaluation>. Review and fix before using with `/scenario-to-tests`.
 
 4. **Skip `out-of-scope` items.** Do not emit scenario content for these. They'll appear in the final report.
 

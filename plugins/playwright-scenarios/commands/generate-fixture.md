@@ -1,9 +1,9 @@
 ---
 name: generate-fixture
-description: Scaffold a fixture JSON file from a scenario's input data bullets, a spec's persona table, or interactive prompts. Outputs the standardized fixture format defined by the fixture-format skill.
+description: Scaffold a fixture JSON file from a scenario's input data bullets, a document's persona table, or interactive prompts. Outputs the standardized fixture format defined by the fixture-format skill.
 arguments:
   - name: source
-    description: Required. Either a scenario file path, a spec document path, or the keyword "interactive" to build from prompts. Optionally followed by --name=<fixture-name> to set the output filename.
+    description: Required. Either a scenario file path, a document path, or the keyword "interactive" to build from prompts. Optionally followed by --name=<fixture-name> to set the output filename.
     required: true
 ---
 
@@ -16,12 +16,12 @@ Create a fixture JSON file in the format defined by the `fixture-format` skill. 
 The first non-flag token is the **source** (required):
 
 - A path to a `.md` file in `<SCENARIO_DIR>` → extract input data bullets from the scenario.
-- A path to any other file → treat as a spec document and extract persona/fixture tables.
+- A path to any other file → treat as a document and extract persona/fixture tables.
 - The literal string `interactive` → prompt the user for each field.
 
 Flags:
 
-- `--name=<fixture-name>` — kebab-case name for the output file. If omitted, inferred from the source (scenario name, persona name from the spec, or prompted in interactive mode).
+- `--name=<fixture-name>` — kebab-case name for the output file. If omitted, inferred from the source (scenario name, persona name from the document, or prompted in interactive mode).
 
 Any unknown `--`-prefixed token → error before doing any work.
 
@@ -40,14 +40,14 @@ Build a fixture object:
 - Leaf values = the literal values from the bullets.
 - If the scenario already has a `**Fixture:**` tag pointing to an existing file, read that file and merge — new values from the scenario override existing fixture values.
 
-### From a spec document
+### From a document
 
 Read the document. Look for structured data in these forms:
 - **Tables** with columns like "Screen", "Field", "Value" or "Input", "Expected".
 - **Persona blocks** with labeled key-value pairs.
 - **Numbered field lists** within test case definitions.
 
-Build a fixture object mapping the spec's structure to the `fixture-format` skill's schema. Use the spec's own grouping (by screen, by category) as top-level keys.
+Build a fixture object mapping the document's structure to the `fixture-format` skill's schema. Use the document's own grouping (by screen, by category) as top-level keys.
 
 ### Interactive mode
 
@@ -97,4 +97,4 @@ Tell the user:
 - The path of the written fixture file.
 - The number of groups and fields.
 - If the source was a scenario, suggest updating it to use `**Fixture:** fixtures/<name>` instead of inline data bullets.
-- If the source was a spec, suggest running `/doc-to-scenarios` to convert the spec's test cases using this fixture.
+- If the source was a document, suggest running `/doc-to-scenarios` to convert the document's test cases using this fixture.
