@@ -12,6 +12,20 @@ Claude Code plugin for scenario-driven Playwright testing — record, crawl, eva
 
 The plugin works with any project that uses Playwright for browser automation. The default test generation stack is Kotlin + Kotest StringSpec + Playwright-for-Java, with other stacks planned.
 
+## How it works
+
+``` mermaid
+graph TD
+    A[User wants to<br/>test a website]
+    A -->|"/record-scenario"| B[Scenario]
+    A -->|"/crawl-site"| B
+    A -->|"/doc-to-scenarios"| B
+    B -->|"/review-scenario"| C[Reviewed<br/>scenario]
+    C -->|"/scenario-to-tests"| D[Test suite]
+```
+
+A **scenario** is an LLM-optimized markdown representation of the flow you want to test — readable by humans, mechanically processable by Claude. You produce one by recording a browser session, crawling the site, or converting an existing document — each writes to its own partition (`scenarios/record/`, `scenarios/crawl/`, `scenarios/convert/`). Hand-edit or delete in place if you want; then `/review-scenario` audits against the live site, and `/scenario-to-tests` turns the reviewed scenarios into a runnable test suite at `<test_dir>/<command>/<scenario-name>/`.
+
 ## Quick start
 
 ```
@@ -33,7 +47,7 @@ Then seed your first scenario:
     ```
     /crawl-site https://your-site.com
     ```
-    Claude explores the site and writes draft scenarios.
+    Claude explores the site and writes scenarios to `crawl/`.
 
 === "Convert a document"
 
@@ -63,7 +77,7 @@ Then review and generate:
 
     ---
 
-    Definitions for scenario, test case, draft, fixture, tag, and more.
+    Definitions for scenario, test case, source partition, fixture, tag, and more.
 
 -   :lucide-git-branch: **[Workflow](workflow.md)**
 

@@ -1,15 +1,15 @@
 ---
 name: crawl-site
-description: Crawl a website starting from a URL to discover user flows, and write draft scenarios (read-only traversal; never fills forms or clicks destructive buttons). Accepts an optional natural-language description of what to focus on or how thorough to be. Complementary seed-generator to /record-scenario.
+description: Crawl a website starting from a URL to discover user flows, and write scenarios to <SCENARIO_DIR>/crawl/ (read-only traversal; never fills forms or clicks destructive buttons). Accepts an optional natural-language description of what to focus on or how thorough to be. Complementary seed-generator to /record-scenario.
 arguments:
   - name: start-url
-    description: Required. The URL to start crawling from. Optionally followed by a natural-language description of what to crawl and/or flags. Supported flags - --depth=N (override interpreted depth; max 3), --max-scenarios=N (cap emitted draft scenarios; default 10).
+    description: Required. The URL to start crawling from. Optionally followed by a natural-language description of what to crawl and/or flags. Supported flags - --depth=N (override interpreted depth; max 3), --max-scenarios=N (cap emitted scenarios; default 10).
     required: true
 ---
 
 # Crawl Site
 
-Drive a site from a starting URL, observe its interactive surface, and write draft scenarios that represent **plausible user flows** (not a page enumeration). The output feeds the existing `/review-scenario` → `/scenario-to-tests` pipeline, but because drafts land under `<SCENARIO_DIR>/drafts/`, those commands won't touch them unless the user passes `--include-drafts` or renames the file out of the drafts folder.
+Drive a site from a starting URL, observe its interactive surface, and write scenarios that represent **plausible user flows** (not a page enumeration). The output is written to `<SCENARIO_DIR>/crawl/` and feeds the `/review-scenario` → `/scenario-to-tests` pipeline. The scenario is the canonical artifact — there is no draft step. If the user wants to delete crawl-emitted scenarios they don't care about (or hand-edit them) before running `/review-scenario`, they do so in place.
 
 This command is strictly **read-only**: it navigates, scrolls, and observes, but never fills inputs, never submits forms, and never clicks buttons whose text suggests state change (submit, delete, buy, subscribe, sign up, log in, etc.). For flows that require interaction, use `/record-scenario`.
 
@@ -20,7 +20,7 @@ Split the argument string into three parts:
 - **Start URL** (required) — the first token that starts with `http://` or `https://`.
 - **Flags** (optional) — tokens starting with `--`:
   - `--depth=N` — explicit depth override. Clamp to `[1, 3]`.
-  - `--max-scenarios=N` — explicit cap on draft scenarios emitted.
+  - `--max-scenarios=N` — explicit cap on scenarios emitted.
 - **Description** (optional) — everything else, joined into one string. This is a natural-language instruction describing what to focus on or how thorough to be.
 
 Any unknown `--`-prefixed token → error before doing any work. Missing start URL → error.
@@ -49,9 +49,9 @@ Run `playwright-cli --version` (timeout: 5s); fall back to `npx --no-install pla
 
 > `playwright-cli` is not available. Install it with `npm install -g @playwright/cli@latest` or make sure `npx playwright-cli` works in this project. See the README's "Host Project Setup" section for details.
 
-### 0c. Prepare drafts directory
+### 0c. Prepare crawl directory
 
-Ensure `<SCENARIO_DIR>/drafts/` exists; create it if not.
+Ensure `<SCENARIO_DIR>/crawl/` exists; create it if not.
 
 ## Phase 1: Fetch and inventory the start page
 
@@ -165,9 +165,9 @@ Each subagent receives one flow and performs these steps (only when effective de
 
 Do **not** fill forms. Do **not** click buttons. If a page obviously requires login to proceed (login wall, 401 / 403), record that fact as the scenario's expected outcome and move on.
 
-## Phase 4: Write draft scenarios
+## Phase 4: Write scenarios
 
-For each retained flow, write one scenario file to `<SCENARIO_DIR>/drafts/<flow-name>.md`.
+For each retained flow, write one scenario file to `<SCENARIO_DIR>/crawl/<flow-name>.md`.
 
 ### Naming
 
@@ -180,7 +180,7 @@ Generate kebab-case filenames from the flow. Examples:
 | Footer navigation inventory | `footer-nav-inventory.md` |
 | Nav to Login (auth gate) | `nav-to-login.md` |
 
-If a draft by that name already exists under `<SCENARIO_DIR>/drafts/`, increment the numeric suffix (`-v2`, `-v3`, ...) until a free name is found. Do not silently overwrite.
+If a scenario by that name already exists under `<SCENARIO_DIR>/crawl/`, increment the numeric suffix (`-v2`, `-v3`, ...) until a free name is found. Do not silently overwrite.
 
 ### Format
 
@@ -193,7 +193,7 @@ Use the flat scenario format documented in the `authoring-scenarios` skill. A re
 
 Navigating from the homepage to the Pricing page via the primary nav.
 
-> Draft generated by `/crawl-site` — "focus on the checkout flow for a first-time buyer". Review and edit before feeding into `/scenario-to-tests`.
+> Generated by `/crawl-site` — "focus on the checkout flow for a first-time buyer". Review and edit before feeding into `/scenario-to-tests`.
 
 ## Test 1: Click the 'Pricing' nav link
 
@@ -206,13 +206,13 @@ Rules for the generated content:
 
 - Preserve **concrete selector text** (exact link text, exact heading text) — `/review-scenario` needs this to verify against the live site.
 - Use the imperative/descriptive voice the `authoring-scenarios` skill mandates.
-- Always include a provenance blockquote. If a description was provided, include it: `> Draft generated by /crawl-site — "<description>"`. If no description, use: `> Draft generated by /crawl-site`.
+- Always include a provenance blockquote. If a description was provided, include it: `> Generated by /crawl-site — "<description>"`. If no description, use: `> Generated by /crawl-site`.
 - For footer-aggregate scenarios, include a minimal Action bullet (`- **Action:** Scroll to the page footer`) followed by the observed links as Expected bullets (`- **Expected:** The footer contains a link to "About"`, etc.) — every test requires at least one Action and one Expected per the `authoring-scenarios` format.
 - Auth-gate scenarios should have a single Expected asserting the user is redirected to or sees the login form — not a speculative login flow.
 
 ## Phase 5: Write crawl metadata
 
-After all drafts are written, write (or append to) a metadata file at `<SCENARIO_DIR>/drafts/.crawl-meta.json`. This file records crawl history so `/scenario-status` can report coverage completeness.
+After all scenarios are written, write (or append to) a metadata file at `<SCENARIO_DIR>/crawl/.crawl-meta.json`. This file records crawl history so `/scenario-status` can report coverage completeness.
 
 If the file exists, read it, append the new crawl entry to the `crawls` array, and write it back. If it doesn't exist, create it with a single-entry array.
 
@@ -249,16 +249,16 @@ Fields:
 - `urls_discovered` — total same-origin links found across all levels.
 - `urls_crawled` — links actually navigated to.
 - `urls_skipped` — links deprioritized or cut by the cap.
-- `flow_types` — count of flows per type that were written as drafts.
+- `flow_types` — count of flows per type that were written as scenarios.
 - `max_depth_reached` — deepest level the crawl actually visited.
 - `max_depth_available` — estimated maximum depth of the site based on outbound links seen at the deepest level crawled (if the deepest pages still had outbound links, the site goes deeper).
 
 ## Phase 6: Report
 
-Print a summary table listing every draft written:
+Print a summary table listing every scenario written:
 
-| Draft | Flow type | Destination | Notes |
-|-------|-----------|-------------|-------|
+| Scenario | Flow type | Destination | Notes |
+|----------|-----------|-------------|-------|
 
 If a description was given, also report:
 - What the description was interpreted as (goal, intensity, or hybrid).
@@ -267,9 +267,8 @@ If a description was given, also report:
 
 Finish with next-step pointers for the user:
 
-1. Review a draft: `cat <SCENARIO_DIR>/drafts/<name>.md`
-2. Promote a draft out of drafts: `mv <SCENARIO_DIR>/drafts/<name>.md <SCENARIO_DIR>/<name>.md`
-3. Run `/review-scenario <name>` once promoted (it will auto-audit against the live site).
-4. Run `/scenario-status` to see overall coverage including this crawl's contribution.
+1. Review a scenario in place: `cat <SCENARIO_DIR>/crawl/<name>.md`. Hand-edit or delete any you don't want.
+2. Run `/review-scenario` to audit the remaining scenarios against the live site.
+3. Run `/scenario-status` to see overall coverage including this crawl's contribution.
 
-Do **not** auto-chain into `/review-scenario` — drafts deserve a human pass first, which is why they live under `drafts/`.
+Do **not** auto-chain into `/review-scenario` — the user decides when to run it.

@@ -11,9 +11,9 @@ Every component shipped by the `playwright-scenarios` plugin, with signatures, f
 | Command | Purpose |
 |---|---|
 | [`/playwright-scenarios-config`](#playwright-scenarios-config) | View or change the plugin's per-project settings |
-| [`/record-scenario`](#record-scenario) | Capture a flow by driving a real browser |
-| [`/crawl-site`](#crawl-site) | Auto-discover flows by exploring a site (read-only) |
-| [`/doc-to-scenarios`](#doc-to-scenarios) | Convert a document into scenario files |
+| [`/record-scenario`](#record-scenario) | Capture a flow by driving a real browser (writes to `record/`) |
+| [`/crawl-site`](#crawl-site) | Auto-discover flows by exploring a site (writes to `crawl/`, read-only) |
+| [`/doc-to-scenarios`](#doc-to-scenarios) | Convert a document into scenarios (writes to `convert/`) |
 | [`/generate-fixture`](#generate-fixture) | Scaffold a fixture JSON file |
 | [`/review-scenario`](#review-scenario) | Audit a scenario against the live site |
 | [`/scenario-to-tests`](#scenario-to-tests) | Generate test code from reviewed scenarios |
@@ -61,10 +61,10 @@ View or change the plugin's per-project settings stored in `.claude/playwright-s
 ### `/record-scenario`
 
 ```
-/record-scenario [name] [--promote] [--no-review]
+/record-scenario [name]
 ```
 
-Create a scenario by demonstrating a flow in a real browser. Launches Playwright codegen, captures clicks/typing/marked assertions, and writes a [draft](terminology.md) scenario file.
+Create a scenario by demonstrating a flow in a real browser. Launches Playwright codegen, captures clicks/typing/marked assertions, and writes a scenario file to `<SCENARIO_DIR>/record/<name>.md`.
 
 **Arguments:**
 
@@ -72,20 +72,13 @@ Create a scenario by demonstrating a flow in a real browser. Launches Playwright
 |---|---|---|
 | `name` | optional, kebab-case | Scenario filename without `.md`. If omitted, inferred from the recorded actions. |
 
-**Flags:**
-
-| Flag | Description |
-|---|---|
-| `--promote` | Write to `<SCENARIO_DIR>/<name>.md` instead of `<SCENARIO_DIR>/drafts/<name>.md`, and auto-chain into `/review-scenario`. |
-| `--no-review` | Used with `--promote` to skip the auto-chain. Ignored without `--promote`. |
+**Flags:** none.
 
 **Examples:**
 
 ```
 /record-scenario
 /record-scenario checkout-flow
-/record-scenario checkout-flow --promote
-/record-scenario checkout-flow --promote --no-review
 ```
 
 **Prerequisites:** The host project must define a `recordScenario` Gradle task. The language template repos linked from the [Tutorial](tutorial.md) include this task pre-configured.
@@ -98,7 +91,7 @@ Create a scenario by demonstrating a flow in a real browser. Launches Playwright
 /crawl-site <start-url> [description] [--depth=N] [--max-scenarios=N]
 ```
 
-Crawl a site starting from a URL, identify plausible user flows, and write draft scenarios. **Strictly read-only:** never fills inputs, never submits forms, never clicks state-changing buttons. For interactive flows use `/record-scenario`.
+Crawl a site starting from a URL, identify plausible user flows, and write scenarios to `<SCENARIO_DIR>/crawl/`. **Strictly read-only:** never fills inputs, never submits forms, never clicks state-changing buttons. For interactive flows use `/record-scenario`.
 
 **Arguments:**
 
@@ -112,7 +105,7 @@ Crawl a site starting from a URL, identify plausible user flows, and write draft
 | Flag | Description |
 |---|---|
 | `--depth=N` | Override the interpreted crawl depth. Clamped to `[1, 3]`. Default: interpreted from the description (or `1` if no description). |
-| `--max-scenarios=N` | Cap the number of draft scenarios emitted. Default `10`. |
+| `--max-scenarios=N` | Cap the number of scenarios emitted. Default `10`. |
 
 **Examples:**
 
@@ -131,10 +124,10 @@ Crawl a site starting from a URL, identify plausible user flows, and write draft
 ### `/doc-to-scenarios`
 
 ```
-/doc-to-scenarios <source> [--skip-evaluation] [--promote]
+/doc-to-scenarios <source> [--skip-evaluation]
 ```
 
-Convert any document (test plan, requirements doc, meeting notes, acceptance criteria) into one or more scenario markdown files. By default runs the `evaluate-doc` skill first and pauses for review.
+Convert any document (test plan, requirements doc, meeting notes, acceptance criteria) into one or more scenario markdown files under `<SCENARIO_DIR>/convert/`. By default runs the `evaluate-doc` skill first and pauses for review.
 
 **Arguments:**
 
@@ -147,14 +140,12 @@ Convert any document (test plan, requirements doc, meeting notes, acceptance cri
 | Flag | Description |
 |---|---|
 | `--skip-evaluation` | Assume the document has already been evaluated; skip the inline `evaluate-doc` pass. |
-| `--promote` | Write directly to `<SCENARIO_DIR>` instead of `<SCENARIO_DIR>/drafts/`. |
 
 **Examples:**
 
 ```
 /doc-to-scenarios path/to/checkout-doc.md
 /doc-to-scenarios path/to/checkout-doc.md --skip-evaluation
-/doc-to-scenarios path/to/checkout-doc.md --promote
 ```
 
 !!! tip
@@ -195,30 +186,27 @@ Scaffold a fixture JSON file in the format defined by the [`fixture-format`](#fi
 ### `/review-scenario`
 
 ```
-/review-scenario [name1 name2 ...] [--include-drafts]
+/review-scenario [name1 name2 ...]
 ```
 
-Audit one or more scenario files against the live site, propose improvements, and rewrite the markdown in place. Does **not** generate tests — pair with `/scenario-to-tests` for that.
+Audit one or more scenario files across `<SCENARIO_DIR>/{record,crawl,convert}/` against the live site, propose improvements, and rewrite the markdown in place. Does **not** generate tests — pair with `/scenario-to-tests` for that.
 
 **Arguments:**
 
 | Argument | Type | Description |
 |---|---|---|
-| `name1 name2 ...` | optional, zero or more | Scenario names without `.md`. Empty = every scenario in `<SCENARIO_DIR>` (excluding subdirectories). |
+| `name1 name2 ...` | optional, zero or more | Scenario names without `.md`, or a partition name (`record`, `crawl`, `convert`) to scope the review to that partition. Empty = review every scenario across all three partitions. If a name matches in multiple partitions, you'll be prompted to disambiguate or use the `partition/name` form. |
 
-**Flags:**
-
-| Flag | Description |
-|---|---|
-| `--include-drafts` | Also review files under subdirectories (e.g., `<SCENARIO_DIR>/drafts/`). |
+**Flags:** none.
 
 **Examples:**
 
 ```
 /review-scenario
+/review-scenario record
 /review-scenario checkout-flow
 /review-scenario checkout-flow add-to-cart
-/review-scenario --include-drafts
+/review-scenario record convert
 ```
 
 **Prerequisites:** `playwright-cli` available on `PATH` or via `npx`.
@@ -228,31 +216,31 @@ Audit one or more scenario files against the live site, propose improvements, an
 ### `/scenario-to-tests`
 
 ```
-/scenario-to-tests [name1 name2 ...] [--include-drafts] [--dry-run]
+/scenario-to-tests [name1 name2 ...] [--dry-run]
 ```
 
-Generate test code from reviewed scenarios. The output language and framework come from `.claude/playwright-scenarios.local.md`. Currently fully wired for **Kotlin + Kotest StringSpec**.
+Generate test code from reviewed scenarios. The output language and framework come from `.claude/playwright-scenarios.local.md`. Currently fully wired for **Kotlin + Kotest StringSpec**. Tests are written to `<TEST_DIR>/<command>/<scenario-name>/<ClassName>.kt`, partitioned by source command and by scenario.
 
 **Arguments:**
 
 | Argument | Type | Description |
 |---|---|---|
-| `name1 name2 ...` | optional, zero or more | Scenario names without `.md`. Empty = every scenario in `<SCENARIO_DIR>` (excluding subdirectories). |
+| `name1 name2 ...` | optional, zero or more | Scenario names without `.md`, or a partition name (`record`, `crawl`, `convert`) to scope generation to that partition. Empty = generate tests for every scenario across all three partitions. |
 
 **Flags:**
 
 | Flag | Description |
 |---|---|
-| `--include-drafts` | Also process files under subdirectories. |
 | `--dry-run` | Write the test files but skip running them. |
 
 **Examples:**
 
 ```
+/scenario-to-tests
+/scenario-to-tests record
 /scenario-to-tests checkout-flow
 /scenario-to-tests checkout-flow add-to-cart
 /scenario-to-tests --dry-run
-/scenario-to-tests --include-drafts --dry-run
 ```
 
 ---

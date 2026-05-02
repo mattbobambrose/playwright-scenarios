@@ -34,6 +34,10 @@ Pages live under `website/playwright-scenarios/docs/`. Nav order is set in `webs
 
 `/review-scenario`, `/scenario-to-tests`, and `/crawl-site` require the `playwright-cli` skill (not shipped by this marketplace). It lives at `~/.claude/skills/playwright-cli/` and wraps `@playwright/cli` (`npm install -g @playwright/cli@latest`).
 
+## Source partitions
+
+Scenario creation commands write to one of three partitions: `<scenario_dir>/{record,crawl,convert}/`. Generated tests mirror at `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. Use `<command>` (not `<partition>`) as the placeholder in path templates everywhere. There is no draft step — the scenario in its partition is the canonical artifact; users hand-edit or delete in place before `/review-scenario`.
+
 ## Scenario format extensions
 
 `authoring-scenarios` supports extended tags beyond the base Action/Expected format: `**Fixture:**`, `**Prerequisite:**`, `**Assert throughout:**`, `**Expected failure:**`, `**Expected (regex):**`, `**Iframe:**`, `**Branch:**`, `**Intercept:**`, `**Cookie:**`, `**Storage:**`, `**Device:**`, `**Timeout:**`, `**Cleanup:**`. See the skill for semantics. `/review-scenario` preserves these during rewrites.

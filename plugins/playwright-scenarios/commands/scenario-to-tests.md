@@ -1,9 +1,9 @@
 ---
 name: scenario-to-tests
-description: Generate tests in the project's configured language and framework from website validation scenarios. Assumes scenarios have already been reviewed.
+description: Generate tests in the project's configured language and framework from website validation scenarios under <SCENARIO_DIR>/{record,crawl,convert}/. Writes tests to <TEST_DIR>/<command>/<scenario-name>/<ClassName>.kt — partitioned by source command and by scenario. Assumes scenarios have already been reviewed.
 arguments:
   - name: scenarios
-    description: Zero or more scenario names (without .md extension), space-separated, optionally mixed with flags. Zero scenarios = all scenarios in the configured scenario directory. Supported flags - --include-drafts (process files under <SCENARIO_DIR>/drafts/ and other subdirectories), --dry-run (skip Phase 4 test execution).
+    description: Zero or more scenario names (without .md extension), space-separated. Zero names = all scenarios across record / crawl / convert. A bare partition name (record, crawl, or convert) limits generation to that partition. Supported flag - --dry-run (skip Phase 4 test execution).
     required: false
 ---
 
@@ -13,12 +13,13 @@ arguments:
 
 ## Argument parsing
 
-Before Phase 0, split the argument string into **flags** (tokens starting with `--`) and **names** (everything else):
+Split the argument string into **flags** (tokens starting with `--`) and **names** (everything else):
 
-- `--include-drafts` — also process scenario files living under subdirectories (e.g. `<SCENARIO_DIR>/drafts/`). Off by default.
 - `--dry-run` — write the test files in Phase 3 but skip the Phase 4 test run.
 
 Any unknown `--`-prefixed token should be reported as an error before doing any work.
+
+The names list has special handling for **partition names**: if a name is exactly one of `record`, `crawl`, or `convert`, it's interpreted as a directive to generate tests for every scenario in that partition.
 
 ## Phase 0: Load project config and preflight
 
@@ -26,8 +27,8 @@ Any unknown `--`-prefixed token should be reported as an error before doing any 
 
 Invoke the `loading-config` skill to resolve the four required config values:
 
-- **`<SCENARIO_DIR>`** — where input scenario `.md` files live.
-- **`<TEST_DIR>`** — where generated test files go.
+- **`<SCENARIO_DIR>`** — root of the scenario tree. Scenarios live under `<SCENARIO_DIR>/{record,crawl,convert}/`.
+- **`<TEST_DIR>`** — root of the generated-test tree. Tests will be written under `<TEST_DIR>/{record,crawl,convert}/<scenario-name>/`.
 - **`<TEST_LANGUAGE>`** — drives the file extension and syntax.
 - **`<TEST_FRAMEWORK>`** — drives the test shape (class, decorators, imports).
 
@@ -47,6 +48,8 @@ Follow the "Source-root inference" procedure in the `loading-config` skill to ob
 
 `SCENARIOS_PACKAGE` = `<TEST_DIR>` with the resolved source root stripped, trailing/leading slashes removed, `/` replaced by `.`. Example: `src/test/kotlin/com/example/qa/scenarios` with source root `src/test/kotlin` → `com.example.qa.scenarios`.
 
+The per-partition package is `<SCENARIOS_PACKAGE>.<command>` (e.g. `com.example.qa.scenarios.record`). The per-scenario directory layer (`<scenario-name>/`) is **organizational only** — it does NOT appear in the Kotlin package declaration.
+
 ### 0d. Resolve `BASE_TEST_CLASS`
 
 Follow the "Base-test-class discovery" procedure in the `loading-config` skill (uses the config value if set, otherwise globs for candidates, prompts on ambiguity, and persists the choice). Both `source_root` and `base_test_class` are persisted to the config after first successful resolution so future runs skip inference entirely.
@@ -64,14 +67,17 @@ Phase 2 shells out to `playwright-cli` via the skill of the same name. Verify it
 
 ## Phase 1: Select scenario files
 
-Using the scenario names parsed from the argument-parsing step:
+Using the names parsed from the argument-parsing step:
 
-- **Zero scenario names:** read all `.md` files **directly inside `<SCENARIO_DIR>`** (non-recursive — do NOT descend into `<SCENARIO_DIR>/drafts/` or any other subdirectory, unless `--include-drafts` was passed) and process each one. Skip `<SCENARIO_DIR>/SCENARIOS.md`.
-- **One or more scenario names:** read `<SCENARIO_DIR>/<name>.md` for each. If a named scenario file is not found directly under `<SCENARIO_DIR>`, also check `<SCENARIO_DIR>/**/<name>.md` — if it's under a subdirectory and `--include-drafts` was not passed, warn and skip. With `--include-drafts`, include it.
+- **Zero names:** glob `<SCENARIO_DIR>/{record,crawl,convert}/*.md`. Process every scenario across all three partitions.
+- **A partition name (`record`, `crawl`, or `convert`):** glob `<SCENARIO_DIR>/<command>/*.md`. Process every scenario in that partition only. Multiple partition names can be combined.
+- **One or more scenario names:** for each name, look up `<SCENARIO_DIR>/{record,crawl,convert}/<name>.md`. If exactly one match exists, include it. If a name matches in multiple partitions, prompt the user to disambiguate (or accept a `partition/name` form). If no match is found, report it and continue with the rest.
 
-If a named scenario file does not exist anywhere under `<SCENARIO_DIR>`, report it and continue with the rest.
+For each selected scenario, retain its **source partition** (`record`, `crawl`, or `convert`) — derived from its parent directory under `<SCENARIO_DIR>/`. Phase 3 needs the partition to compute the output path and package.
 
-If the final list is empty (no scenarios found, or all were drafts and `--include-drafts` was not passed), report that clearly and stop — do not proceed to Phase 2 with no work to do.
+Skip any `SCENARIOS.md` and `.crawl-meta.json` encountered during the glob.
+
+If the final list is empty, report that clearly and stop — do not proceed to Phase 2 with no work to do.
 
 ## Phase 2: Browser Exploration (Main Thread)
 
@@ -81,7 +87,7 @@ For each scenario, sequentially:
 2. Open the target URL using the Playwright CLI (via the `playwright-cli` skill, using whichever invocation the preflight in step 0e confirmed works)
 3. Perform each test case interactively, observing actual behavior and error messages
 4. Record observations: exact error messages, element selectors, page URLs, and any unexpected behavior
-5. Save any screenshots to `screenshots/` directory (e.g., `screenshots/scenario-name-test1.png`)
+5. Save any screenshots to `screenshots/` directory (e.g., `screenshots/<command>/<scenario-name>-test1.png`)
 
 Collect all observations before moving to Phase 3.
 
@@ -94,6 +100,7 @@ Each subagent receives:
 - The scenario file content
 - The browser observations collected in Phase 2
 - The resolved config values (`<TEST_DIR>`, `SCENARIOS_PACKAGE`, `BASE_TEST_CLASS`, `BASE_PACKAGE`, `<TEST_LANGUAGE>`, `<TEST_FRAMEWORK>`)
+- The scenario's **source partition** (`record`, `crawl`, or `convert`) and **scenario-name** (filename without `.md`)
 - The test generation rules below (including the scenario-name → class-name conversion rules)
 
 Subagents write the test file but do NOT run the build tool.
@@ -104,19 +111,23 @@ Skip this phase entirely if `--dry-run` was passed; report the list of generated
 
 Otherwise, run the project's test command:
 
-- **If the user named specific scenarios**, target those test classes explicitly — one `--tests` flag per class. For example, scenarios `login-invalid-credentials` and `email-signup-form` with `SCENARIOS_PACKAGE = com.example.qa.scenarios` become:
+- **If the user named specific scenarios**, target those test classes explicitly — one `--tests` flag per class. The fully-qualified class name is `<SCENARIOS_PACKAGE>.<command>.<ClassName>`. For example, scenario `login-invalid-credentials` (in the `record` partition) and scenario `email-signup-form` (in the `convert` partition) with `SCENARIOS_PACKAGE = com.example.qa.scenarios` become:
 
   ```
-  ./gradlew test --tests "com.example.qa.scenarios.LoginInvalidCredentialsTest" --tests "com.example.qa.scenarios.EmailSignupFormTest"
+  ./gradlew test --tests "com.example.qa.scenarios.record.LoginInvalidCredentialsTest" --tests "com.example.qa.scenarios.convert.EmailSignupFormTest"
   ```
 
-- **If zero scenario names were passed** (all scenarios), target the whole scenarios package:
+- **If a partition name was passed** (`record`, `crawl`, or `convert`), target that subpackage:
+
+  ```
+  ./gradlew test --tests "<SCENARIOS_PACKAGE>.<command>.*"
+  ```
+
+- **If zero names were passed** (all scenarios), target the whole scenarios package recursively:
 
   ```
   ./gradlew test --tests "<SCENARIOS_PACKAGE>.*"
   ```
-
-  (e.g. `--tests "com.example.qa.scenarios.*"`)
 
 If any tests fail, fix them sequentially and re-run.
 
@@ -149,12 +160,24 @@ Examples:
 
 The filename for the generated Kotlin file is `<ClassName>.kt`.
 
+### Output path
+
+For a scenario at `<SCENARIO_DIR>/<command>/<name>.md`, the generated test goes to:
+
+```
+<TEST_DIR>/<command>/<name>/<ClassName>.kt
+```
+
+The `<name>/` directory is kebab-case verbatim (matches the scenario filename without the `.md` extension). It is purely organizational on disk — the `.kt` file declares its package as `<SCENARIOS_PACKAGE>.<command>` (no `<name>` segment). IDEs may flag the directory-vs-package mismatch; compilation works regardless because Kotlin test discovery is classpath-based, not directory-based.
+
+Create the directory tree if it doesn't exist.
+
 ### `kotlin` + `kotest-stringspec`
 
 - Use Kotest with **StringSpec** style and an **`init`** block.
 - Extend `BASE_TEST_CLASS` if one was resolved in step 0d. If `BASE_TEST_CLASS` is empty, omit the `extends` clause and add a TODO comment at the top of the file flagging that the user needs to supply a base class.
-- Declare the class in `SCENARIOS_PACKAGE`.
-- Write the test file to `<TEST_DIR>/<ClassName>.kt`, creating the directory tree if it doesn't exist.
+- Declare the class in `<SCENARIOS_PACKAGE>.<command>` (e.g. `com.example.qa.scenarios.record`).
+- Write the test file to `<TEST_DIR>/<command>/<name>/<ClassName>.kt`.
 
 ### Extended tag handling
 

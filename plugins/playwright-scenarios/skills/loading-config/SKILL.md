@@ -1,6 +1,6 @@
 ---
 name: loading-config
-description: Load per-project configuration for the playwright-scenarios plugin from .claude/playwright-scenarios.local.md. Triggers automatically at the start of any playwright-scenarios command (/record-scenario, /review-scenario, /scenario-to-tests, /playwright-scenarios-config). Prompts the user for the four required fields (scenario_dir, test_dir, test_language, test_framework) on first run and persists them. Additional optional fields (source_root, base_test_class) are auto-inferred when needed and persisted on disambiguation.
+description: Load per-project configuration for the playwright-scenarios plugin from .claude/playwright-scenarios.local.md. Triggers automatically at the start of any playwright-scenarios command (/record-scenario, /review-scenario, /scenario-to-tests, /playwright-scenarios-config). Prompts the user for the four required fields (scenario_dir, test_dir, test_language, test_framework) on first run, persists them, and scaffolds the record/crawl/convert subdirectories under both <scenario_dir> and <test_dir>. Additional optional fields (source_root, base_test_class) are auto-inferred when needed and persisted on disambiguation.
 ---
 
 # Loading Plugin Configuration
@@ -31,8 +31,8 @@ Edit the YAML frontmatter to reconfigure, or run `/playwright-scenarios-config` 
 
 | Field | Required | Default offered | Purpose |
 |-------|----------|-----------------|---------|
-| `scenario_dir` | **yes** | `src/test/scenarios` | Directory (relative to repo root) where scenario `.md` files live. Non-recursive — subdirectories are treated as drafts. |
-| `test_dir` | **yes** | none (must be entered) | Directory (relative to repo root) where generated test files go. |
+| `scenario_dir` | **yes** | `src/test/scenarios` | Root directory (relative to repo root) for scenario `.md` files. Scenarios live under three command-keyed subdirectories: `<scenario_dir>/record/` (from `/record-scenario`), `<scenario_dir>/crawl/` (from `/crawl-site`), and `<scenario_dir>/convert/` (from `/doc-to-scenarios`). The bootstrap creates these subdirectories. |
+| `test_dir` | **yes** | none (must be entered) | Root directory (relative to repo root) for generated test files. Tests are written under `<test_dir>/<command>/<scenario-name>/<ClassName>.<ext>` — partitioned by source command and by scenario. The bootstrap creates the three top-level subdirectories. |
 | `test_language` | **yes** | `kotlin` | One of: `kotlin`, `java`, `typescript`, `python`, or any free-form value. |
 | `test_framework` | **yes** | `kotest-stringspec` | One of: `kotest-stringspec`, `junit5`, `playwright-test`, `jest`, `pytest`, or any free-form value. |
 | `source_root` | optional | inferred from `test_dir` | Source-set root above the test package (e.g., `src/test/kotlin`). Used to derive the package name from `test_dir`. Only set explicitly when inference fails. |
@@ -121,7 +121,18 @@ Currently only `kotlin` + `kotest-stringspec` has a fully wired test-generation 
 
    f. Write `.claude/playwright-scenarios.local.md` with the four chosen values as YAML frontmatter, followed by the standard markdown body (see "Config file format" above). Do *not* write `source_root` or `base_test_class` at bootstrap — they're added later, only when disambiguation is needed.
 
-   g. Report the path and the chosen values to the user in a compact table, then return the four values.
+   g. **Scaffold the partition subdirectories.** Create the three command-keyed subdirectories under both roots, if they don't already exist:
+
+      - `<scenario_dir>/record/`
+      - `<scenario_dir>/crawl/`
+      - `<scenario_dir>/convert/`
+      - `<test_dir>/record/`
+      - `<test_dir>/crawl/`
+      - `<test_dir>/convert/`
+
+      Use `mkdir -p` semantics — silent if the directories already exist. Don't drop placeholder files inside; empty directories are fine.
+
+   h. Report the path, the chosen values, and the scaffolded directories to the user in a compact table, then return the four values.
 
 5. **Return the resolved values** to the caller. Callers reference them as `<SCENARIO_DIR>`, `<TEST_DIR>`, `<TEST_LANGUAGE>`, `<TEST_FRAMEWORK>` (plus `<SOURCE_ROOT>` and `<BASE_TEST_CLASS>` when set).
 

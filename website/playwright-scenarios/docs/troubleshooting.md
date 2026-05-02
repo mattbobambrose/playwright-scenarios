@@ -147,9 +147,9 @@ Setup-time and operational failures, with a fix for each.
 
 ## `/crawl-site` results
 
-### Crawl finishes but writes no drafts
+### Crawl finishes but writes no scenarios
 
-> **Symptom:** `/crawl-site` reports completion with an empty drafts directory.<br>
+> **Symptom:** `/crawl-site` reports completion with an empty `<scenario_dir>/crawl/` directory.<br>
 > **Cause #1:** The start page is JS-rendered and links don't exist in the initial HTML the crawler sees.<br>
 > **Fix:** The crawler sees what `playwright-cli snapshot` returns after the page loads — if links only appear after a client-side route change, the crawl can't follow them. Use `/record-scenario` for those flows instead, or point the crawl at a server-rendered route.
 
@@ -180,19 +180,19 @@ Setup-time and operational failures, with a fix for each.
 
 ---
 
-## Drafts and promotion
+## Scenario layout
 
-### "I ran `/review-scenario` but it skipped my file"
+### "I ran `/review-scenario` but it can't find my file"
 
-> **Symptom:** A scenario file you expected to be reviewed wasn't touched.<br>
-> **Cause:** The file lives under `<SCENARIO_DIR>/drafts/` (or another subdirectory). `/review-scenario` and `/scenario-to-tests` skip subdirectories by default to avoid mass-processing unreviewed work.<br>
-> **Fix:** Either `mv src/test/scenarios/drafts/foo.md src/test/scenarios/foo.md` to promote it, or pass `--include-drafts` for one-off processing in place.
+> **Symptom:** `/review-scenario foo` reports that `foo` doesn't exist anywhere under `<SCENARIO_DIR>`.<br>
+> **Cause:** Scenarios live under one of the three command-keyed subdirectories (`<SCENARIO_DIR>/record/`, `<SCENARIO_DIR>/crawl/`, or `<SCENARIO_DIR>/convert/`). A flat `<SCENARIO_DIR>/foo.md` won't be picked up.<br>
+> **Fix:** Move the file into the appropriate partition (e.g. `mv src/test/scenarios/foo.md src/test/scenarios/record/foo.md`). Then re-run.
 
-### Promoted file ended up in the wrong place
+### Same scenario name in multiple partitions
 
-> **Symptom:** You moved a draft out but `/review-scenario foo` still says it can't find `foo`.<br>
-> **Cause:** The destination directory doesn't match `<SCENARIO_DIR>` from your config, or the filename has an extra subdirectory.<br>
-> **Fix:** Confirm `<SCENARIO_DIR>` with `/playwright-scenarios-config` and ensure the file sits directly under it as `<name>.md`.
+> **Symptom:** `/review-scenario checkout-flow` prompts you to disambiguate between `record/checkout-flow.md` and `convert/checkout-flow.md`.<br>
+> **Cause:** Two creation commands wrote scenarios with the same kebab-case name into different partitions.<br>
+> **Fix:** Either pick one in the prompt, or invoke with the explicit partition form: `/review-scenario record/checkout-flow`. Renaming one of the two scenarios is also fine.
 
 ---
 

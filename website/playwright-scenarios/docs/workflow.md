@@ -10,7 +10,7 @@ Every workflow in this plugin converges on the same destination — a **reviewed
 
 ``` mermaid
 graph LR
-    A[reviewed scenario] -->|"/scenario-to-tests"| B[test file]
+    A[reviewed scenario] -->|"/scenario-to-tests"| B[test files]
     B -->|run| C[pass / fail]
     C -->|"/scenario-status"| D[health dashboard]
 ```
@@ -21,12 +21,12 @@ graph LR
 
 1. Resolves config (test directory, language, framework, base class).
 2. Explores the live site to observe actual behavior.
-3. Generates one test file per scenario.
+3. Generates one test file per scenario at `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`.
 4. Runs the tests and fixes failures.
 
 Use `--dry-run` to write the files without running them. Use `/scenario-status` to monitor health across all scenarios.
 
-The question is: **how do you get a reviewed scenario?** Four paths, depending on where you're starting from.
+The question is: **how do you get a reviewed scenario?** Four paths, depending on where you're starting from. Each path writes to its own **source partition** — `<scenario_dir>/record/`, `<scenario_dir>/crawl/`, or `<scenario_dir>/convert/` — and there is no draft step. The scenario is the canonical artifact; if you want to hand-edit or delete some before review, you do so in place.
 
 ---
 
@@ -38,15 +38,14 @@ You're starting from scratch and using an LLM (ChatGPT, Claude, Gemini, etc.) to
 graph LR
     A[Paste DOC_GUIDE\ninto your LLM] --> B[LLM writes document]
     B --> C["/doc-to-scenarios"]
-    C --> D["drafts/"]
-    D -->|promote| E[scenario]
-    E -->|"/review-scenario"| F[reviewed scenario]
+    C --> D["scenarios/convert/"]
+    D -->|"/review-scenario"| E[reviewed scenario]
 ```
 
 1. **Paste [DOC_GUIDE.md](https://github.com/mattbobambrose/playwright-scenarios/blob/master/plugins/playwright-scenarios/DOC_GUIDE.md) into your LLM's context** — system prompt, custom GPT instructions, or the start of a conversation. This teaches the LLM the rules *before* it writes anything.
 2. **Ask the LLM to write your document.** Because it already knows what the test framework can handle, what format to use, and what pitfalls to avoid, the output should be clean on the first pass.
-3. **Run `/doc-to-scenarios`** to convert. The evaluation step will mostly confirm the document is already well-formed.
-4. **Promote** drafts out of `drafts/` and **run `/review-scenario`** to verify against the live site.
+3. **Run `/doc-to-scenarios`** to convert. The evaluation step will mostly confirm the document is already well-formed. Output lands in `<scenario_dir>/convert/`.
+4. **Run `/review-scenario`** to verify against the live site (optionally hand-edit the convert-partition scenarios first).
 
 This path is **front-loaded**: you invest in the LLM's instructions once, and the output needs little to no revision. The `evaluate-doc` step becomes a rubber stamp rather than a feedback loop.
 
@@ -63,15 +62,14 @@ graph LR
     C -->|Yes| D[Fix document in place]
     D --> A
     C -->|No| E["/doc-to-scenarios"]
-    E --> F["drafts/"]
-    F -->|promote| G[scenario]
-    G -->|"/review-scenario"| H[reviewed scenario]
+    E --> F["scenarios/convert/"]
+    F -->|"/review-scenario"| G[reviewed scenario]
 ```
 
 1. **Run `evaluate-doc`** against your document. It classifies each test case as direct, needs changes, extended tag, or out of scope.
 2. **Fix issues in place.** The evaluation report tells you exactly what to change — vague selectors, missing iframe notes, display text without DOM identifiers, untestable assertions.
 3. **Re-evaluate** until the report is clean. Each round narrows the gap.
-4. **Run `/doc-to-scenarios`**, then **promote** and **review**.
+4. **Run `/doc-to-scenarios`**, then **review**.
 
 This path is **iterative**: `evaluate-doc` acts as a feedback loop that guides you toward a testable document.
 
@@ -86,9 +84,8 @@ graph LR
     A[Start URL] --> B["/record-scenario"]
     B --> C[Playwright codegen opens]
     C --> D[You drive the browser]
-    D --> E["drafts/"]
-    E -->|promote| F[scenario]
-    F -->|"/review-scenario"| G[reviewed scenario]
+    D --> E["scenarios/record/"]
+    E -->|"/review-scenario"| F[reviewed scenario]
 ```
 
 ```
@@ -97,14 +94,8 @@ graph LR
 
 1. Prompts for a start URL.
 2. Opens Playwright codegen — you drive the browser.
-3. Converts the recording into a draft scenario file under `drafts/`.
-4. Promote and review when ready.
-
-Or use `--promote` to skip the drafts step and auto-review:
-
-```
-/record-scenario checkout-flow --promote
-```
+3. Converts the recording into `<scenario_dir>/record/<name>.md`.
+4. Hand-edit if you want, then run `/review-scenario`.
 
 Best for interactive flows (form fills, logins) where watching the flow is faster than writing it.
 
@@ -120,9 +111,8 @@ graph LR
     B --> C[Interpret description]
     C --> D[Show crawl plan]
     D --> E[Walk flows]
-    E --> F["drafts/"]
-    F -->|promote| G[scenario]
-    G -->|"/review-scenario"| H[reviewed scenario]
+    E --> F["scenarios/crawl/"]
+    F -->|"/review-scenario"| G[reviewed scenario]
 ```
 
 ```
@@ -135,9 +125,9 @@ graph LR
 2. Interprets your description (goal-oriented, intensity-oriented, or hybrid) and shows a crawl plan for approval.
 3. Groups and ranks flows, prioritizing those matching your description.
 4. Walks each flow (read-only — never fills forms).
-5. Writes draft scenarios to `<scenario_dir>/drafts/` and saves crawl metadata for `/scenario-status`.
+5. Writes scenarios to `<scenario_dir>/crawl/` and saves crawl metadata for `/scenario-status`.
 
-Best for bootstrapping coverage. The description lets you steer toward specific areas without manual flag-tuning.
+Best for bootstrapping coverage. The description lets you steer toward specific areas without manual flag-tuning. Delete any crawl-emitted scenarios you don't want before running `/review-scenario`.
 
 ---
 
@@ -149,25 +139,17 @@ Best for bootstrapping coverage. The description lets you steer toward specific 
 | **Who writes the document** | Your LLM | A human (already written) | You (in a browser) | Claude (autonomous) |
 | **Key tool** | DOC_GUIDE.md | evaluate-doc | /record-scenario | /crawl-site |
 | **Feedback loop** | Minimal | Iterative | None | None |
-| **Produces drafts?** | Yes | Yes | Yes (or direct with `--promote`) | Yes |
-| **Fastest to reviewed scenario** | Medium | Slow (iteration) | Fastest (with `--promote`) | Medium |
+| **Output partition** | `convert/` | `convert/` | `record/` | `crawl/` |
+| **Fastest to reviewed scenario** | Medium | Slow (iteration) | Fastest | Medium |
 
 ## Common steps
-
-### Promoting drafts
-
-Paths A, B, and D produce drafts under `<scenario_dir>/drafts/`. Commands skip these by default. When a draft is ready:
-
-```bash
-mv src/test/scenarios/drafts/checkout-flow.md src/test/scenarios/checkout-flow.md
-```
-
-Or pass `--include-drafts` to process them in place.
 
 ### Reviewing against the live site
 
 ```
 /review-scenario checkout-flow
+/review-scenario record         # review every scenario in the record partition
+/review-scenario                # review every scenario across all partitions
 ```
 
 1. Opens the URL via `playwright-cli`.

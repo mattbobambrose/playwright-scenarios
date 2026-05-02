@@ -1,23 +1,23 @@
 ---
 name: review-scenario
-description: Audit website validation scenarios in the project's scenario directory against the live site and apply improvements to the markdown
+description: Audit website validation scenarios across <SCENARIO_DIR>/{record,crawl,convert}/ against the live site and apply improvements to the markdown. Zero arguments = review every scenario across all three partitions.
 arguments:
   - name: scenarios
-    description: Zero or more scenario names (without .md extension), space-separated, optionally mixed with flags. Zero scenarios = all scenarios in the configured scenario directory. Supported flag - --include-drafts (review files under <SCENARIO_DIR>/drafts/ and other subdirectories).
+    description: Zero or more scenario names (without .md extension), space-separated. Zero names = review every scenario across <SCENARIO_DIR>/{record,crawl,convert}/. A bare partition name (record, crawl, or convert) limits the review to that partition.
     required: false
 ---
 
 # Review Scenario
 
-Audit website validation scenarios in `<SCENARIO_DIR>` by checking each scenario's claims against the live site, proposing improvements, and applying them to the scenario `.md` file. This command does **not** generate tests — use `/scenario-to-tests` for that.
+Audit website validation scenarios under `<SCENARIO_DIR>/{record,crawl,convert}/` by checking each scenario's claims against the live site, proposing improvements, and applying them to the scenario `.md` file. This command does **not** generate tests — use `/scenario-to-tests` for that.
 
 ## Argument parsing
 
-Before Phase 0, split the argument string into **flags** (tokens starting with `--`) and **names** (everything else):
-
-- `--include-drafts` — also review scenario files living under subdirectories (e.g. `<SCENARIO_DIR>/drafts/`). Off by default.
+Split the argument string into **flags** (tokens starting with `--`) and **names** (everything else). No flags are supported.
 
 Any unknown `--`-prefixed token should be reported as an error before doing any work.
+
+The names list has special handling for **partition names**: if a name is exactly one of `record`, `crawl`, or `convert`, it's interpreted as a directive to review every scenario in that partition (rather than a single scenario file named `record.md`).
 
 ## Phase 0: Load project config and preflight
 
@@ -36,14 +36,15 @@ Phase 2 shells out to `playwright-cli` via the skill of the same name. Verify it
 
 ## Phase 1: Select scenario files
 
-Using the scenario names parsed from the argument-parsing step:
+Using the names parsed from the argument-parsing step:
 
-- **Zero scenario names:** read all `.md` files **directly inside `<SCENARIO_DIR>`** (non-recursive — do NOT descend into `<SCENARIO_DIR>/drafts/` or any other subdirectory unless `--include-drafts` was passed) and review each one. Skip `<SCENARIO_DIR>/SCENARIOS.md` (the hand-maintained index).
-- **One or more scenario names:** read `<SCENARIO_DIR>/<name>.md` for each. If a named scenario file is not found directly under `<SCENARIO_DIR>`, also check `<SCENARIO_DIR>/**/<name>.md` — if it's under a subdirectory and `--include-drafts` was not passed, warn and skip. With `--include-drafts`, include it.
+- **Zero names:** glob `<SCENARIO_DIR>/{record,crawl,convert}/*.md`. Review every scenario across all three partitions.
+- **A partition name (`record`, `crawl`, or `convert`):** glob `<SCENARIO_DIR>/<command>/*.md`. Review every scenario in that partition only. Multiple partition names can be combined.
+- **One or more scenario names:** for each name, look up `<SCENARIO_DIR>/{record,crawl,convert}/<name>.md`. If exactly one match exists, include it. If a name matches in multiple partitions, prompt the user to disambiguate (or accept a `partition/name` form). If no match is found, report it and continue with the rest.
 
-If a named scenario file does not exist anywhere under `<SCENARIO_DIR>`, report it and continue with the rest.
+Skip any `SCENARIOS.md` (hand-maintained index) and any `.crawl-meta.json` (crawl metadata) encountered during the glob.
 
-If the final list is empty (all drafts skipped, or empty scenarios directory), report that and stop — don't proceed to Phase 2 with no work to do.
+If the final list is empty, report that and stop — don't proceed to Phase 2 with no work to do.
 
 ## Phase 2: Live-Site Verification (Main Thread)
 
@@ -72,7 +73,7 @@ Each subagent receives:
 
 - The original scenario markdown
 - The findings list from Phase 2 for that scenario
-- Up to two existing style-reference scenario files from `<SCENARIO_DIR>` (whichever are present, excluding `SCENARIOS.md` and subdirectories) so the subagent can match the host project's formatting conventions; if none exist, point the subagent at the `authoring-scenarios` skill instead
+- Up to two existing style-reference scenario files from `<SCENARIO_DIR>/{record,crawl,convert}/` (whichever are present, excluding `SCENARIOS.md`) so the subagent can match the host project's formatting conventions; if none exist, point the subagent at the `authoring-scenarios` skill instead
 - Instructions to rewrite the scenario `.md` in place
 
 Subagent rules:

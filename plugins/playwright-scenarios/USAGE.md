@@ -12,7 +12,7 @@ LLM-optimized reference for using the `playwright-scenarios` plugin in a host pr
 **Plugin artifacts** (what the plugin works with)
 - **Scenario** — a flat markdown file (`# Title`, `**URL:**`, `## Test N:` blocks with Action/Expected pairs). The central artifact.
 - **Test case** — a single `## Test N:` section inside a scenario. Each becomes one test function.
-- **Draft** — a scenario under `<scenario_dir>/drafts/`. Ignored unless `--include-drafts` is passed. Created by `/crawl-site` and `/doc-to-scenarios`.
+- **Source partition** — the subdirectory under `<scenario_dir>` that records which command produced the scenario: `<scenario_dir>/record/`, `<scenario_dir>/crawl/`, `<scenario_dir>/convert/`. Generated tests mirror the partition under `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. There is no draft state — scenarios are canonical from the moment they're written.
 - **Fixture** — a JSON file (`<scenario_dir>/fixtures/<name>.json`) with structured test data. Referenced via `**Fixture:** fixtures/<name>`.
 - **Tag** — a bold-label directive (`**Iframe:**`, `**Intercept:**`, etc.) that controls test generation beyond Action/Expected.
 
@@ -23,38 +23,38 @@ LLM-optimized reference for using the `playwright-scenarios` plugin in a host pr
 
 | If you want to... | Use | Notes |
 |---|---|---|
-| Record a user flow by driving a browser | `/record-scenario [name] [--promote] [--no-review]` | Opens Playwright codegen. Writes to `drafts/` by default; `--promote` writes directly and auto-reviews. |
-| Auto-discover flows on a site | `/crawl-site <url> [description] [--depth=N] [--max-scenarios=N]` | Read-only. Accepts natural-language scope ("focus on checkout"). Writes drafts. |
+| Record a user flow by driving a browser | `/record-scenario [name]` | Opens Playwright codegen. Writes to `<scenario_dir>/record/<name>.md`. |
+| Auto-discover flows on a site | `/crawl-site <url> [description] [--depth=N] [--max-scenarios=N]` | Read-only. Accepts natural-language scope ("focus on checkout"). Writes to `<scenario_dir>/crawl/`. |
 | Check if a doc is testable | `/evaluate-doc` (skill, not command — invoke by asking Claude to evaluate) | Advisory. Reports what converts, what needs changes, what's out of scope. |
-| Convert a doc into scenarios | `/doc-to-scenarios <path> [--skip-evaluation] [--promote]` | Runs evaluate-doc first. Writes drafts by default. |
+| Convert a doc into scenarios | `/doc-to-scenarios <path> [--skip-evaluation]` | Runs evaluate-doc first. Writes to `<scenario_dir>/convert/`. |
 | Create a fixture file | `/generate-fixture <source \| interactive> [--name=N]` | From a scenario, document, or interactive prompts. |
-| Audit scenarios against the live site | `/review-scenario [names...] [--include-drafts]` | Verifies claims, tightens vague assertions, adds missing coverage. |
-| Generate test code | `/scenario-to-tests [names...] [--include-drafts] [--dry-run]` | Currently: Kotlin + Kotest only. |
-| Check scenario health | `/scenario-status` | Dashboard: review dates, test staleness, pass/fail, crawl depth, flow type coverage, conversion rate, critical paths. |
+| Audit scenarios against the live site | `/review-scenario [names...]` | Reviews across `record/`, `crawl/`, `convert/`. Pass a partition name to scope. Verifies claims, tightens assertions, adds coverage. |
+| Generate test code | `/scenario-to-tests [names...] [--dry-run]` | Output at `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. Pass a partition name to scope. Currently: Kotlin + Kotest only. |
+| Check scenario health | `/scenario-status` | Dashboard grouped by partition: review dates, test staleness, pass/fail, crawl depth, flow type coverage, conversion rate, critical paths. |
 | View or change config | `/playwright-scenarios-config` | Also the recovery path for malformed config. |
 
 ## Workflow
 
 ```
-Document ──→ /evaluate-doc ──→ /doc-to-scenarios ──→ drafts/
-                                                              │
-Browser recording ──→ /record-scenario ─────────────────→ drafts/
-                                                              │
-Site crawl ──→ /crawl-site ──────────────────────────→ drafts/ │
-                                                              │
-                                    promote from drafts/ ─────┤
-                                                              │
-                                              /review-scenario │
-                                                              │
-                                          /scenario-to-tests ──→ test file
+Document ──→ /evaluate-doc ──→ /doc-to-scenarios ──→ <scenario_dir>/convert/
+                                                                          │
+Browser recording ──→ /record-scenario ────────────→ <scenario_dir>/record/
+                                                                          │
+Site crawl ──→ /crawl-site ────────────────────────→ <scenario_dir>/crawl/
+                                                                          │
+                          (optional) hand-edit / delete scenarios in place ┤
+                                                                          │
+                                                          /review-scenario │
+                                                                          │
+                                                       /scenario-to-tests ──→ <test_dir>/<command>/<scenario-name>/<ClassName>.kt
 ```
 
 **Decision tree:**
-- Have a written document? → `/doc-to-scenarios`
-- Know the flow but no document? → `/record-scenario`
-- Don't know what flows exist? → `/crawl-site`
-- Have a scenario, want to verify it? → `/review-scenario`
-- Have a reviewed scenario, want tests? → `/scenario-to-tests`
+- Have a written document? → `/doc-to-scenarios` (writes to `convert/`)
+- Know the flow but no document? → `/record-scenario` (writes to `record/`)
+- Don't know what flows exist? → `/crawl-site` (writes to `crawl/`)
+- Have scenarios, want to verify them? → `/review-scenario`
+- Have reviewed scenarios, want tests? → `/scenario-to-tests`
 
 ## Scenario format — quick reference
 

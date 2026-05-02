@@ -7,7 +7,7 @@ This repository is a Claude Code plugin marketplace (no application source). It 
 ## Docs
 
 - [README](README.md): Installation, host-project setup, workflow, capabilities/limitations, and input-document guidance.
-- [CLAUDE.md](CLAUDE.md): Repo orientation for Claude — layout, version-bump rule, doc propagation checklist, external dependency, tag list.
+- [CLAUDE.md](CLAUDE.md): Repo orientation for Claude — layout, version-bump rule, doc propagation checklist, external dependency, source partitions, tag list.
 - [USAGE.md](plugins/playwright-scenarios/USAGE.md): In-project reference — paste into a host project's CLAUDE.md so Claude Code knows how to use the plugin.
 - [DOC_GUIDE.md](plugins/playwright-scenarios/DOC_GUIDE.md): For LLMs authoring input documents — what the framework can/can't handle, 10 authoring rules, document template, self-evaluation checklist.
 - [CHANGELOG](CHANGELOG.md): Release notes.
@@ -16,7 +16,7 @@ This repository is a Claude Code plugin marketplace (no application source). It 
 
 - [index](website/playwright-scenarios/docs/index.md): Site landing page — elevator pitch, quick start, links to each section.
 - [tutorial](website/playwright-scenarios/docs/tutorial.md): Step-by-step walkthrough from installation to generated tests.
-- [terminology](website/playwright-scenarios/docs/terminology.md): Definitions for scenario, test case, draft, fixture, tag, generated test.
+- [terminology](website/playwright-scenarios/docs/terminology.md): Definitions for scenario, test case, source partition, fixture, tag, generated test.
 - [workflow](website/playwright-scenarios/docs/workflow.md): The four paths to a reviewed scenario (LLM-authored, existing-doc migration, record, crawl).
 - [commands](website/playwright-scenarios/docs/commands.md): Per-command and per-skill reference — signatures, args, flags, examples.
 - [capabilities](website/playwright-scenarios/docs/capabilities.md): What the plugin can and can't test, with the full extended-tag table.
@@ -30,13 +30,13 @@ This repository is a Claude Code plugin marketplace (no application source). It 
 
 ## Commands
 
-- [/record-scenario](plugins/playwright-scenarios/commands/record-scenario.md): Launch Playwright codegen, capture a real user flow, and write a draft scenario. Accepts `--no-review`.
-- [/crawl-site](plugins/playwright-scenarios/commands/crawl-site.md): Read-only site crawl; emits user-flow-oriented drafts to `<scenario_dir>/drafts/`. Accepts `--depth` and `--max-scenarios`.
-- [/doc-to-scenarios](plugins/playwright-scenarios/commands/doc-to-scenarios.md): Convert any document into scenario markdown files with proper tag mapping. Accepts `--skip-evaluation` and `--promote`.
+- [/record-scenario](plugins/playwright-scenarios/commands/record-scenario.md): Launch Playwright codegen, capture a real user flow, and write a scenario to `<scenario_dir>/record/<name>.md`.
+- [/crawl-site](plugins/playwright-scenarios/commands/crawl-site.md): Read-only site crawl; emits user-flow-oriented scenarios to `<scenario_dir>/crawl/`. Accepts `--depth` and `--max-scenarios`.
+- [/doc-to-scenarios](plugins/playwright-scenarios/commands/doc-to-scenarios.md): Convert any document into scenario markdown files under `<scenario_dir>/convert/` with proper tag mapping. Accepts `--skip-evaluation`.
 - [/generate-fixture](plugins/playwright-scenarios/commands/generate-fixture.md): Scaffold a JSON fixture file from a scenario, document, or interactively. Accepts `--name`.
-- [/review-scenario](plugins/playwright-scenarios/commands/review-scenario.md): Audit scenarios against the live site and apply improvements. Accepts `--include-drafts`.
-- [/scenario-to-tests](plugins/playwright-scenarios/commands/scenario-to-tests.md): Generate tests from reviewed scenarios. Accepts `--include-drafts` and `--dry-run`.
-- [/scenario-status](plugins/playwright-scenarios/commands/scenario-status.md): Health dashboard — review dates, test file status, pass/fail results, coverage gaps.
+- [/review-scenario](plugins/playwright-scenarios/commands/review-scenario.md): Audit scenarios across `<scenario_dir>/{record,crawl,convert}/` against the live site and apply improvements. Pass a partition name to scope.
+- [/scenario-to-tests](plugins/playwright-scenarios/commands/scenario-to-tests.md): Generate tests from reviewed scenarios. Output partitioned at `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. Accepts `--dry-run`.
+- [/scenario-status](plugins/playwright-scenarios/commands/scenario-status.md): Health dashboard grouped by partition — review dates, test file status, pass/fail results, coverage gaps.
 - [/playwright-scenarios-config](plugins/playwright-scenarios/commands/config.md): View or update per-project settings. Recovery path for malformed config files.
 
 ## Skills
