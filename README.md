@@ -51,13 +51,13 @@ Author browser-driven scenarios as markdown, audit them against the live site, a
 
 | Command | Description |
 |---------|-------------|
-| `/record-scenario [name] [--promote] [--no-review]` | Launch Playwright codegen, capture a real user flow, and write a draft scenario to `drafts/`. Pass `--promote` to write directly to the scenario directory and auto-review. |
-| `/crawl-site <url> [description] [--depth=N] [--max-scenarios=N]` | Read-only crawl of a site. Accepts natural-language descriptions ("focus on checkout flow") to guide scope. Emits draft scenarios to `<scenario_dir>/drafts/`. |
-| `/doc-to-scenarios <path> [--skip-evaluation] [--promote]` | Convert any document into scenario markdown files. Runs `evaluate-doc` first, then maps test cases to the scenario format with proper tags. |
+| `/record-scenario [name]` | Launch Playwright codegen, capture a real user flow, and write a scenario to `<scenario_dir>/record/<name>.md`. |
+| `/crawl-site <url> [description] [--depth=N] [--max-scenarios=N]` | Read-only crawl of a site. Accepts natural-language descriptions ("focus on checkout flow") to guide scope. Emits scenarios to `<scenario_dir>/crawl/`. |
+| `/doc-to-scenarios <path> [--skip-evaluation]` | Convert any document into scenario markdown files under `<scenario_dir>/convert/`. Runs `evaluate-doc` first, then maps test cases to the scenario format with proper tags. |
 | `/generate-fixture <source \| interactive> [--name=N]` | Scaffold a fixture JSON file from a scenario's data bullets, a document's persona table, or interactive prompts. |
-| `/review-scenario [names...] [--include-drafts]` | Audit scenarios against the live site and apply improvements to the markdown. |
-| `/scenario-to-tests [names...] [--include-drafts] [--dry-run]` | Generate tests (defaults: Kotlin + Kotest StringSpec with Playwright-for-Java) from reviewed scenarios. |
-| `/scenario-status` | Health dashboard: review dates, test status, pass/fail, plus coverage completeness (crawl depth, flow types, conversion rate, critical paths). |
+| `/review-scenario [names...]` | Audit scenarios across `<scenario_dir>/{record,crawl,convert}/` against the live site and apply improvements to the markdown. A bare partition name scopes the review to that partition. |
+| `/scenario-to-tests [names...] [--dry-run]` | Generate tests (defaults: Kotlin + Kotest StringSpec with Playwright-for-Java) at `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. A bare partition name scopes generation to that partition. |
+| `/scenario-status` | Health dashboard grouped by partition: review dates, test status, pass/fail, plus coverage completeness (crawl depth, flow types, conversion rate, critical paths). |
 | `/playwright-scenarios-config` | View or update per-project settings. Also the recovery path for malformed config files. |
 
 **Skills**
@@ -140,9 +140,13 @@ If `npx playwright-cli --version` works, the commands will fall back to `npx pla
 
 ### 4. Scenario directory
 
-Scenario markdown files live in the project's configured scenario directory (`scenario_dir` in `.claude/playwright-scenarios.local.md`). The default is `src/test/scenarios/`; `scenarios/` at the repo root is offered as a legacy alternative. You don't need to create the directory by hand — the first time you run `/record-scenario` the plugin will prompt you to pick a location and create it on demand.
+Scenario markdown files live in the project's configured scenario directory (`scenario_dir` in `.claude/playwright-scenarios.local.md`). The default is `src/test/scenarios/`. The first time you run any plugin command, the bootstrap creates three command-keyed subdirectories under it:
 
-Work-in-progress scenarios can go in a `drafts/` subdirectory (e.g. `src/test/scenarios/drafts/`). `/review-scenario` and `/scenario-to-tests` skip files under subdirectories by default; pass `--include-drafts` to include them. `/crawl-site` writes its output here automatically.
+- `<scenario_dir>/record/` — written to by `/record-scenario`
+- `<scenario_dir>/crawl/` — written to by `/crawl-site`
+- `<scenario_dir>/convert/` — written to by `/doc-to-scenarios`
+
+There is no draft step. The scenario in its partition is the canonical artifact. If you want to hand-edit or delete a scenario before review, do it in place, then run `/review-scenario`.
 
 ### 5. A base test class
 

@@ -1,24 +1,21 @@
 ---
 name: record-scenario
-description: Record a new website validation scenario by driving a real browser. Launches Playwright codegen, captures clicks/typing/assertions, then writes a draft scenario markdown file to the project's configured drafts directory.
+description: Record a new website validation scenario by driving a real browser. Launches Playwright codegen, captures clicks/typing/assertions, then writes a scenario markdown file to <SCENARIO_DIR>/record/.
 arguments:
   - name: name
-    description: Optional kebab-case scenario name, optionally followed by flags. If the name is omitted, it is inferred from the recorded actions. Supported flags - --promote (write directly to <SCENARIO_DIR> instead of drafts/ and auto-chain into /review-scenario), --no-review (with --promote, skip the auto-chain).
+    description: Optional kebab-case scenario name. If omitted, it is inferred from the recorded actions.
     required: false
 ---
 
 # Record Scenario
 
-Create a new scenario by *demonstrating* it in a browser instead of writing markdown from scratch. This command launches Playwright codegen, lets the user drive a real browser, captures their actions and marked assertions, and produces a draft scenario file.
+Create a new scenario by *demonstrating* it in a browser instead of writing markdown from scratch. This command launches Playwright codegen, lets the user drive a real browser, captures their actions and marked assertions, and writes the result to `<SCENARIO_DIR>/record/<name>.md`.
 
-By default, output goes to `<SCENARIO_DIR>/drafts/` — the same as `/crawl-site` and `/doc-to-scenarios`. Pass `--promote` to write directly to `<SCENARIO_DIR>` and auto-chain into `/review-scenario`.
+The scenario is the canonical artifact — there is no draft step. If the user wants to eyeball or hand-edit it before running `/review-scenario`, they do so in place.
 
 ## Argument parsing
 
-Split the argument string into **flags** (tokens starting with `--`) and a **name** (the first non-flag token, if any):
-
-- `--promote` — write the scenario directly to `<SCENARIO_DIR>/<name>.md` instead of `<SCENARIO_DIR>/drafts/<name>.md`, and auto-chain into `/review-scenario`. Off by default.
-- `--no-review` — when used with `--promote`, skip the auto-chain into `/review-scenario`. Ignored without `--promote` (drafts don't get auto-reviewed).
+The argument string is the **name** (the first non-flag token, if any). No flags are supported.
 
 Any unknown `--`-prefixed token should be reported as an error before doing any work.
 
@@ -42,9 +39,9 @@ Always prompt for the **Start URL**. Do not supply a default — require the use
 
 ### Phase 2: Check for collisions (only if name is known)
 
-Determine the output directory: `<SCENARIO_DIR>/drafts/` by default, or `<SCENARIO_DIR>/` if `--promote` was passed. Ensure the output directory exists; create it if not.
+The output directory is `<SCENARIO_DIR>/record/`. Ensure it exists; create it if not.
 
-If the name was supplied as an argument, check whether `<output-dir>/<name>.md` already exists. If it does, ask whether to overwrite, pick a new name, or cancel. Do not silently overwrite.
+If the name was supplied as an argument, check whether `<SCENARIO_DIR>/record/<name>.md` already exists. If it does, ask whether to overwrite, pick a new name, or cancel. Do not silently overwrite.
 
 If the name will be inferred, skip this phase — collision handling happens in Phase 6.
 
@@ -104,13 +101,13 @@ If no name was supplied as an argument, infer a kebab-case name from the recorde
 
 Produce a short name (2–4 kebab-case words) that would make sense as a test filename. Examples: `login-invalid-credentials`, `email-signup-form`, `checkout-happy-path`.
 
-Then check for collisions: if `<output-dir>/<inferred-name>.md` already exists, increment the numeric suffix (`-v2`, `-v3`, ...) until a free name is found. Do not silently overwrite.
+Then check for collisions: if `<SCENARIO_DIR>/record/<inferred-name>.md` already exists, increment the numeric suffix (`-v2`, `-v3`, ...) until a free name is found. Do not silently overwrite.
 
 Briefly tell the user the inferred name and give them a chance to override it before writing.
 
 ### Phase 7: Convert to scenario markdown
 
-The `authoring-scenarios` skill is the authoritative reference for the flat-markdown format, voice, selector rules, test grouping, and known gotchas (HTML5 validation tooltips, cross-origin links). Follow it. If one or more `.md` files already exist directly under `<SCENARIO_DIR>` (excluding `SCENARIOS.md` and subdirectories), glance at one to match the host project's house style.
+The `authoring-scenarios` skill is the authoritative reference for the flat-markdown format, voice, selector rules, test grouping, and known gotchas (HTML5 validation tooltips, cross-origin links). Follow it. If one or more `.md` files already exist directly under `<SCENARIO_DIR>/record/`, glance at one to match the host project's house style.
 
 **Playwright Java API → scenario markdown conversion:**
 
@@ -129,7 +126,7 @@ The `authoring-scenarios` skill is the authoritative reference for the flat-mark
 
 ### Phase 8: Write the scenario file
 
-Write the converted markdown to `<output-dir>/<name>.md` using the Write tool. Include a provenance blockquote after the description line:
+Write the converted markdown to `<SCENARIO_DIR>/record/<name>.md` using the Write tool. Include a provenance blockquote after the description line:
 
 > Recorded by `/record-scenario` from `<start-url>`. Review before feeding into `/scenario-to-tests`.
 
@@ -140,16 +137,6 @@ If the recording was saved under a temporary `untitled-<timestamp>.java` filenam
 Tell the user:
 - The path of the written file.
 - A one-line summary of what was recorded (e.g. "3 actions, 2 assertions across 1 test").
-- If writing to `drafts/` (default): next steps are to review the draft, promote it, then run `/review-scenario` and `/scenario-to-tests`.
-- If `--promote` was passed and `--no-review` was not: that you are about to chain into `/review-scenario <name>` automatically (next phase).
-- If `--promote` and `--no-review` were both passed: that the scenario was promoted but review is skipped; they can run `/review-scenario <name>` manually.
+- Next step: review the scenario in place if you want to hand-edit, then run `/review-scenario <name>` to audit it against the live site.
 
-### Phase 10: Auto-chain into `/review-scenario` (only with `--promote`)
-
-**Skip this phase entirely** unless `--promote` was passed (drafts don't get auto-reviewed — they need a human pass first, which is why they live under `drafts/`).
-
-**If `--promote` was passed and `--no-review` was not**, immediately execute the `/review-scenario <name>` command inline — run its procedure (audit the just-written scenario against the live site and apply improvements) as a continuation of this turn.
-
-**If both `--promote` and `--no-review` were passed**, skip this phase.
-
-Do **not** auto-run `/scenario-to-tests` — test generation is a heavier step that the user should opt into explicitly.
+Do **not** auto-chain into `/review-scenario`. The user decides when to run it.

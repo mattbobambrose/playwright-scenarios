@@ -1,24 +1,23 @@
 ---
 name: doc-to-scenarios
-description: Convert any document (test plan, requirements doc, meeting notes, acceptance criteria) into scenario markdown files. Requires the evaluate-doc skill to have been run first (or runs it inline). The bridge between evaluation and the /review-scenario → /scenario-to-tests pipeline.
+description: Convert any document (test plan, requirements doc, meeting notes, acceptance criteria) into scenario markdown files under <SCENARIO_DIR>/convert/. Requires the evaluate-doc skill to have been run first (or runs it inline). The bridge between evaluation and the /review-scenario → /scenario-to-tests pipeline.
 arguments:
   - name: source
-    description: Required. Path to the source document to convert. Optionally followed by flags. Supported flags - --skip-evaluation (assume the doc has already been evaluated; skip the evaluate-doc pass), --promote (write directly to <SCENARIO_DIR> instead of <SCENARIO_DIR>/drafts/).
+    description: Required. Path to the source document to convert. Optionally followed by flags. Supported flag - --skip-evaluation (assume the doc has already been evaluated; skip the evaluate-doc pass).
     required: true
 ---
 
 # Doc To Scenarios
 
-Convert any document into scenario markdown files that feed the existing `/review-scenario` → `/scenario-to-tests` pipeline. The input can be a test plan, requirements doc, meeting notes, acceptance criteria, or any structured description of what to test. This is the automated counterpart to hand-writing scenarios.
+Convert any document into scenario markdown files under `<SCENARIO_DIR>/convert/`, feeding the `/review-scenario` → `/scenario-to-tests` pipeline. The input can be a test plan, requirements doc, meeting notes, acceptance criteria, or any structured description of what to test. This is the automated counterpart to hand-writing scenarios.
 
-By default, output goes to `<SCENARIO_DIR>/drafts/` so the user can review before promoting. Pass `--promote` to write directly to `<SCENARIO_DIR>`.
+The scenario is the canonical artifact — there is no draft step. If the user wants to inspect or hand-edit the converted scenarios before running `/review-scenario`, they do so in place.
 
 ## Argument parsing
 
 The first non-flag token is the **source document path** (required). Split remaining args into flags:
 
 - `--skip-evaluation` — skip the inline evaluate-doc pass. Use when the user already ran `evaluate-doc` on this document and reviewed the report. Without this flag, the command runs evaluation first and pauses for the user to review before converting.
-- `--promote` — write scenario files directly to `<SCENARIO_DIR>` instead of `<SCENARIO_DIR>/drafts/`.
 
 Any unknown `--`-prefixed token → error before doing any work. Missing source path → error.
 
@@ -26,7 +25,7 @@ Any unknown `--`-prefixed token → error before doing any work. Missing source 
 
 Invoke the `loading-config` skill to resolve `<SCENARIO_DIR>`. If `loading-config` returns `MALFORMED_CONFIG`, abort and tell the user to run `/playwright-scenarios-config` to repair.
 
-Ensure the output directory exists (`<SCENARIO_DIR>/drafts/` or `<SCENARIO_DIR>` depending on `--promote`).
+Ensure `<SCENARIO_DIR>/convert/` exists; create it if not.
 
 ## Phase 1: Read and evaluate the source document
 
@@ -72,11 +71,11 @@ For each test case the evaluation classified as `direct`, `needs-changes`, or `e
 For each scenario file to be written:
 
 1. Derive a kebab-case name from the primary flow (e.g., `checkout-happy-path`, `book-search-filters`, `intl-shipping-surcharge`).
-2. Check for collisions in the output directory. Increment the numeric suffix (`-v2`, `-v3`, ...) until a free name is found. Do not silently overwrite.
+2. Check for collisions under `<SCENARIO_DIR>/convert/`. Increment the numeric suffix (`-v2`, `-v3`, ...) until a free name is found. Do not silently overwrite.
 
 ## Phase 4: Write scenario files (parallel subagents)
 
-Launch subagents in **batches of at most 5 concurrent**. Each subagent writes one scenario file following the `authoring-scenarios` skill format.
+Launch subagents in **batches of at most 5 concurrent**. Each subagent writes one scenario file to `<SCENARIO_DIR>/convert/<name>.md` following the `authoring-scenarios` skill format.
 
 Each file includes:
 - A provenance blockquote: `> Converted from \`<source-filename>\` by \`/doc-to-scenarios\`. Review before feeding into \`/scenario-to-tests\`.`
@@ -94,10 +93,9 @@ Then list:
 - **Skipped (out-of-scope):** each out-of-scope test case with the reason and where it should live instead.
 - **Needs review:** each `needs-changes` item that was converted with warnings.
 - **Next steps:**
-  1. Review drafts: `cat <SCENARIO_DIR>/drafts/<name>.md`
+  1. Review the converted scenarios in place: `cat <SCENARIO_DIR>/convert/<name>.md`. Hand-edit or delete any you don't want.
   2. If fixtures were referenced, run `/generate-fixture` to create the fixture files.
-  3. Promote when ready: move from `drafts/` to `<SCENARIO_DIR>/`.
-  4. Run `/review-scenario <name>` to verify against the live site.
-  5. Run `/scenario-to-tests <name>` to generate test code.
+  3. Run `/review-scenario` to verify against the live site.
+  4. Run `/scenario-to-tests` to generate test code.
 
-Do **not** auto-chain into `/review-scenario` — the user should inspect the drafts first.
+Do **not** auto-chain into `/review-scenario` — the user decides when to run it.
