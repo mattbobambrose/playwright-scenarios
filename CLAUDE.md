@@ -32,11 +32,11 @@ Skills return short structured error codes (e.g. `MALFORMED_CONFIG: <reason>`, `
 
 ## Doc propagation
 
-When adding or changing a command, skill, or config field, update all of: README.md, CHANGELOG.md, llms.txt, llms-full.txt, plus the matching page under `website/playwright-scenarios/docs/` (e.g. `commands.md`, `terminology.md`).
+When adding or changing a command, skill, or config field, update all of: README.md, CHANGELOG.md, llms.txt, llms-full.txt, plus the matching page under `website/playwright-scenarios/docs/` (e.g. `commands.md`, `terminology.md`). When adding a new command, also extend the explicit trigger list inside `loading-config`'s SKILL `description` field — the skill keeps working without it (fuzzy match), but the list is what other docs cite as the canonical command roster.
 
 ## Website docs (Zensical)
 
-Pages live under `website/playwright-scenarios/docs/`. Nav order is set in `website/playwright-scenarios/zensical.toml` — new pages must be added to the `nav = [...]` array or they won't appear in the sidebar. Avoid backticks, dots, slashes, and parens in `##`/`###` headings if anything cross-links to them — slugs become fragile (the `## Config` section in `troubleshooting.md` was simplified for this reason). When a command and a skill share a name (e.g. `### /scaffold-base-test` and `### scaffold-base-test`), they slugify to the same anchor; disambiguate with `attr_list` (`### scaffold-base-test {: #scaffold-base-test-skill }`).
+Pages live under `website/playwright-scenarios/docs/`. Nav order is set in `website/playwright-scenarios/zensical.toml` — new pages must be added to the `nav = [...]` array or they won't appear in the sidebar. Avoid backticks, dots, slashes, and parens in `##`/`###` headings if anything cross-links to them — slugs become fragile (the `## Config` section in `troubleshooting.md` was simplified for this reason). When a command and a skill share a name (e.g. `### /scaffold-base-test` and `### scaffold-base-test`), they slugify to the same anchor; disambiguate with `attr_list` (`### scaffold-base-test {: #scaffold-base-test-skill }`). In Mermaid diagrams, never use `(...)` inside `[...]` node labels — it silently breaks rendering. Strip the parenthetical or move it to surrounding prose.
 
 ## External dependency
 

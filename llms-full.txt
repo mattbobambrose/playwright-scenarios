@@ -104,11 +104,11 @@ Skills return short structured error codes (e.g. `MALFORMED_CONFIG: <reason>`, `
 
 ## Doc propagation
 
-When adding or changing a command, skill, or config field, update all of: README.md, CHANGELOG.md, llms.txt, llms-full.txt, plus the matching page under `website/playwright-scenarios/docs/` (e.g. `commands.md`, `terminology.md`).
+When adding or changing a command, skill, or config field, update all of: README.md, CHANGELOG.md, llms.txt, llms-full.txt, plus the matching page under `website/playwright-scenarios/docs/` (e.g. `commands.md`, `terminology.md`). When adding a new command, also extend the explicit trigger list inside `loading-config`'s SKILL `description` field — the skill keeps working without it (fuzzy match), but the list is what other docs cite as the canonical command roster.
 
 ## Website docs (Zensical)
 
-Pages live under `website/playwright-scenarios/docs/`. Nav order is set in `website/playwright-scenarios/zensical.toml` — new pages must be added to the `nav = [...]` array or they won't appear in the sidebar. Avoid backticks, dots, slashes, and parens in `##`/`###` headings if anything cross-links to them — slugs become fragile. When a command and a skill share a name (e.g. `### /scaffold-base-test` and `### scaffold-base-test`), they slugify to the same anchor; disambiguate with `attr_list` (`### scaffold-base-test {: #scaffold-base-test-skill }`).
+Pages live under `website/playwright-scenarios/docs/`. Nav order is set in `website/playwright-scenarios/zensical.toml` — new pages must be added to the `nav = [...]` array or they won't appear in the sidebar. Avoid backticks, dots, slashes, and parens in `##`/`###` headings if anything cross-links to them — slugs become fragile. When a command and a skill share a name (e.g. `### /scaffold-base-test` and `### scaffold-base-test`), they slugify to the same anchor; disambiguate with `attr_list` (`### scaffold-base-test {: #scaffold-base-test-skill }`). In Mermaid diagrams, never use `(...)` inside `[...]` node labels — it silently breaks rendering. Strip the parenthetical or move it to surrounding prose.
 
 ## External dependency
 
@@ -326,7 +326,7 @@ Scenario creation commands write to one of three partitions: `<scenario_dir>/{re
 1. Load config via `loading-config`. Abort on `MALFORMED_CONFIG`.
 2. Unsupported-combo guard: stop if `test_language` ≠ `kotlin` or `test_framework` ≠ `kotest-stringspec`.
 3. Already-configured guard: stop if `base_test_class` is non-empty in config (tell the user to clear it first).
-4. Hand off to the `scaffold-base-test` skill (passing `<TEST_LANGUAGE>`, `<TEST_FRAMEWORK>`, `<TEST_DIR>`, `<SOURCE_ROOT>`, `auto_invoked: false`). The skill prompts for three customizations, renders the template, and writes the file. Returns the FQN, target path, and the user's choices.
+4. Hand off to the `scaffold-base-test` skill (passing `<TEST_LANGUAGE>`, `<TEST_FRAMEWORK>`, `<TEST_DIR>`, `<SOURCE_ROOT>`). The skill prompts for three customizations, renders the template, and writes the file. Returns the FQN, target path, and the user's choices.
 5. Persist `base_test_class: <fqn>` to the YAML frontmatter of `.claude/playwright-scenarios.local.md` (preserve all other lines and the markdown body verbatim).
 6. Report the file path, FQN, and chosen customizations.
 
@@ -447,7 +447,7 @@ Scenario creation commands write to one of three partitions: `<scenario_dir>/{re
 
 **Description:** Render the Kotlin `BasePageTest` template and write it to disk. Owns the three customization prompts (reset endpoint, lifecycle scope, browser) and the variant rules that compose them with the canonical template. Invoked by `/scaffold-base-test` (explicit) and by `loading-config` (auto-offered when zero base-test-class candidates are found). Currently `kotlin` + `kotest-stringspec` only.
 
-**Inputs:** `test_language`, `test_framework`, `test_dir`, `source_root` from the caller. Optional `auto_invoked` flag adjusts the closing report's wording.
+**Inputs:** `test_language`, `test_framework`, `test_dir`, `source_root` from the caller.
 
 **Guards:** abort if `test_language` ≠ `kotlin` / `test_framework` ≠ `kotest-stringspec`, or if the target file already exists. Never overwrites.
 

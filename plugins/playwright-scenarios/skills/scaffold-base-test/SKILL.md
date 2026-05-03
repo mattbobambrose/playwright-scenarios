@@ -132,9 +132,28 @@ Apply rules in any order. Imports stay alphabetically sorted in a single flat bl
 
 **lifecycle = `Per test`**
 
-- Replace the `import io.kotest.core.spec.Spec` line with `import io.kotest.core.test.TestCase` and `import io.kotest.core.test.TestResult` (both alphabetically sorted within the import block).
-- Replace `override suspend fun beforeSpec(spec: Spec) {` with `override suspend fun beforeTest(testCase: TestCase) {`.
-- Replace `override suspend fun afterSpec(spec: Spec) {` with `override suspend fun afterTest(testCase: TestCase, result: TestResult) {`.
+Splits the lifecycle so the expensive `Playwright` and `Browser` are created once per spec, while the cheap `BrowserContext` and `Page` are recreated per test for isolation. Without this split, every test would spin up a fresh JVM-side Playwright driver — typically a 5–10× slowdown vs. per-spec.
+
+- **Imports:** keep `io.kotest.core.spec.Spec`. Add `io.kotest.core.test.TestCase` and `io.kotest.core.test.TestResult` (alphabetically sorted within the import block).
+- **`beforeSpec` body:** keep only the `headless` lookup, `playwright = Playwright.create()`, and `browser = playwright.chromium().launch(...)` lines. Drop the `resetServerState()` call, the `context = browser.newContext(...)` line, and the `page = context.newPage()` line.
+- **Add `beforeTest`** immediately after `beforeSpec`:
+  ```kotlin
+  override suspend fun beforeTest(testCase: TestCase) {
+    resetServerState()
+    context = browser.newContext(
+      Browser.NewContextOptions().setBaseURL(baseUrl)
+    )
+    page = context.newPage()
+  }
+  ```
+  If reset = `No`, drop the `resetServerState()` line.
+- **`afterSpec` body:** keep only the `browser` and `playwright` close lines. Drop the `context` close line.
+- **Add `afterTest`** immediately after `afterSpec`:
+  ```kotlin
+  override suspend fun afterTest(testCase: TestCase, result: TestResult) {
+    if (::context.isInitialized) context.close()
+  }
+  ```
 
 **browser = `Firefox`** — replace `playwright.chromium()` with `playwright.firefox()`.
 

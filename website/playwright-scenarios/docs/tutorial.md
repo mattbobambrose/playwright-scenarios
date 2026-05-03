@@ -21,9 +21,9 @@ Do this once before working through any of the authoring sections.
 
 1. Install Git, Docker, and Claude.
 2. Clone the Kotlin template repo *(link to be filled in)*. This is the supported stack today — Python and TypeScript templates are planned but not yet available.
-3. Start the docker image (it bundles a small demo site at `http://localhost:8080`):
+3. Start the docker image *(image name to be filled in)*. It bundles a small demo site at `http://localhost:8080`:
     ```
-    docker run imageName
+    docker run <imageName>
     ```
 4. Start a Claude Code session at the repo root:
     ```
@@ -91,7 +91,7 @@ Claude converts the recorded actions into a scenario markdown file at `<scenario
 /scenario-to-tests record
 ```
 
-Same shape as Section 2 — scoped this time to the `record` partition. The new tests land at `<test_dir>/record/<scenario-name>/<ClassName>.kt`, alongside the crawl tests from earlier.
+Same shape as Step 2 — scoped this time to the `record` partition. The new tests land at `<test_dir>/record/<scenario-name>/<ClassName>.kt`, alongside the crawl tests from earlier.
 
 ---
 
