@@ -14,7 +14,7 @@ Two reference documents ship with the plugin for different stages of the workflo
 
 - **[DOC_GUIDE.md](plugins/playwright-scenarios/DOC_GUIDE.md)** — Paste into any LLM's system prompt (ChatGPT, Claude, Gemini, Copilot) when writing test documents. LLM-agnostic. Covers what the test framework can and can't handle, 10 authoring rules, a document template, and a self-evaluation checklist. Use this *before* testing, when generating the docs that eventually become scenarios.
 
-- **[USAGE.md](plugins/playwright-scenarios/USAGE.md)** — Add to your project's CLAUDE.md so Claude Code knows how to use the plugin. Covers all 8 commands, 13 tags, workflow, do's/don'ts, and troubleshooting. Use this *during* testing, when running the plugin commands.
+- **[USAGE.md](plugins/playwright-scenarios/USAGE.md)** — Add to your project's CLAUDE.md so Claude Code knows how to use the plugin. Covers all 9 commands, 13 tags, workflow, do's/don'ts, and troubleshooting. Use this *during* testing, when running the plugin commands.
 
 ## Installation
 
@@ -52,13 +52,14 @@ Author browser-driven scenarios as markdown, audit them against the live site, a
 | Command | Description |
 |---------|-------------|
 | `/record-scenario [name]` | Launch Playwright codegen, capture a real user flow, and write a scenario to `<scenario_dir>/record/<name>.md`. |
-| `/crawl-site <url> [description] [--depth=N] [--max-scenarios=N]` | Read-only crawl of a site. Accepts natural-language descriptions ("focus on checkout flow") to guide scope. Emits scenarios to `<scenario_dir>/crawl/`. |
+| `/crawl-site <url> [description] [--depth=N] [--max-scenarios=N]` | Read-only crawl of a site. Accepts natural-language descriptions ("focus on checkout flow") to guide scope. A bare URL with no description and no flags triggers an interactive Structural / Shallow / Deep menu. Emits scenarios to `<scenario_dir>/crawl/`. |
 | `/doc-to-scenarios <path> [--skip-evaluation]` | Convert any document into scenario markdown files under `<scenario_dir>/convert/`. Runs `evaluate-doc` first, then maps test cases to the scenario format with proper tags. |
 | `/generate-fixture <source \| interactive> [--name=N]` | Scaffold a fixture JSON file from a scenario's data bullets, a document's persona table, or interactive prompts. |
 | `/review-scenario [names...]` | Audit scenarios across `<scenario_dir>/{record,crawl,convert}/` against the live site and apply improvements to the markdown. A bare partition name scopes the review to that partition. |
 | `/scenario-to-tests [names...] [--dry-run]` | Generate tests (defaults: Kotlin + Kotest StringSpec with Playwright-for-Java) at `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. A bare partition name scopes generation to that partition. |
 | `/scenario-status` | Health dashboard grouped by partition: review dates, test status, pass/fail, plus coverage completeness (crawl depth, flow types, conversion rate, critical paths). |
 | `/playwright-scenarios-config` | View or update per-project settings. Also the recovery path for malformed config files. |
+| `/scaffold-base-test` | Generate a Kotlin `BasePageTest` so generated tests have a base class to extend. Prompts for `/reset` endpoint, lifecycle scope, and browser. Persists `base_test_class` in the config. Currently `kotlin` + `kotest-stringspec` only. Auto-offered by `loading-config` when no base class is found in the project. |
 
 **Skills**
 
@@ -69,6 +70,7 @@ Author browser-driven scenarios as markdown, audit them against the live site, a
 | `evaluate-doc` | Evaluates any document against the plugin's capabilities; reports what converts directly, what needs changes, and what's out of scope |
 | `fixture-format` | Defines the standardized JSON fixture file format shared across all generators |
 | `debugging-scenarios` | Guides troubleshooting when generated tests fail — iframe detection, selector drift, timing, stale fixtures |
+| `scaffold-base-test` | Renders the Kotlin `BasePageTest` template into the consuming project; owns the three customization prompts (reset, lifecycle, browser) and the file write |
 
 ## Host Project Setup
 
@@ -150,32 +152,9 @@ There is no draft step. The scenario in its partition is the canonical artifact.
 
 ### 5. A base test class
 
-For the Kotlin + Kotest default, `/scenario-to-tests` generates tests that extend a project-provided base class (typically `BasePageTest`) which owns the Playwright browser lifecycle. The first time you run any plugin command you'll be asked where to emit these tests (`test_dir`); that path is saved to `.claude/playwright-scenarios.local.md` and reused thereafter. If your project doesn't have a base test class yet, a minimal starting point:
+For the Kotlin + Kotest default, `/scenario-to-tests` generates tests that extend a project-provided base class (typically `BasePageTest`) which owns the Playwright browser lifecycle. The first time you run any plugin command you'll be asked where to emit these tests (`test_dir`); that path is saved to `.claude/playwright-scenarios.local.md` and reused thereafter.
 
-```kotlin
-package com.example.qa.examples
-
-import com.microsoft.playwright.*
-import io.kotest.core.spec.style.StringSpec
-
-abstract class BasePageTest : StringSpec() {
-    private val playwright = Playwright.create()
-    protected val browser: Browser = playwright.chromium().launch()
-    protected lateinit var page: Page
-
-    init {
-        beforeTest {
-            page = browser.newContext().newPage()
-        }
-        afterTest {
-            page.context().close()
-        }
-        finalizeSpec { playwright.close() }
-    }
-}
-```
-
-Place it wherever your existing test support classes live.
+If your project doesn't have a base test class yet, run `/scaffold-base-test` — it prompts for three customizations (whether your dev server has a `POST /reset` endpoint, whether to run the browser lifecycle per-spec or per-test, and which Playwright browser to launch) and writes a `BasePageTest.kt` at the parent of `<test_dir>`. The `loading-config` skill also auto-offers to scaffold one during the first-run bootstrap when no candidates are found in the project — so you can usually just answer Yes when prompted, no need to invoke the command explicitly. The scaffolded file is yours to edit afterwards.
 
 ## Configuration
 
@@ -197,7 +176,7 @@ test_framework: kotest-stringspec
 | `test_language` | yes | `kotlin` | Target language for generated tests. |
 | `test_framework` | yes | `kotest-stringspec` | Target framework for generated tests. |
 | `source_root` | optional | inferred from `test_dir` | Source-set root above the test package (e.g. `src/test/kotlin`). Set this explicitly if `/scenario-to-tests` reports it couldn't infer the source root from your `test_dir`. |
-| `base_test_class` | optional | auto-detected | Fully-qualified name of the class generated tests should extend. Auto-detected on first run and persisted; set explicitly if multiple candidates exist or none are found. |
+| `base_test_class` | optional | auto-detected or scaffolded | Fully-qualified name of the class generated tests should extend. On first run: auto-detected if a single candidate exists, prompted on multiple matches, or scaffolded via `/scaffold-base-test` (default Yes) when none are found. Persisted afterwards. Set explicitly to override. |
 
 **Currently supported combinations for `/scenario-to-tests`:** `kotlin` + `kotest-stringspec` only. Other values for `test_language` / `test_framework` are accepted and persisted but `/scenario-to-tests` will abort with a clear message until generation rules for that stack are added.
 

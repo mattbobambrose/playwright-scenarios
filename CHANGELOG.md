@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-05-02
+
+### Added
+
+- New `/scaffold-base-test` command. Generates a Kotlin + Kotest `BasePageTest` class at the parent of `<test_dir>` so `/scenario-to-tests` has something to extend. Prompts for three customizations: whether the dev server has a `POST /reset` endpoint, whether the browser lifecycle runs per spec or per test, and which Playwright browser (Chromium / Firefox / Webkit) to launch. Persists the generated class's FQN to `base_test_class` in `.claude/playwright-scenarios.local.md`. Refuses to overwrite an existing `BasePageTest.kt` or an already-set `base_test_class`. Currently supports `kotlin` + `kotest-stringspec` only — additional language/framework variants will land alongside their `/scenario-to-tests` generation paths.
+- New `scaffold-base-test` skill backing the command. Owns the inline Kotlin template, variant rules, and file-write logic.
+
+### Changed
+
+- `loading-config`: when base-test-class discovery finds zero candidates, it now offers to scaffold one (default Yes) by handing off to the `scaffold-base-test` skill, then persists the resulting FQN to the config. Previously, zero matches emitted a warning and `/scenario-to-tests` produced classes with no `extends` clause and a TODO comment. The warning path is preserved as the No branch.
+
+## [0.6.1] - 2026-05-02
+
+### Changed
+
+- `/crawl-site`: when invoked with only a URL (no description, no flags), the command now prompts the user with a short menu — **Structural overview** / **Shallow overview** / **Deep crawl** — instead of silently falling back to defaults. The selected option becomes the description for downstream interpretation. Invocations that include any description or any flag (`--depth`, `--max-scenarios`) skip the prompt.
+
 ## [0.6.0] - 2026-05-02
 
 ### ⚠️ Breaking changes
@@ -145,6 +162,10 @@ Initial release.
 - Host-project setup documentation covering the required Gradle `recordScenario` and `installPlaywrightBrowsers` tasks, Playwright / Kotest dependencies, `scenarios/` directory convention, and base test class pattern.
 - MIT license.
 
+[0.7.0]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.6.1...0.7.0
+[0.6.1]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.6.0...0.6.1
+[0.6.0]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.5.1...0.6.0
+[0.5.1]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.5.0...0.5.1
 [0.5.0]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.4.0...0.5.0
 [0.4.0]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.3.0...0.4.0
 [0.3.0]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.2.0...0.3.0

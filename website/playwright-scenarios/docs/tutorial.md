@@ -4,20 +4,28 @@ icon: lucide/graduation-cap
 
 # Tutorial
 
-A walkthrough from installation to your first generated tests. Pick one of three quick-start paths to write a scenario into the appropriate partition (`record/`, `crawl/`, or `convert/`), then run the shared pipeline to review, generate, and monitor. (See [Workflow](workflow.md) for a fourth path: authoring documents from scratch with an LLM.)
+A linear walkthrough from a fresh machine to a growing test suite. We'll set up the environment once, then exercise each of the three authoring paths in turn — **crawl**, **record**, and **doc-driven** — running the full review/generate pipeline after each so you end up with three batches of executable tests.
 
-## Setup
+By the end you'll have:
+
+- Tests under `<test_dir>/crawl/` from a `/crawl-site` run.
+- Tests under `<test_dir>/record/` from a `/record-scenario` run.
+- Tests under `<test_dir>/convert/` from a `/doc-to-scenarios` run.
+- A health dashboard view via `/scenario-status` that ties them all together.
+
+---
+
+## Step 1: Setup
+
+Do this once before working through any of the authoring sections.
 
 1. Install Git, Docker, and Claude.
-2. Clone a template repo in your language of choice:
-    - kotlin template link
-    - python template link
-    - typescript template link
-3. Start the docker image:
+2. Clone the Kotlin template repo *(link to be filled in)*. This is the supported stack today — Python and TypeScript templates are planned but not yet available.
+3. Start the docker image *(image name to be filled in)*. It bundles a small demo site at `http://localhost:8080`:
     ```
-    docker run imageName
+    docker run <imageName>
     ```
-4. Start a Claude Code session:
+4. Start a Claude Code session at the repo root:
     ```
     claude
     ```
@@ -26,50 +34,109 @@ A walkthrough from installation to your first generated tests. Pick one of three
     /plugin marketplace add mattbobambrose/playwright-scenarios
     /plugin install playwright-scenarios@playwright-scenarios
     ```
+6. The first time you run any plugin command, you'll be prompted for `scenario_dir`, `test_dir`, `test_language`, and `test_framework`. Accept the defaults to follow along with this tutorial.
 
 ---
 
-## Crawl a site
+## Step 2: Crawl a site → tests
 
-You don't know what flows exist and want Claude to discover them autonomously.
+The first authoring path is the most hands-off: tell `/crawl-site` where to start and let Claude discover user flows on its own.
+
+### Run the crawl
 
 ```
 /crawl-site http://localhost:8080
 ```
 
-Claude navigates the site, identifies user flows, and writes scenarios to `<scenario_dir>/crawl/` with minimal input.
+A bare URL triggers an interactive menu. Pick **Structural overview** for this run. Claude inventories the start page, ranks candidate flows, walks each (read-only — no form submits), and writes one scenario per flow to `<scenario_dir>/crawl/`.
+
+### Review the scenarios
+
+```
+/review-scenario crawl
+```
+
+The `crawl` argument scopes the review to scenarios in the crawl partition. Claude opens each one against the live site, verifies the claims, tightens vague assertions, and rewrites the markdown in place. You'll see a summary table of what changed.
+
+### Generate tests
+
+```
+/scenario-to-tests crawl
+```
+
+For each reviewed scenario in `<scenario_dir>/crawl/`, Claude generates a test file at `<test_dir>/crawl/<scenario-name>/<ClassName>.kt`, runs the suite, and fixes failures.
+
+You now have your first batch of executable tests.
 
 ---
 
-## Record a flow
+## Step 3: Record a flow → tests
 
-You know the flow you want to test and want to capture it by driving a browser.
+For interactive flows (logins, form fills, multi-step purchases) it's faster to *demonstrate* the flow than to describe it.
+
+### Record
 
 ```
 /record-scenario
 ```
 
-A Chromium window opens with the Playwright Inspector. Drive the browser, mark assertions, and Claude converts the recording into a scenario markdown file at `<scenario_dir>/record/<name>.md`.
+A Chromium window opens with the Playwright Inspector. Drive the browser through the flow you want to test — click links, fill forms, mark assertions using the Inspector's "Assert visibility / text / value" toolbar buttons. Close the browser when done.
+
+Claude converts the recorded actions into a scenario markdown file at `<scenario_dir>/record/<name>.md`. You'll be prompted to confirm the inferred name if you didn't supply one.
+
+### Review and generate
+
+```
+/review-scenario record
+/scenario-to-tests record
+```
+
+Same shape as Step 2 — scoped this time to the `record` partition. The new tests land at `<test_dir>/record/<scenario-name>/<ClassName>.kt`, alongside the crawl tests from earlier.
 
 ---
 
-## Convert a document
+## Step 4: Generate docs with an LLM → tests
 
-You already have a written description of what to test — test plan, requirements doc, user stories, meeting notes.
+The third path starts from a written description. You can hand it to any LLM (ChatGPT, Claude, Gemini), have it produce a test document in the plugin's expected shape, and convert that document into scenarios.
+
+### Generate a document
+
+Paste [`DOC_GUIDE.md`](https://github.com/mattbobambrose/playwright-scenarios/blob/master/plugins/playwright-scenarios/DOC_GUIDE.md) into your LLM's context — system prompt, custom GPT instructions, or the start of a conversation. This teaches the LLM the format, the available tags, and the pitfalls to avoid *before* it writes anything.
+
+Then ask it to draft a document covering the flows you care about. Save the output to a file in your repo, e.g. `docs/checkout-tests.md`.
+
+### Convert to scenarios
 
 ```
-/doc-to-scenarios <docFileName>
+/doc-to-scenarios docs/checkout-tests.md
 ```
 
-Claude evaluates the document and converts it into one or more scenarios under `<scenario_dir>/convert/` with tag mapping.
+Claude runs `evaluate-doc` first (a sanity check that the doc is well-formed for conversion), pauses for your approval, then writes one scenario per flow to `<scenario_dir>/convert/`.
+
+### Review and generate
+
+```
+/review-scenario convert
+/scenario-to-tests convert
+```
+
+The third batch of tests lands at `<test_dir>/convert/<scenario-name>/<ClassName>.kt`.
 
 ---
 
-## Shared pipeline
+## Step 5: Check the dashboard
 
-Every path writes scenarios directly into a partition under `<scenario_dir>/`. From there:
+```
+/scenario-status
+```
 
-1. **(Optional) Hand-edit or delete in place.** The scenario in its partition is the canonical artifact — there's no draft / promote step. Open the file in your editor if you want to refine it, or delete any you don't care about.
-2. **`/review-scenario`** — audit each scenario against the live site and apply improvements to the markdown. Pass a partition name (`record`, `crawl`, or `convert`) to scope the review, or run with no args to review everything.
-3. **`/scenario-to-tests`** — generate tests in your configured language and framework. Output is partitioned by command and by scenario: `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`.
-4. **`/scenario-status`** — health dashboard for review dates, test status, pass/fail, and coverage, grouped by partition.
+You'll see all three batches grouped by partition — review dates, test file existence, pass/fail, plus coverage signals (crawl depth reached, flow types covered, conversion rate). Run this any time you want a single view of what's reviewed, what's tested, what's stale, and what's missing.
+
+---
+
+## Where to go next
+
+- **[Workflow](workflow.md)** — the conceptual map of all four paths to a reviewed scenario, including a fourth path (migrating existing docs that weren't written for this framework) that this tutorial skips.
+- **[Commands & Skills](commands.md)** — full reference for every command and skill, including flags and prerequisites.
+- **[Writing Docs](writing-docs.md)** — guidance on writing or refining input documents that convert cleanly via `/doc-to-scenarios`.
+- **[Troubleshooting](troubleshooting.md)** — Symptom → Cause → Fix entries for the failures you're most likely to hit at setup and runtime.

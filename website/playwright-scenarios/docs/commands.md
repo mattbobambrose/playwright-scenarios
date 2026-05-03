@@ -11,6 +11,7 @@ Every component shipped by the `playwright-scenarios` plugin, with signatures, f
 | Command | Purpose |
 |---|---|
 | [`/playwright-scenarios-config`](#playwright-scenarios-config) | View or change the plugin's per-project settings |
+| [`/scaffold-base-test`](#scaffold-base-test) | Generate a Kotlin `BasePageTest` so generated tests have something to extend |
 | [`/record-scenario`](#record-scenario) | Capture a flow by driving a real browser (writes to `record/`) |
 | [`/crawl-site`](#crawl-site) | Auto-discover flows by exploring a site (writes to `crawl/`, read-only) |
 | [`/doc-to-scenarios`](#doc-to-scenarios) | Convert a document into scenarios (writes to `convert/`) |
@@ -26,6 +27,7 @@ Every component shipped by the `playwright-scenarios` plugin, with signatures, f
 | [`fixture-format`](#fixture-format) | Canonical JSON fixture schema |
 | [`evaluate-doc`](#evaluate-doc) | Score a document's testability before conversion |
 | [`debugging-scenarios`](#debugging-scenarios) | Diagnose failing generated tests |
+| [`scaffold-base-test`](#scaffold-base-test-skill) | Render and write the Kotlin `BasePageTest` template |
 
 ## Argument-syntax conventions
 
@@ -55,6 +57,52 @@ View or change the plugin's per-project settings stored in `.claude/playwright-s
 1. Reads `.claude/playwright-scenarios.local.md` directly. If missing, runs the normal interactive bootstrap (the `loading-config` skill).
 2. If malformed, prints the offending content with a one-line diagnosis and asks whether to overwrite.
 3. If clean, shows a table of current values and lets you change any field.
+
+---
+
+### `/scaffold-base-test`
+
+```
+/scaffold-base-test
+```
+
+Generate a Kotlin `BasePageTest` class so [`/scenario-to-tests`](#scenario-to-tests) has a base class to extend. Without one, generated tests are emitted with no `extends` clause and a TODO comment at the top of every file. Run this once per project; the resulting class is registered as `base_test_class` in `.claude/playwright-scenarios.local.md` and reused thereafter.
+
+Most users hit this skill indirectly: when [`loading-config`](#loading-config) runs its base-test-class discovery and finds zero candidates, it offers to scaffold one. Run the command explicitly only when you want to (re)generate the file or when you originally said "No" to the auto-offer.
+
+**Arguments:** none.
+
+**What it does:**
+
+1. Loads the project config and aborts if the language/framework combo isn't `kotlin` + `kotest-stringspec` (the only combo currently wired).
+2. Aborts if `base_test_class` is already set in the config — to regenerate, remove that line from `.claude/playwright-scenarios.local.md` first.
+3. Resolves where the file should go: parent of `<test_dir>`, sibling to the scenarios directory. For example, `<test_dir> = src/test/kotlin/com/example/qa/scenarios` produces `src/test/kotlin/com/example/qa/BasePageTest.kt`.
+4. Prompts for three customizations:
+
+    | Prompt | Choices | Default |
+    |---|---|---|
+    | Reset endpoint | Whether the dev server has a `POST /reset` that clears state between specs. If yes, the scaffold emits `resetServerState()` and calls it from the lifecycle hook. | Yes |
+    | Lifecycle scope | `Per spec` (one Browser/Page per spec class, faster, shared state across tests in the spec) or `Per test` (fresh Browser/Page per test, slower, full isolation). | Per spec |
+    | Browser | `Chromium`, `Firefox`, or `Webkit`. | Chromium |
+
+5. Writes the rendered `BasePageTest.kt` and persists the new FQN to `base_test_class` in the config.
+
+**Prerequisites:** `test_language = kotlin` and `test_framework = kotest-stringspec` in the project config. No external binaries — the scaffold is pure file generation.
+
+**Refusals:**
+
+- Target file `BasePageTest.kt` already exists at the resolved path → asks you to delete it first. Existing customizations are never silently overwritten.
+- `base_test_class` already set in config → asks you to remove that line first.
+- `test_language` ≠ `kotlin` or `test_framework` ≠ `kotest-stringspec` → no Kotlin scaffold is appropriate; nothing is written.
+
+**Customizing further:**
+
+The scaffolded file is yours to edit. Common follow-ups:
+
+- Override `baseUrl` in your concrete test class to point at a different server.
+- Read the headless flag from an env var instead of `System.getProperty("playwright.headless", "true")`.
+- Add cookies, storage state, or auth fixtures by extending the `Browser.NewContextOptions()` call.
+- Switch browsers per-test by maintaining multiple subclasses of `BasePageTest`.
 
 ---
 
@@ -98,7 +146,7 @@ Crawl a site starting from a URL, identify plausible user flows, and write scena
 | Argument | Type | Description |
 |---|---|---|
 | `start-url` | required | The first token starting with `http://` or `https://`. |
-| `description` | optional | Free-form natural-language scope (e.g., "focus on the checkout flow"). Everything that isn't the URL or a flag is joined as the description. |
+| `description` | optional | Free-form natural-language scope (e.g., "focus on the checkout flow"). Everything that isn't the URL or a flag is joined as the description. If neither a description nor any flag is given, the command prompts interactively with a short menu (Structural / Shallow / Deep). |
 
 **Flags:**
 
@@ -110,8 +158,8 @@ Crawl a site starting from a URL, identify plausible user flows, and write scena
 **Examples:**
 
 ```
-/crawl-site https://bookstore.example.com
-/crawl-site https://bookstore.example.com --depth=3
+/crawl-site https://bookstore.example.com                 # bare URL → interactive menu
+/crawl-site https://bookstore.example.com --depth=3       # flag-only → defaults, no menu
 /crawl-site https://bookstore.example.com focus on the checkout flow for a first-time buyer
 /crawl-site https://bookstore.example.com thorough crawl of all product pages --max-scenarios=15
 /crawl-site https://bookstore.example.com shallow overview of the main navigation
@@ -291,3 +339,7 @@ Reads any document and produces a structured testability report — what convert
 ### `debugging-scenarios`
 
 Diagnoses tests generated by `/scenario-to-tests` that fail. Triggers when the user reports test failures. Works through common root causes in order — undeclared iframe, stale selectors, race conditions, base-class misconfiguration, missing fixture data — with detection method and fix for each.
+
+### `scaffold-base-test` {: #scaffold-base-test-skill }
+
+Renders the Kotlin `BasePageTest` template and writes it to disk. Owns the three customization prompts (`/reset` endpoint, lifecycle scope, browser) and the variant rules that compose them with the canonical template. Invoked by [`/scaffold-base-test`](#scaffold-base-test) (explicit) and by [`loading-config`](#loading-config) (auto-offered when zero base-test-class candidates are found in the project). Currently supports `kotlin` + `kotest-stringspec` only; additional language/framework variants will land alongside their `/scenario-to-tests` generation paths. After scaffolding, `base_test_class` is recorded in `.claude/playwright-scenarios.local.md` automatically.

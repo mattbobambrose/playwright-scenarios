@@ -23,6 +23,7 @@ Author browser-driven scenarios as markdown, audit them against the live site, a
 | `/scenario-status` | Health dashboard grouped by partition: review dates, test status, pass/fail, coverage gaps. |
 | `/generate-fixture <source \| interactive> [--name=N]` | Scaffold a JSON fixture file from a scenario, document, or interactive prompts. |
 | `/playwright-scenarios-config` | View or update per-project settings in `.claude/playwright-scenarios.local.md`. Also the recovery path for malformed config files. |
+| `/scaffold-base-test` | Generate a Kotlin `BasePageTest` so generated tests have a base class to extend. Prompts for `/reset` endpoint, lifecycle scope, and browser. Persists `base_test_class` in the config. Currently `kotlin` + `kotest-stringspec` only. Auto-offered by `loading-config` when no base class is found in the project. |
 
 **Skills**
 
@@ -33,13 +34,14 @@ Author browser-driven scenarios as markdown, audit them against the live site, a
 | `evaluate-doc` | Reads a QA document and produces a structured testability report. Advisory only — never writes scenario files. |
 | `fixture-format` | Defines the canonical JSON fixture format shared across all generators. |
 | `debugging-scenarios` | Guides troubleshooting when generated tests fail — iframe detection, selector drift, timing, stale fixtures. |
+| `scaffold-base-test` | Renders the Kotlin `BasePageTest` template into the consuming project. Owns the three customization prompts (reset endpoint, lifecycle scope, browser) and the file write. Caller persists `base_test_class`. |
 
 **Host project setup (Kotlin + Kotest default)**
 1. `testImplementation("com.microsoft.playwright:playwright:...")` and `testImplementation("io.kotest:kotest-runner-junit5")` in `build.gradle.kts`.
 2. Gradle tasks `recordScenario` (wraps `com.microsoft.playwright.CLI codegen`, driven by `-Purl=` / `-Pout=` properties) and `installPlaywrightBrowsers` (runs `CLI install`, required once before first recording).
 3. `playwright-cli` binary (via `npm install -g @playwright/cli@latest` or `npx playwright-cli`). Required by `/review-scenario`, `/scenario-to-tests`, and `/crawl-site`. `/record-scenario` uses Gradle codegen instead.
 4. Scenario directory — configured via `scenario_dir` (default `src/test/scenarios/`). Three command-keyed subdirectories live underneath: `record/`, `crawl/`, `convert/`. The bootstrap creates them. There is no draft state — scenarios are canonical from the moment a creation command writes them; users hand-edit or delete in place if they want.
-5. A base test class extending Kotest's `StringSpec` that owns the Playwright browser lifecycle. Auto-detected and persisted as `base_test_class` in the config.
+5. A base test class extending Kotest's `StringSpec` that owns the Playwright browser lifecycle. Auto-detected and persisted as `base_test_class` in the config; if none exists, `loading-config` offers to scaffold one via `/scaffold-base-test`.
 
 **Configuration** (`.claude/playwright-scenarios.local.md`)
 
@@ -92,13 +94,21 @@ No automated tests. Validate by installing the plugin locally and running the co
 The `playwright-scenarios` plugin reads per-project settings from `.claude/playwright-scenarios.local.md` (YAML frontmatter: `scenario_dir`, `test_dir`, `test_language`, `test_framework`). Every command starts by invoking the `loading-config` skill, which prompts the user and creates the file on first use. Use `/playwright-scenarios-config` to re-prompt.
 Optional advanced fields: `source_root`, `base_test_class` — auto-inferred and persisted; not prompted at bootstrap.
 
+## Config file write authority
+
+Only `loading-config` and `/playwright-scenarios-config` write `.claude/playwright-scenarios.local.md`. Other skills return values; their callers persist. Single-writer prevents racy/partial updates and keeps the malformed-recovery path well-defined.
+
+## Skill error contract
+
+Skills return short structured error codes (e.g. `MALFORMED_CONFIG: <reason>`, `UNSUPPORTED_COMBO: <combo>`, `TARGET_EXISTS: <path>`) and let the calling command produce the user-facing message. Keeps messaging in one place per command and prevents drift between sibling docs.
+
 ## Doc propagation
 
-When adding or changing a command, skill, or config field, update all of: README.md, CHANGELOG.md, llms.txt, llms-full.txt, plus the matching page under `website/playwright-scenarios/docs/` (e.g. `commands.md`, `terminology.md`).
+When adding or changing a command, skill, or config field, update all of: README.md, CHANGELOG.md, llms.txt, llms-full.txt, plus the matching page under `website/playwright-scenarios/docs/` (e.g. `commands.md`, `terminology.md`). When adding a new command, also extend the explicit trigger list inside `loading-config`'s SKILL `description` field — the skill keeps working without it (fuzzy match), but the list is what other docs cite as the canonical command roster.
 
 ## Website docs (Zensical)
 
-Pages live under `website/playwright-scenarios/docs/`. Nav order is set in `website/playwright-scenarios/zensical.toml` — new pages must be added to the `nav = [...]` array or they won't appear in the sidebar. Avoid backticks, dots, slashes, and parens in `##`/`###` headings if anything cross-links to them — slugs become fragile.
+Pages live under `website/playwright-scenarios/docs/`. Nav order is set in `website/playwright-scenarios/zensical.toml` — new pages must be added to the `nav = [...]` array or they won't appear in the sidebar. Avoid backticks, dots, slashes, and parens in `##`/`###` headings if anything cross-links to them — slugs become fragile. When a command and a skill share a name (e.g. `### /scaffold-base-test` and `### scaffold-base-test`), they slugify to the same anchor; disambiguate with `attr_list` (`### scaffold-base-test {: #scaffold-base-test-skill }`). In Mermaid diagrams, never use `(...)` inside `[...]` node labels — it silently breaks rendering. Strip the parenthetical or move it to surrounding prose.
 
 ## External dependency
 
@@ -191,12 +201,13 @@ Scenario creation commands write to one of three partitions: `<scenario_dir>/{re
 
 **Description:** Read-only crawl of a website to seed user-flow-oriented scenarios under `<SCENARIO_DIR>/crawl/`. Complementary to `/record-scenario` — useful when you want Claude to explore autonomously instead of driving the browser yourself.
 
-**Arguments:** required `<start-url>`, plus optional natural-language description and flags: `--depth=N` (same-origin hops, default 1, clamp `[1, 3]`), `--max-scenarios=N` (cap on emitted scenarios, default 10).
+**Arguments:** required `<start-url>`, plus optional natural-language description and flags: `--depth=N` (same-origin hops, default 1, clamp `[1, 3]`), `--max-scenarios=N` (cap on emitted scenarios, default 10). A bare URL with no description and no flags triggers an interactive Structural / Shallow / Deep menu.
 
 **Safety:** strictly read-only. Navigates, scrolls, snapshots. Never fills forms, never clicks buttons whose text suggests state change.
 
 **Phases:**
 0. **Argument parse + load config + preflight.** `loading-config` resolves `<SCENARIO_DIR>` (abort on `MALFORMED_CONFIG`). Verify `playwright-cli`. Ensure `<SCENARIO_DIR>/crawl/` exists.
+0.5. **Prompt for focus** (only if neither description nor any flag was given). `AskUserQuestion` with options Structural overview / Shallow overview / Deep crawl. Selected option is treated as the description for Phase 1.5.
 1. **Fetch and inventory the start page.** Open via `playwright-cli`, snapshot, classify links.
 2. **Identify candidate user flows** — group by intent (nav / hero CTA / content / footer / auth-gate). Dedupe by destination URL.
 3. **Walk each selected flow** (parallel subagents, batches of 5) via direct `playwright-cli goto` (still read-only).
@@ -307,6 +318,22 @@ Scenario creation commands write to one of three partitions: `<scenario_dir>/{re
 
 ---
 
+### /scaffold-base-test
+
+**Description:** Generate a Kotlin `BasePageTest` class so `/scenario-to-tests` has a base class to extend. Without one, generated tests are emitted with no `extends` clause and a TODO comment per file. One-shot setup; the resulting class is registered as `base_test_class` and reused thereafter. Currently `kotlin` + `kotest-stringspec` only.
+
+**Steps:**
+1. Load config via `loading-config`. Abort on `MALFORMED_CONFIG`.
+2. Unsupported-combo guard: stop if `test_language` ≠ `kotlin` or `test_framework` ≠ `kotest-stringspec`.
+3. Already-configured guard: stop if `base_test_class` is non-empty in config (tell the user to clear it first).
+4. Hand off to the `scaffold-base-test` skill (passing `<TEST_LANGUAGE>`, `<TEST_FRAMEWORK>`, `<TEST_DIR>`, `<SOURCE_ROOT>`). The skill prompts for three customizations, renders the template, and writes the file. Returns the FQN, target path, and the user's choices.
+5. Persist `base_test_class: <fqn>` to the YAML frontmatter of `.claude/playwright-scenarios.local.md` (preserve all other lines and the markdown body verbatim).
+6. Report the file path, FQN, and chosen customizations.
+
+**Auto-invocation path:** `loading-config`'s base-test-class discovery offers to scaffold one when zero candidates are found in the project. The user can accept (skill runs identically; loading-config persists the FQN) or decline (loading-config falls through to its existing warning behavior).
+
+---
+
 ## Skills
 
 ### loading-config
@@ -326,7 +353,7 @@ Scenario creation commands write to one of three partitions: `<scenario_dir>/{re
 
 **Source-root inference (used by `/scenario-to-tests`):** if `source_root` is set, use it verbatim; otherwise match `<test_dir>` against known prefixes in order (`src/test/kotlin`, `src/test/java`, `src/test/scala`, `src/test/groovy`, `src/test/<lang>`, `test/kotlin`, `test/java`, `test/<lang>`, `tests/<lang>`, `src/test`). No match → abort asking the user to set `source_root`.
 
-**Base-test-class discovery:** if `base_test_class` is set, use it; otherwise glob for `Base*Test.*`, `*TestBase.*`, `Abstract*Test.*`, `*PageTest.*`, or a class with `StringSpec`/`FunSpec` + `Playwright.create()`/`browser`/`page` markers. Exactly one match → use silently and persist. Multiple → prompt to pick and persist. None → warn and continue without `extends`.
+**Base-test-class discovery:** if `base_test_class` is set, use it; otherwise glob for `Base*Test.*`, `*TestBase.*`, `Abstract*Test.*`, `*PageTest.*`, or a class with `StringSpec`/`FunSpec` + `Playwright.create()`/`browser`/`page` markers. Exactly one match → use silently and persist. Multiple → prompt to pick and persist. None → offer to scaffold one via the `scaffold-base-test` skill (default Yes); if user accepts, run the skill and persist the returned FQN; if user declines, warn and continue without `extends`.
 
 **Non-responsibilities:**
 - Does not validate that `test_dir` exists on disk.
@@ -416,6 +443,29 @@ Scenario creation commands write to one of three partitions: `<scenario_dir>/{re
 
 ---
 
+### scaffold-base-test
+
+**Description:** Render the Kotlin `BasePageTest` template and write it to disk. Owns the three customization prompts (reset endpoint, lifecycle scope, browser) and the variant rules that compose them with the canonical template. Invoked by `/scaffold-base-test` (explicit) and by `loading-config` (auto-offered when zero base-test-class candidates are found). Currently `kotlin` + `kotest-stringspec` only.
+
+**Inputs:** `test_language`, `test_framework`, `test_dir`, `source_root` from the caller.
+
+**Guards:** abort if `test_language` ≠ `kotlin` / `test_framework` ≠ `kotest-stringspec`, or if the target file already exists. Never overwrites.
+
+**Procedure:**
+1. **Resolve target path and package.** `base_dir` = parent of `test_dir`; `target_file` = `<base_dir>/BasePageTest.kt`; `package_name` = `<base_dir>` with `<source_root>` prefix stripped, `/` → `.`. Empty package → emit no `package` line.
+2. **Three prompts** (single `AskUserQuestion`): `/reset` endpoint (Yes/No, default Yes), lifecycle (per-spec/per-test, default per-spec), browser (Chromium/Firefox/Webkit, default Chromium).
+3. **Render** the canonical template (Yes-reset, per-spec, Chromium) and apply variant rules: drop `resetServerState()` and its imports if `/reset = No`; swap `beforeSpec`/`afterSpec` for `beforeTest`/`afterTest` (and swap `Spec` import for `TestCase` + `TestResult`) if `lifecycle = per-test`; substitute browser method (`chromium()` / `firefox()` / `webkit()`). Imports stay alphabetically sorted in a single flat block.
+4. **Write** the file via the Write tool, creating intermediate directories as needed.
+5. **Return** `{fqn, target_file, choices}` to the caller. The caller persists `base_test_class` — this skill never edits the config.
+
+**Non-responsibilities:**
+- Does not write to `.claude/playwright-scenarios.local.md` (caller's job).
+- Does not regenerate or overwrite existing `BasePageTest.kt` (caller deletes first).
+- Does not add Playwright/Kotest dependencies to `build.gradle.kts`.
+- Does not support languages or frameworks other than Kotlin + kotest-stringspec; additional template variants will land alongside `/scenario-to-tests` generation paths for those stacks.
+
+---
+
 ## Website docs
 
 User-facing documentation lives at `website/playwright-scenarios/docs/` and is rendered by Zensical. Nav order is configured in `website/playwright-scenarios/zensical.toml`.
@@ -424,7 +474,7 @@ User-facing documentation lives at `website/playwright-scenarios/docs/` and is r
 - **tutorial** (`website/playwright-scenarios/docs/tutorial.md`): Step-by-step walkthrough from installation to generated tests.
 - **terminology** (`website/playwright-scenarios/docs/terminology.md`): Definitions for scenario, test case, draft, fixture, tag, generated test.
 - **workflow** (`website/playwright-scenarios/docs/workflow.md`): The four paths to a reviewed scenario (LLM-authored, existing-doc migration, record, crawl) with Mermaid diagrams.
-- **commands** (`website/playwright-scenarios/docs/commands.md`): Per-command and per-skill reference — signatures, arguments, flags, examples for all 8 commands and 5 skills.
+- **commands** (`website/playwright-scenarios/docs/commands.md`): Per-command and per-skill reference — signatures, arguments, flags, examples for all 9 commands and 6 skills.
 - **capabilities** (`website/playwright-scenarios/docs/capabilities.md`): What the plugin can and can't test, with the full extended-tag table.
 - **writing-docs** (`website/playwright-scenarios/docs/writing-docs.md`): Guidance for writing input documents that convert cleanly into scenarios.
 - **troubleshooting** (`website/playwright-scenarios/docs/troubleshooting.md`): Setup-time and operational failures with Symptom→Cause→Fix entries (plugin install, config bootstrap, `playwright-cli`, browser binaries, host-project, non-Kotlin stacks, crawl results, URL reachability, scenario layout, `/scenario-status`).

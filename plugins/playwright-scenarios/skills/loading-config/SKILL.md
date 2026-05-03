@@ -1,6 +1,6 @@
 ---
 name: loading-config
-description: Load per-project configuration for the playwright-scenarios plugin from .claude/playwright-scenarios.local.md. Triggers automatically at the start of any playwright-scenarios command (/record-scenario, /review-scenario, /scenario-to-tests, /playwright-scenarios-config). Prompts the user for the four required fields (scenario_dir, test_dir, test_language, test_framework) on first run, persists them, and scaffolds the record/crawl/convert subdirectories under both <scenario_dir> and <test_dir>. Additional optional fields (source_root, base_test_class) are auto-inferred when needed and persisted on disambiguation.
+description: Load per-project configuration for the playwright-scenarios plugin from .claude/playwright-scenarios.local.md. Triggers automatically at the start of any playwright-scenarios command (/record-scenario, /crawl-site, /doc-to-scenarios, /review-scenario, /scenario-to-tests, /scenario-status, /generate-fixture, /scaffold-base-test, /playwright-scenarios-config). Prompts the user for the four required fields (scenario_dir, test_dir, test_language, test_framework) on first run, persists them, and scaffolds the record/crawl/convert subdirectories under both <scenario_dir> and <test_dir>. Additional optional fields (source_root, base_test_class) are auto-inferred when needed and persisted on disambiguation. When base-test-class discovery finds zero candidates, offers to scaffold one via the scaffold-base-test skill.
 ---
 
 # Loading Plugin Configuration
@@ -157,7 +157,11 @@ When a command needs to know what class generated tests should extend (currently
    - Files containing a `StringSpec`/`FunSpec` parent and a `Playwright.create()`/`browser`/`page` member.
 3. If exactly one class matches, use it silently — persist it to the config so future runs skip the glob.
 4. If multiple match, use `AskUserQuestion` to let the user pick one, then persist the choice.
-5. If none match, emit a warning and proceed without an `extends` clause. Generated tests will need a manual base-class fix; the warning should say so and suggest setting `base_test_class`.
+5. If none match, ask via `AskUserQuestion`: "No base test class found. Scaffold a `BasePageTest` now? (Generated tests need one to extend.)" with options `Yes (Recommended)` / `No`.
+   - **Yes**: invoke the `scaffold-base-test` skill with `<TEST_LANGUAGE>`, `<TEST_FRAMEWORK>`, `<TEST_DIR>`, `<SOURCE_ROOT>`. Append `base_test_class: <returned_fqn>` to the config frontmatter. Continue with that as the resolved value. Handle skill errors as follows:
+     - **`UNSUPPORTED_COMBO`**: print "Scaffolding only supports `kotlin` + `kotest-stringspec`. Generated tests will lack an `extends` clause for now — add one manually or change the language/framework via `/playwright-scenarios-config`." Fall through to the No branch.
+     - **`TARGET_EXISTS: <path>`**: a `BasePageTest.kt` already exists at `<path>` but discovery didn't recognize it. Print "Found `<path>` but it doesn't look like a Playwright base test. Either edit it to extend `StringSpec` and own the Playwright lifecycle, or set `base_test_class` directly via `/playwright-scenarios-config`." Fall through to the No branch.
+   - **No**: warn that generated tests will lack an `extends` clause; suggest running `/scaffold-base-test` later. Proceed without a base class.
 
 ## Gitignore note
 
