@@ -20,7 +20,7 @@ By the end you'll have:
 Do this once before working through any of the authoring sections.
 
 1. Install Git, Docker, and Claude.
-2. Clone the Kotlin template repo *(link to be filled in)*. This is the supported stack today — Python and TypeScript templates are planned but not yet available.
+2. Use the [Kotlin template repo](https://github.com/mattbobambrose/playwright-scenarios-kotlin-template) as the starting point. Click **Use this template → Create a new repository** on the GitHub page to get your own copy, then clone it locally. (You can also `git clone` the template directly if you don't want a fresh repo of your own.) Kotlin is the supported stack today — Python and TypeScript templates are planned but not yet available.
 3. Start the docker image *(image name to be filled in)*. It bundles a small demo site at `http://localhost:8080`:
     ```
     docker run <imageName>
