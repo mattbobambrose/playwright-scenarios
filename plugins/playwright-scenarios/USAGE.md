@@ -24,7 +24,7 @@ LLM-optimized reference for using the `playwright-scenarios` plugin in a host pr
 | If you want to... | Use | Notes |
 |---|---|---|
 | Record a user flow by driving a browser | `/record-scenario [name]` | Opens Playwright codegen. Writes to `<scenario_dir>/record/<name>.md`. |
-| Auto-discover flows on a site | `/crawl-site <url> [description] [--depth=N] [--max-scenarios=N]` | Read-only. Accepts natural-language scope ("focus on checkout"). Writes to `<scenario_dir>/crawl/`. |
+| Auto-discover flows on a site | `/crawl-site <url> [description] [--depth=N] [--max-scenarios=N]` | Read-only. Accepts natural-language scope ("focus on checkout"). A bare URL prompts an interactive Structural/Shallow/Deep menu. Writes to `<scenario_dir>/crawl/`. |
 | Check if a doc is testable | `/evaluate-doc` (skill, not command — invoke by asking Claude to evaluate) | Advisory. Reports what converts, what needs changes, what's out of scope. |
 | Convert a doc into scenarios | `/doc-to-scenarios <path> [--skip-evaluation]` | Runs evaluate-doc first. Writes to `<scenario_dir>/convert/`. |
 | Create a fixture file | `/generate-fixture <source \| interactive> [--name=N]` | From a scenario, document, or interactive prompts. |
@@ -32,6 +32,7 @@ LLM-optimized reference for using the `playwright-scenarios` plugin in a host pr
 | Generate test code | `/scenario-to-tests [names...] [--dry-run]` | Output at `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. Pass a partition name to scope. Currently: Kotlin + Kotest only. |
 | Check scenario health | `/scenario-status` | Dashboard grouped by partition: review dates, test staleness, pass/fail, crawl depth, flow type coverage, conversion rate, critical paths. |
 | View or change config | `/playwright-scenarios-config` | Also the recovery path for malformed config. |
+| Generate a `BasePageTest` to extend | `/scaffold-base-test` | One-shot setup. Prompts for `/reset` endpoint, lifecycle scope, browser. Writes `BasePageTest.kt` at the parent of `<test_dir>` and persists `base_test_class`. Currently: Kotlin + Kotest only. Also auto-offered by `loading-config` when no base class is found. |
 
 ## Workflow
 
@@ -167,4 +168,4 @@ Stored in `.claude/playwright-scenarios.local.md`. Created on first command run.
 | `test_language` | yes | `kotlin` | Target language |
 | `test_framework` | yes | `kotest-stringspec` | Target framework |
 | `source_root` | no | inferred | Source-set root for package derivation |
-| `base_test_class` | no | auto-detected | Base class for generated tests |
+| `base_test_class` | no | auto-detected or scaffolded | Base class for generated tests. If none exists, `loading-config` offers to scaffold one via `/scaffold-base-test`. |

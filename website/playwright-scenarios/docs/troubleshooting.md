@@ -55,6 +55,12 @@ Setup-time and operational failures, with a fix for each.
 > **Cause:** The auto-inference walks your test source tree and picks the first base test class it finds. In a multi-module project this isn't always the right one.<br>
 > **Fix:** Open `.claude/playwright-scenarios.local.md` and add (or correct) `base_test_class: com.example.path.ToYourBaseClass`. Re-run `/scenario-to-tests`.
 
+### No base test class exists in the project
+
+> **Symptom:** Generated tests have no `extends` clause and a TODO comment at the top of every file. Or `loading-config` warned during bootstrap that no base class was found and you said "No" to the scaffold offer.<br>
+> **Cause:** The host project doesn't yet define a Playwright + Kotest base class.<br>
+> **Fix:** Run `/scaffold-base-test`. It prompts for three customizations (whether the dev server has a `POST /reset` endpoint, whether the browser lifecycle runs per-spec or per-test, and which Playwright browser to launch), writes a `BasePageTest.kt` at the parent of `<test_dir>`, and persists the FQN to `base_test_class`. Re-run `/scenario-to-tests` afterwards — generated tests will now extend the new class.
+
 ### "Couldn't infer the source root from `test_dir=…`"
 
 > **Symptom:** A command aborts with that exact message.<br>

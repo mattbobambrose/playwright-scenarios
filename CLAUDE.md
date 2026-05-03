@@ -22,13 +22,21 @@ No automated tests. Validate by installing the plugin locally and running the co
 The `playwright-scenarios` plugin reads per-project settings from `.claude/playwright-scenarios.local.md` (YAML frontmatter: `scenario_dir`, `test_dir`, `test_language`, `test_framework`). Every command starts by invoking the `loading-config` skill, which prompts the user and creates the file on first use. Use `/playwright-scenarios-config` to re-prompt.
 Optional advanced fields: `source_root`, `base_test_class` — auto-inferred and persisted; not prompted at bootstrap.
 
+## Config file write authority
+
+Only `loading-config` and `/playwright-scenarios-config` write `.claude/playwright-scenarios.local.md`. Other skills return values; their callers persist. Single-writer prevents racy/partial updates and keeps the malformed-recovery path well-defined.
+
+## Skill error contract
+
+Skills return short structured error codes (e.g. `MALFORMED_CONFIG: <reason>`, `UNSUPPORTED_COMBO: <combo>`, `TARGET_EXISTS: <path>`) and let the calling command produce the user-facing message. Keeps messaging in one place per command and prevents drift between sibling docs.
+
 ## Doc propagation
 
 When adding or changing a command, skill, or config field, update all of: README.md, CHANGELOG.md, llms.txt, llms-full.txt, plus the matching page under `website/playwright-scenarios/docs/` (e.g. `commands.md`, `terminology.md`).
 
 ## Website docs (Zensical)
 
-Pages live under `website/playwright-scenarios/docs/`. Nav order is set in `website/playwright-scenarios/zensical.toml` — new pages must be added to the `nav = [...]` array or they won't appear in the sidebar. Avoid backticks, dots, slashes, and parens in `##`/`###` headings if anything cross-links to them — slugs become fragile (the `## Config` section in `troubleshooting.md` was simplified for this reason).
+Pages live under `website/playwright-scenarios/docs/`. Nav order is set in `website/playwright-scenarios/zensical.toml` — new pages must be added to the `nav = [...]` array or they won't appear in the sidebar. Avoid backticks, dots, slashes, and parens in `##`/`###` headings if anything cross-links to them — slugs become fragile (the `## Config` section in `troubleshooting.md` was simplified for this reason). When a command and a skill share a name (e.g. `### /scaffold-base-test` and `### scaffold-base-test`), they slugify to the same anchor; disambiguate with `attr_list` (`### scaffold-base-test {: #scaffold-base-test-skill }`).
 
 ## External dependency
 
