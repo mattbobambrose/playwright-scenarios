@@ -29,11 +29,15 @@ Do this once before working through any of the authoring sections.
     ```
     ./gradlew installPlaywrightBrowsers
     ```
-5. Start a Claude Code session at the repo root, with permission prompts disabled:
+5. Start a Claude Code session at the repo root:
+    ```
+    claude
+    ```
+    Alternatively, run with permission prompts disabled:
     ```
     claude --dangerously-skip-permissions
     ```
-    The plugin commands kick off many tool calls per invocation (file reads, file writes, `playwright-cli` launches, Gradle runs). Without `--dangerously-skip-permissions`, you'd click **Approve** dozens of times per scenario. Only use this flag in a disposable / sandboxed checkout like the template repo you just cloned — it bypasses all permission checks for the duration of the session.
+    The plugin commands kick off many tool calls per invocation (file reads, file writes, `playwright-cli` launches, Gradle runs). With the default `claude`, you'll click **Approve** for each one. The `--dangerously-skip-permissions` flag bypasses every prompt for the session — use it only in a disposable / sandboxed checkout like the template repo you just cloned.
 6. Install the plugin:
     ```
     /plugin marketplace add mattbobambrose/playwright-scenarios
