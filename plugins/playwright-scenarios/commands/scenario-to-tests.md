@@ -1,6 +1,8 @@
 ---
 name: scenario-to-tests
 description: Generate tests in the project's configured language and framework from website validation scenarios under <SCENARIO_DIR>/{record,crawl,convert}/. Writes tests to <TEST_DIR>/<command>/<scenario-name>/<ClassName>.kt — partitioned by source command and by scenario. Assumes scenarios have already been reviewed.
+summary: Generate tests (defaults: Kotlin + Kotest StringSpec with Playwright-for-Java) at `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. A bare partition name scopes generation to that partition.
+signature: /scenario-to-tests [names...] [--dry-run]
 arguments:
   - name: scenarios
     description: Zero or more scenario names (without .md extension), space-separated. Zero names = all scenarios across record / crawl / convert. A bare partition name (record, crawl, or convert) limits generation to that partition. Supported flag - --dry-run (skip Phase 4 test execution).
