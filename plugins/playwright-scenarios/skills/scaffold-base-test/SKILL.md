@@ -44,9 +44,9 @@ Show the resolved `target_file` and `fqn` to the user before prompting for custo
 
 Issue a single `AskUserQuestion` call with three single-select questions:
 
-1. **Reset endpoint** — "Does your dev server expose a `POST /reset` endpoint that resets state between specs?"
-   - `Yes (Recommended)` — emit `resetServerState()` and call it from the lifecycle hook.
-   - `No` — omit `resetServerState()` and its imports.
+1. **Reset endpoint** — "Does your dev server expose a `POST /reset` endpoint that resets state between specs? Most dev servers don't — this is a deliberate test affordance that purpose-built fixture or demo apps add for predictable state."
+   - `No (Recommended)` — omit `resetServerState()` and its imports.
+   - `Yes` — emit `resetServerState()` and call it from the lifecycle hook.
 
 2. **Lifecycle** — "Run the browser lifecycle once per spec class, or once per test?"
    - `Per spec (Recommended)` — `beforeSpec` / `afterSpec`. Faster; tests share state within a spec.

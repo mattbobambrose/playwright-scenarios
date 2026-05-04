@@ -81,7 +81,7 @@ Most users hit this skill indirectly: when [`loading-config`](#loading-config) r
 
     | Prompt | Choices | Default |
     |---|---|---|
-    | Reset endpoint | Whether the dev server has a `POST /reset` that clears state between specs. If yes, the scaffold emits `resetServerState()` and calls it from the lifecycle hook. | Yes |
+    | Reset endpoint | Whether the dev server has a `POST /reset` that clears state between specs. Most don't — it's a deliberate test affordance some fixture / demo apps add. If yes, the scaffold emits `resetServerState()` and calls it from the lifecycle hook. | No |
     | Lifecycle scope | `Per spec` (one Browser/Page per spec class, faster, shared state across tests in the spec) or `Per test` (fresh Browser/Page per test, slower, full isolation). | Per spec |
     | Browser | `Chromium`, `Firefox`, or `Webkit`. | Chromium |
 
