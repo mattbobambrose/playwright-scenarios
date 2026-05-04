@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `summary` and `signature` frontmatter fields on each command, plus `scripts/gen-command-table.py` — a Python stdlib-only generator that derives the Markdown command table from the frontmatter. The README's command table is now auto-generated between `<!-- COMMANDS:BEGIN -->` / `<!-- COMMANDS:END -->` markers; run `python3 scripts/gen-command-table.py --inplace README.md` after editing any command's `summary` or `signature`. CI-friendly `--check` flag exits 1 if the file would change. Other doc surfaces (USAGE.md, llms.txt, website `commands.md`) still need hand-editing for now.
 
+### Changed
+
+- `/scaffold-base-test`: the recommended option for the "Does your dev server expose a `POST /reset` endpoint?" prompt is now `No`, not `Yes`. Most real dev servers don't expose `/reset` — it's a deliberate test affordance that purpose-built fixture or demo apps add. Picking `Yes` reflexively was producing `BasePageTest`s that POSTed to a non-existent endpoint and 404'd silently on every spec. The prompt copy was also reworded to make `Yes` opt-in.
+
 ### Removed
 
 - `/crawl-site` no longer prompts an interactive Structural / Shallow / Deep menu when invoked with a bare URL (introduced in 0.6.1). The "Structural overview" option matched default behavior anyway, the prompt didn't reliably fire across all sessions, and the post-bootstrap stack of prompts was friction without payoff. A bare URL now goes straight to defaults (structural crawl, depth 1, max 10 scenarios, no filtering); pass a description or flag for non-default behavior.
