@@ -43,7 +43,11 @@ Do this once before working through any of the authoring sections.
     /plugin marketplace add mattbobambrose/playwright-scenarios
     /plugin install playwright-scenarios@playwright-scenarios
     ```
-7. The first time you run any plugin command, you'll be prompted for `scenario_dir`, `test_dir`, `test_language`, and `test_framework`. Accept the defaults to follow along with this tutorial.
+7. Scaffold a base test class so generated tests have something to extend:
+    ```
+    /scaffold-base-test
+    ```
+    This is your first plugin command, so two prompts fire in sequence: first the config bootstrap (`scenario_dir`, `test_dir`, `test_language`, `test_framework`), then three scaffold customizations (whether the dev server has a `POST /reset` endpoint, lifecycle scope, browser). Accept the defaults at every prompt to follow along with the tutorial. Claude writes `BasePageTest.kt` next to your scenarios package and persists `base_test_class` in the config.
 
 ---
 
