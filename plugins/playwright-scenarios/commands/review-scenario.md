@@ -1,6 +1,8 @@
 ---
 name: review-scenario
 description: Audit website validation scenarios across <SCENARIO_DIR>/{record,crawl,convert}/ against the live site and apply improvements to the markdown. Zero arguments = review every scenario across all three partitions.
+summary: Audit scenarios across `<scenario_dir>/{record,crawl,convert}/` against the live site and apply improvements to the markdown. A bare partition name scopes the review to that partition.
+signature: /review-scenario [names...]
 arguments:
   - name: scenarios
     description: Zero or more scenario names (without .md extension), space-separated. Zero names = review every scenario across <SCENARIO_DIR>/{record,crawl,convert}/. A bare partition name (record, crawl, or convert) limits the review to that partition.

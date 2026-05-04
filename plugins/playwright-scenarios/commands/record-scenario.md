@@ -1,6 +1,8 @@
 ---
 name: record-scenario
 description: Record a new website validation scenario by driving a real browser. Launches Playwright codegen, captures clicks/typing/assertions, then writes a scenario markdown file to <SCENARIO_DIR>/record/.
+summary: Launch Playwright codegen, capture a real user flow, and write a scenario to `<scenario_dir>/record/<name>.md`.
+signature: /record-scenario [name]
 arguments:
   - name: name
     description: Optional kebab-case scenario name. If omitted, it is inferred from the recorded actions.

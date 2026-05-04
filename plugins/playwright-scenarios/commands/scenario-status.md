@@ -1,6 +1,8 @@
 ---
 name: scenario-status
 description: Display a health dashboard for all scenarios across record/crawl/convert partitions — last reviewed, test file existence, test pass/fail status, coverage completeness (crawl depth, flow types, conversion rate, critical paths). Use when the user asks "what's the status of my scenarios?" or "what's stale/missing/broken?" or "how much of the site is covered?"
+summary: 'Health dashboard grouped by partition: review dates, test status, pass/fail, plus coverage completeness (crawl depth, flow types, conversion rate, critical paths).'
+signature: /scenario-status
 ---
 
 # Scenario Status

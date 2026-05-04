@@ -1,6 +1,8 @@
 ---
 name: doc-to-scenarios
 description: Convert any document (test plan, requirements doc, meeting notes, acceptance criteria) into scenario markdown files under <SCENARIO_DIR>/convert/. Requires the evaluate-doc skill to have been run first (or runs it inline). The bridge between evaluation and the /review-scenario → /scenario-to-tests pipeline.
+summary: Convert any document into scenario markdown files under `<scenario_dir>/convert/`. Runs `evaluate-doc` first, then maps test cases to the scenario format with proper tags.
+signature: /doc-to-scenarios <path> [--skip-evaluation]
 arguments:
   - name: source
     description: Required. Path to the source document to convert. Optionally followed by flags. Supported flag - --skip-evaluation (assume the doc has already been evaluated; skip the evaluate-doc pass).

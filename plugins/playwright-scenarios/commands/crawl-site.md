@@ -1,6 +1,8 @@
 ---
 name: crawl-site
 description: Crawl a website starting from a URL to discover user flows, and write scenarios to <SCENARIO_DIR>/crawl/ (read-only traversal; never fills forms or clicks destructive buttons). Accepts an optional natural-language description of what to focus on or how thorough to be — if neither a description nor any flags are given, prompts interactively with a short menu. Complementary seed-generator to /record-scenario.
+summary: Read-only crawl of a site. Accepts natural-language descriptions ("focus on checkout flow") to guide scope. A bare URL with no description and no flags triggers an interactive Structural / Shallow / Deep menu. Emits scenarios to `<scenario_dir>/crawl/`.
+signature: /crawl-site <url> [description] [--depth=N] [--max-scenarios=N]
 arguments:
   - name: start-url
     description: Required. The URL to start crawling from. Optionally followed by a natural-language description of what to crawl and/or flags. Supported flags - --depth=N (override interpreted depth; max 3), --max-scenarios=N (cap emitted scenarios; default 10). A bare URL with no description and no flags triggers an interactive prompt.

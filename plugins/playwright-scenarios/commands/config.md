@@ -1,6 +1,8 @@
 ---
 name: playwright-scenarios-config
 description: View or update the playwright-scenarios per-project settings stored in .claude/playwright-scenarios.local.md. Also the recovery path when that file is malformed.
+summary: View or update per-project settings. Also the recovery path for malformed config files.
+signature: /playwright-scenarios-config
 ---
 
 # Playwright Scenarios Config
