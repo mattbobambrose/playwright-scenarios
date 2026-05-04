@@ -1,11 +1,11 @@
 ---
 name: crawl-site
-description: Crawl a website starting from a URL to discover user flows, and write scenarios to <SCENARIO_DIR>/crawl/ (read-only traversal; never fills forms or clicks destructive buttons). Accepts an optional natural-language description of what to focus on or how thorough to be — if neither a description nor any flags are given, prompts interactively with a short menu. Complementary seed-generator to /record-scenario.
-summary: Read-only crawl of a site. Accepts natural-language descriptions ("focus on checkout flow") to guide scope. A bare URL with no description and no flags triggers an interactive Structural / Shallow / Deep menu. Emits scenarios to `<scenario_dir>/crawl/`.
+description: Crawl a website starting from a URL to discover user flows, and write scenarios to <SCENARIO_DIR>/crawl/ (read-only traversal; never fills forms or clicks destructive buttons). Accepts an optional natural-language description of what to focus on or how thorough to be. Complementary seed-generator to /record-scenario.
+summary: Read-only crawl of a site. Accepts natural-language descriptions ("focus on checkout flow") to guide scope. A bare URL crawls with default settings (depth 1, max 10 scenarios, no filtering). Emits scenarios to `<scenario_dir>/crawl/`.
 signature: /crawl-site <url> [description] [--depth=N] [--max-scenarios=N]
 arguments:
   - name: start-url
-    description: Required. The URL to start crawling from. Optionally followed by a natural-language description of what to crawl and/or flags. Supported flags - --depth=N (override interpreted depth; max 3), --max-scenarios=N (cap emitted scenarios; default 10). A bare URL with no description and no flags triggers an interactive prompt.
+    description: Required. The URL to start crawling from. Optionally followed by a natural-language description of what to crawl and/or flags. Supported flags - --depth=N (override interpreted depth; max 3), --max-scenarios=N (cap emitted scenarios; default 10).
     required: true
 ---
 
@@ -37,7 +37,7 @@ Any unknown `--`-prefixed token → error before doing any work. Missing start U
 /crawl-site https://bookstore.example.com shallow overview of the main navigation
 ```
 
-If a description is provided, Phase 1.5 interprets it. If no description is provided but at least one flag is, fall back to the default behavior (structural crawl, depth 1, max 10 scenarios, no filtering) with the flag overrides applied. If no description and no flags are provided (a bare `/crawl-site <url>` invocation), Phase 0.5 prompts the user to pick a focus before continuing.
+If a description is provided, Phase 1.5 interprets it. Otherwise, fall back to default behavior (structural crawl, depth 1, max 10 scenarios, no filtering), applying any flag overrides if present.
 
 ## Phase 0: Load project config and preflight
 
@@ -54,22 +54,6 @@ Run `playwright-cli --version` (timeout: 5s); fall back to `npx --no-install pla
 ### 0c. Prepare crawl directory
 
 Ensure `<SCENARIO_DIR>/crawl/` exists; create it if not.
-
-## Phase 0.5: Prompt for focus (if none given)
-
-If a description was already provided in the argument string, **or** any flag (`--depth`, `--max-scenarios`) was provided, skip this phase entirely.
-
-Otherwise (a bare `/crawl-site <url>` invocation), prompt the user before continuing:
-
-> No focus given. Pick a crawl style — or cancel and re-run with a description like *"focus on the checkout flow"* for tighter targeting.
-
-Use `AskUserQuestion` with options:
-
-- **Structural overview** (Recommended) — default behavior: depth 1, max 10 scenarios, no filtering. Equivalent to running with no description or flags in earlier versions.
-- **Shallow overview** — same as a description of "shallow overview of the main navigation".
-- **Deep crawl** — same as a description of "thorough crawl of everything".
-
-If the user picks **Shallow overview** or **Deep crawl**, treat the option's wording as the description and continue into Phase 1.5 with that value. If the user picks **Structural overview**, leave the description empty (Phase 1.5 will be skipped).
 
 ## Phase 1: Fetch and inventory the start page
 
