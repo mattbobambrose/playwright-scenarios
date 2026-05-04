@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `summary` and `signature` frontmatter fields on each command, plus `scripts/gen-command-table.py` — a Python stdlib-only generator that derives the Markdown command table from the frontmatter. The README's command table is now auto-generated between `<!-- COMMANDS:BEGIN -->` / `<!-- COMMANDS:END -->` markers; run `python3 scripts/gen-command-table.py --inplace README.md` after editing any command's `summary` or `signature`. CI-friendly `--check` flag exits 1 if the file would change. Other doc surfaces (USAGE.md, llms.txt, website `commands.md`) still need hand-editing for now.
+
+### Removed
+
+- `/crawl-site` no longer prompts an interactive Structural / Shallow / Deep menu when invoked with a bare URL (introduced in 0.6.1). The "Structural overview" option matched default behavior anyway, the prompt didn't reliably fire across all sessions, and the post-bootstrap stack of prompts was friction without payoff. A bare URL now goes straight to defaults (structural crawl, depth 1, max 10 scenarios, no filtering); pass a description or flag for non-default behavior.
+
+### Fixed
+
+- Tutorial Step 1 now uses the real demo image name (`mattbobambrose/playwright-scenario-playground`) and the required `-p 8080:8080` port mapping, replacing the `<imageName>` placeholder. Adds an `installPlaywrightBrowsers` step so users who jump to the tutorial without reading the template README don't hit a missing-browser error on `/record-scenario`.
+
 ## [0.7.0] - 2026-05-02
 
 ### Added

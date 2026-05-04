@@ -146,7 +146,7 @@ Crawl a site starting from a URL, identify plausible user flows, and write scena
 | Argument | Type | Description |
 |---|---|---|
 | `start-url` | required | The first token starting with `http://` or `https://`. |
-| `description` | optional | Free-form natural-language scope (e.g., "focus on the checkout flow"). Everything that isn't the URL or a flag is joined as the description. If neither a description nor any flag is given, the command prompts interactively with a short menu (Structural / Shallow / Deep). |
+| `description` | optional | Free-form natural-language scope (e.g., "focus on the checkout flow"). Everything that isn't the URL or a flag is joined as the description. If omitted, the crawl runs with default settings (depth 1, max 10 scenarios, no filtering). |
 
 **Flags:**
 
@@ -158,8 +158,8 @@ Crawl a site starting from a URL, identify plausible user flows, and write scena
 **Examples:**
 
 ```
-/crawl-site https://bookstore.example.com                 # bare URL → interactive menu
-/crawl-site https://bookstore.example.com --depth=3       # flag-only → defaults, no menu
+/crawl-site https://bookstore.example.com                 # bare URL → defaults
+/crawl-site https://bookstore.example.com --depth=3       # default crawl with depth override
 /crawl-site https://bookstore.example.com focus on the checkout flow for a first-time buyer
 /crawl-site https://bookstore.example.com thorough crawl of all product pages --max-scenarios=15
 /crawl-site https://bookstore.example.com shallow overview of the main navigation
