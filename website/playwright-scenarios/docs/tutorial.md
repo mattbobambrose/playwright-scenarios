@@ -57,7 +57,7 @@ The first authoring path is the most hands-off: tell `/crawl-site` where to star
 /crawl-site http://localhost:8080
 ```
 
-A bare URL triggers an interactive menu. Pick **Structural overview** for this run. Claude inventories the start page, ranks candidate flows, walks each (read-only — no form submits), and writes one scenario per flow to `<scenario_dir>/crawl/`.
+Claude inventories the start page, ranks candidate flows, walks each (read-only — no form submits), and writes one scenario per flow to `<scenario_dir>/crawl/`. Respond to any prompts Claude shows along the way — accepting the recommended option each time is fine for a first run.
 
 ### Review the scenarios
 
