@@ -21,20 +21,24 @@ Do this once before working through any of the authoring sections.
 
 1. Install Git, Docker, and Claude.
 2. Use the [Kotlin template repo](https://github.com/mattbobambrose/playwright-scenarios-kotlin-template) as the starting point. Click **Use this template → Create a new repository** on the GitHub page to get your own copy, then clone it locally. (You can also `git clone` the template directly if you don't want a fresh repo of your own.) Kotlin is the supported stack today — Python and TypeScript templates are planned but not yet available.
-3. Start the docker image *(image name to be filled in)*. It bundles a small demo site at `http://localhost:8080`:
+3. Start the demo site in a Docker container. It serves a small bookshelf app at `http://localhost:8080`:
     ```
-    docker run <imageName>
+    docker run --rm -p 8080:8080 mattbobambrose/playwright-scenario-playground
     ```
-4. Start a Claude Code session at the repo root:
+4. Download the Playwright browsers (one-time, ~200 MB):
+    ```
+    ./gradlew installPlaywrightBrowsers
+    ```
+5. Start a Claude Code session at the repo root:
     ```
     claude
     ```
-5. Install the plugin:
+6. Install the plugin:
     ```
     /plugin marketplace add mattbobambrose/playwright-scenarios
     /plugin install playwright-scenarios@playwright-scenarios
     ```
-6. The first time you run any plugin command, you'll be prompted for `scenario_dir`, `test_dir`, `test_language`, and `test_framework`. Accept the defaults to follow along with this tutorial.
+7. The first time you run any plugin command, you'll be prompted for `scenario_dir`, `test_dir`, `test_language`, and `test_framework`. Accept the defaults to follow along with this tutorial.
 
 ---
 
