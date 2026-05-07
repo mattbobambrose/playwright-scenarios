@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `/scenario-status` now accepts an optional natural-language description that biases the report: `/scenario-status focus on what's broken`, `/scenario-status one-paragraph executive summary`, `/scenario-status only the checkout-related scenarios`. Phases 1–5 still gather the full picture so the report stays truthful; Phase 6 uses the description to lead with a tailored prose summary, condense or skip tangential sections, optionally filter the per-partition tables, and reorder the recommended actions. Bare `/scenario-status` is unchanged.
 - `summary` and `signature` frontmatter fields on each command, plus `scripts/gen-command-table.py` — a Python stdlib-only generator that derives the Markdown command table from the frontmatter. The README's command table is now auto-generated between `<!-- COMMANDS:BEGIN -->` / `<!-- COMMANDS:END -->` markers; run `python3 scripts/gen-command-table.py --inplace README.md` after editing any command's `summary` or `signature`. CI-friendly `--check` flag exits 1 if the file would change. Other doc surfaces (USAGE.md, llms.txt, website `commands.md`) still need hand-editing for now.
 
 ### Changed

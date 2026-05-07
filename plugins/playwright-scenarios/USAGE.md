@@ -30,7 +30,7 @@ LLM-optimized reference for using the `playwright-scenarios` plugin in a host pr
 | Create a fixture file | `/generate-fixture <source \| interactive> [--name=N]` | From a scenario, document, or interactive prompts. |
 | Audit scenarios against the live site | `/review-scenario [names...]` | Reviews across `record/`, `crawl/`, `convert/`. Pass a partition name to scope. Verifies claims, tightens assertions, adds coverage. |
 | Generate test code | `/scenario-to-tests [names...] [--dry-run]` | Output at `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. Pass a partition name to scope. Currently: Kotlin + Kotest only. |
-| Check scenario health | `/scenario-status` | Dashboard grouped by partition: review dates, test staleness, pass/fail, crawl depth, flow type coverage, conversion rate, critical paths. |
+| Check scenario health | `/scenario-status [description]` | Dashboard grouped by partition: review dates, test staleness, pass/fail, crawl depth, flow type coverage, conversion rate, critical paths. Optional natural-language description ("focus on what's broken", "executive summary") biases what's emphasized. |
 | View or change config | `/playwright-scenarios-config` | Also the recovery path for malformed config. |
 | Generate a `BasePageTest` to extend | `/scaffold-base-test` | One-shot setup. Prompts for `/reset` endpoint, lifecycle scope, browser. Writes `BasePageTest.kt` at the parent of `<test_dir>` and persists `base_test_class`. Currently: Kotlin + Kotest only. Also auto-offered by `loading-config` when no base class is found. |
 

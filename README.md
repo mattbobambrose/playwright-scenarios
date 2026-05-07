@@ -60,7 +60,7 @@ Author browser-driven scenarios as markdown, audit them against the live site, a
 | `/generate-fixture <source \| interactive> [--name=N]` | Scaffold a fixture JSON file from a scenario's data bullets, a document's persona table, or interactive prompts. |
 | `/review-scenario [names...]` | Audit scenarios across `<scenario_dir>/{record,crawl,convert}/` against the live site and apply improvements to the markdown. A bare partition name scopes the review to that partition. |
 | `/scenario-to-tests [names...] [--dry-run]` | Generate tests (defaults: Kotlin + Kotest StringSpec with Playwright-for-Java) at `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. A bare partition name scopes generation to that partition. |
-| `/scenario-status` | Health dashboard grouped by partition: review dates, test status, pass/fail, plus coverage completeness (crawl depth, flow types, conversion rate, critical paths). |
+| `/scenario-status [description]` | Health dashboard grouped by partition: review dates, test status, pass/fail, plus coverage completeness (crawl depth, flow types, conversion rate, critical paths). Accepts a natural-language description ("focus on what's broken") to bias the rendering. |
 | `/playwright-scenarios-config` | View or update per-project settings. Also the recovery path for malformed config files. |
 | `/scaffold-base-test` | Generate a Kotlin `BasePageTest` so generated tests have a base class to extend. Prompts for `/reset` endpoint, lifecycle scope, and browser. Persists `base_test_class` in the config. Currently `kotlin` + `kotest-stringspec` only. Auto-offered by `loading-config` when no base class is found in the project. |
 <!-- COMMANDS:END -->
