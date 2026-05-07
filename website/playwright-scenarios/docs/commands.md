@@ -296,12 +296,14 @@ Generate test code from reviewed scenarios. The output language and framework co
 ### `/scenario-status`
 
 ```
-/scenario-status
+/scenario-status [description]
 ```
 
 Single-view health dashboard for every scenario and its generated tests, plus crawl-derived coverage metrics.
 
-**Arguments:** none.
+**Arguments:** optional free-form English description that biases the rendering. Examples: `/scenario-status focus on what's broken`, `/scenario-status one-paragraph executive summary`, `/scenario-status only the checkout-related scenarios`. Without it, the full default dashboard is rendered. With it, the command leads with a tailored prose summary, condenses or skips tangential sections, may filter per-partition tables, and reorders the recommended actions to match the focus. Phases 1–5 still gather the full picture either way.
+
+In every mode the output keeps each scenario partition-tagged (record / crawl / convert) so it's always clear which command produced a given scenario — partition headers are preserved, prose summaries name partitions when citing counts, and recommended actions qualify scenario names with their partition.
 
 **Reports:**
 

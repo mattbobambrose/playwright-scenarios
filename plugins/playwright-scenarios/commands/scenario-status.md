@@ -1,13 +1,33 @@
 ---
 name: scenario-status
-description: Display a health dashboard for all scenarios across record/crawl/convert partitions — last reviewed, test file existence, test pass/fail status, coverage completeness (crawl depth, flow types, conversion rate, critical paths). Use when the user asks "what's the status of my scenarios?" or "what's stale/missing/broken?" or "how much of the site is covered?"
-summary: 'Health dashboard grouped by partition: review dates, test status, pass/fail, plus coverage completeness (crawl depth, flow types, conversion rate, critical paths).'
-signature: /scenario-status
+description: Display a health dashboard for all scenarios across record/crawl/convert partitions — last reviewed, test file existence, test pass/fail status, coverage completeness (crawl depth, flow types, conversion rate, critical paths). Accepts an optional natural-language description that biases the report ("focus on what's broken", "give me a one-paragraph executive summary", "what should I work on this week?", "only the checkout-related scenarios"). Use when the user asks "what's the status of my scenarios?" or "what's stale/missing/broken?" or "how much of the site is covered?" or asks for a tailored summary.
+summary: 'Health dashboard grouped by partition: review dates, test status, pass/fail, plus coverage completeness (crawl depth, flow types, conversion rate, critical paths). Accepts a natural-language description ("focus on what''s broken") to bias the rendering.'
+signature: /scenario-status [description]
+arguments:
+  - name: description
+    description: Optional. A natural-language description of what to focus on in the report (e.g. "focus on what's broken", "executive summary", "only the checkout-related scenarios"). Biases what Phase 6 emphasizes, condenses, or skips. Without it, the full default dashboard is rendered.
+    required: false
 ---
 
 # Scenario Status
 
 Show a single-view dashboard of every scenario's health across the record / crawl / convert partitions, plus coverage completeness metrics from crawl history.
+
+## Argument parsing
+
+Everything after the command name, joined into one string, is the optional **focus description** (`<FOCUS>`). It's free-form English describing what the user wants emphasized.
+
+**Examples:**
+
+```
+/scenario-status
+/scenario-status focus on what's broken
+/scenario-status give me a one-paragraph executive summary
+/scenario-status what should I work on this week?
+/scenario-status only the checkout-related scenarios
+```
+
+If `<FOCUS>` is empty, render the default full dashboard (Phase 6 as written). If `<FOCUS>` is provided, Phases 1–5 still gather the full picture (data collection is cheap and the description should not silently change what's "true" about the report); Phase 6 then uses `<FOCUS>` to shape what's expanded, condensed, or skipped, and may lead with a tailored prose summary.
 
 ## Phase 0: Load config
 
@@ -134,6 +154,31 @@ If `.critical-paths.md` doesn't exist, skip this section and suggest creating on
 > ```
 
 ## Phase 6: Print dashboard
+
+### Output invariants (apply in all modes)
+
+Regardless of `<FOCUS>` or formatting choice, every reference to a scenario in the report must make its **source partition** (`record`, `crawl`, or `convert`) visible to the user. This rule applies to:
+
+- The per-partition tables — render the `=== record ===` / `=== crawl ===` / `=== convert ===` headers even when one partition is empty (write `(no scenarios)` underneath rather than dropping the section).
+- The leading prose summary (when `<FOCUS>` is set) — name partitions when citing counts, e.g. "3 stale scenarios, all in `crawl/`" rather than "3 stale scenarios."
+- Any per-scenario callout in **Recommended actions** — qualify the scenario name with its partition, e.g. `record/checkout-happy-path` or "the crawl scenario `nav-to-pricing`."
+- Filtered views — keep partition headers (or partition badges per row) so a filtered list still tells the user which command produced each scenario.
+
+The user must never have to cross-reference a scenario name back to its source command; the report always answers that question itself.
+
+### If `<FOCUS>` was provided
+
+Interpret the description against the data gathered in Phases 1–5 and decide:
+
+1. **Lead with a prose summary** that directly answers the user's question. 1–3 short paragraphs, citing concrete numbers from the gathered data. Place this *before* any tables.
+2. **Pick which standard sections to keep, condense, or skip:**
+   - Sections that bear on the focus → keep in full.
+   - Sections that are tangential → condense to a single line, or drop.
+   - Sections with no data (no `.crawl-meta.json`, no `.critical-paths.md`, no test report) → still drop, as today.
+3. **Reorder / filter the Recommended actions** so the top items match the focus. Cap at 7. Drop suggestions that don't relate.
+4. **If the focus implies a filter** (e.g. "only the checkout-related scenarios", "stale ones only"), apply it to the per-partition tables — don't show rows that don't match. Note the filter in the section header (e.g. `=== record (filtered: checkout-related) ===`).
+
+After the prose summary, render the kept sections in the same order as the default dashboard below. Don't invent new section types — re-arrange and re-emphasize the existing ones.
 
 ### Scenario health table — grouped by partition
 

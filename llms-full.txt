@@ -20,7 +20,7 @@ Author browser-driven scenarios as markdown, audit them against the live site, a
 | `/doc-to-scenarios <source> [--skip-evaluation]` | Convert any document into scenario markdown files under `<scenario_dir>/convert/`. |
 | `/review-scenario [names...]` | Audit scenarios across `<scenario_dir>/{record,crawl,convert}/` against the live site and apply improvements. A bare partition name scopes the review to that partition. |
 | `/scenario-to-tests [names...] [--dry-run]` | Generate tests (defaults: Kotlin + Kotest StringSpec with Playwright-for-Java) at `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. `--dry-run` writes files but skips the test run. |
-| `/scenario-status` | Health dashboard grouped by partition: review dates, test status, pass/fail, coverage gaps. |
+| `/scenario-status [description]` | Health dashboard grouped by partition: review dates, test status, pass/fail, coverage gaps. Optional natural-language description biases the rendering. |
 | `/generate-fixture <source \| interactive> [--name=N]` | Scaffold a JSON fixture file from a scenario, document, or interactive prompts. |
 | `/playwright-scenarios-config` | View or update per-project settings in `.claude/playwright-scenarios.local.md`. Also the recovery path for malformed config files. |
 | `/scaffold-base-test` | Generate a Kotlin `BasePageTest` so generated tests have a base class to extend. Prompts for `/reset` endpoint, lifecycle scope, and browser. Persists `base_test_class` in the config. Currently `kotlin` + `kotest-stringspec` only. Auto-offered by `loading-config` when no base class is found in the project. |
@@ -290,7 +290,9 @@ Scenario creation commands write to one of three partitions: `<scenario_dir>/{re
 
 ### /scenario-status
 
-**Description:** Health dashboard for all scenarios across the record / crawl / convert partitions — review dates, test file status, pass/fail, coverage gaps.
+**Description:** Health dashboard for all scenarios across the record / crawl / convert partitions — review dates, test file status, pass/fail, coverage gaps. Accepts an optional free-form English description that biases what the report emphasizes.
+
+**Argument:** Everything after the command name, joined into one string, is the optional focus description (`<FOCUS>`). Examples: `/scenario-status focus on what's broken`, `/scenario-status one-paragraph executive summary`, `/scenario-status only the checkout-related scenarios`. Empty `<FOCUS>` → default full dashboard.
 
 **Phases:**
 0. Load config.
@@ -299,7 +301,7 @@ Scenario creation commands write to one of three partitions: `<scenario_dir>/{re
 3. Check test file existence and staleness for `<TEST_DIR>/<command>/<scenario-name>/<ClassName>.kt` (scenario newer than test file = stale).
 4. Parse most recent Gradle test report for pass/fail (optional — skipped if no report found). Match classes against `<SCENARIOS_PACKAGE>.{record,crawl,convert}.*`.
 5. Coverage completeness: crawl depth (from `<SCENARIO_DIR>/crawl/.crawl-meta.json`), flow type coverage, conversion rate by partition, critical paths (from `.critical-paths.md`).
-6. Print dashboard tables grouped by partition + summary stats + recommended actions.
+6. Print dashboard. With no `<FOCUS>`: tables grouped by partition + summary stats + recommended actions. With `<FOCUS>`: lead with a tailored 1–3-paragraph prose summary citing concrete numbers, then keep/condense/skip standard sections according to the focus, optionally filter the per-partition tables (e.g. "checkout-related scenarios"), and reorder the recommended actions to match. **Invariant in all modes:** every scenario reference is partition-tagged (record / crawl / convert) so the user always knows which command produced it — partition headers are kept (with `(no scenarios)` if empty), prose summaries name partitions when citing counts, recommended actions qualify scenario names with their partition.
 
 ---
 
