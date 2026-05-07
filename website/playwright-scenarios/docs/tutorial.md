@@ -19,7 +19,10 @@ By the end you'll have:
 
 Do this once before working through any of the authoring sections.
 
-1. Install Git, Docker, and Claude.
+1. Install Git, Docker, Node.js, and Claude. Then install the `playwright-cli` prerequisite (used by `/review-scenario`, `/scenario-to-tests`, and `/crawl-site` for live-site exploration):
+    ```
+    npm install -g @playwright/cli@latest
+    ```
 2. Use the [Kotlin template repo](https://github.com/mattbobambrose/playwright-scenarios-kotlin-template) as the starting point. Click **Use this template → Create a new repository** on the GitHub page to get your own copy, then clone it locally. (You can also `git clone` the template directly if you don't want a fresh repo of your own.) Kotlin is the supported stack today — Python and TypeScript templates are planned but not yet available.
 3. Start the demo site in a Docker container. It serves a small bookshelf app at `http://localhost:8080`:
     ```
