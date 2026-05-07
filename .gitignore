@@ -14,3 +14,6 @@ __pycache__/
 ### Zensical (website build output) ###
 website/playwright-scenarios/site/
 website/playwright-scenarios/.cache/
+
+### Local notes ###
+TODO.md
