@@ -81,3 +81,15 @@ All payment-related actions below target elements inside that iframe.
 The generated test code will use `page.frameLocator('#stripe-payment-iframe')` instead of `page` for all selectors inside the boundary. If the document doesn't mention the iframe, the generated tests will target the top-level page and fail on every assertion.
 
 When the flow exits the iframe (e.g., a confirmation page outside the payment form), add `**Iframe:** none` at the transition point.
+
+## Full authoring rules
+
+The patterns above cover the highest-leverage cases. The complete authoring rule set lives in [`DOC_GUIDE.md`](https://github.com/mattbobambrose/playwright-scenarios/blob/master/plugins/playwright-scenarios/DOC_GUIDE.md), which you paste into your LLM's context when drafting a test document. It covers everything here plus:
+
+- **Async/loading transitions** — name the observable end-condition (a spinner appearing then disappearing, a button enabling) instead of relying on implicit waits.
+- **Modal and dialog boundaries** — qualify selectors to "inside the modal" once a dialog opens; note where it closes.
+- **Navigation type** — say whether an action triggers a same-tab load, a client-side route change, a new tab, a download, or an external redirect.
+- **Deterministic test data** — for resource-creating flows (signup, account creation), use stably-suffixed or timestamped values so reruns don't collide.
+- **Per-test preconditions** — keep setup state (auth, feature flags, seeded data) in a dedicated `Preconditions:` block, separate from the action steps.
+
+`DOC_GUIDE.md` also lists what the framework can and cannot handle (CAPTCHA, OTP/email verification, native browser dialogs, hardware integration are all out of scope) and ends with a self-applied checklist.

@@ -4,6 +4,14 @@ Rules for writing documents that can be converted into automated Playwright test
 
 ---
 
+## How to use this guide
+
+You are reading this guide because the user wants you to **draft a test document** — typically a flow description, user story, test spec, or acceptance-criteria document that will later be converted into Playwright tests by the `/doc-to-scenarios` command in the [`playwright-scenarios`](https://github.com/mattbobambrose/playwright-scenarios) plugin.
+
+Apply the rules below to whatever flow the user asks you to document. Do **not** summarize, critique, or suggest improvements to this guide — the user is not asking for a meta-review of it. If the user has not yet told you which flow to document, ask them what to cover. Once they tell you, produce the document in the shape described under "Document template" below, applying every rule that fits the flow, and end with the checklist self-applied to your draft.
+
+---
+
 ## What the test framework can handle
 
 The test generator translates human-readable documents into Playwright browser automation. It supports:
@@ -36,6 +44,11 @@ Do **not** write documents for these — they need different tools:
 | Accessibility | "Screen readers should announce the form labels" | Needs specialized tooling | axe-core, pa11y |
 | API testing | "The endpoint returns a 200 with these fields" | It tests the UI, not the API | Postman, REST Assured |
 | Conditional branching | "If the user picks X, show screen A; if Y, show screen B" | Each test is a single linear flow | Write one test per branch |
+| CAPTCHA / bot detection | "Pass the reCAPTCHA challenge" | Automation is intentionally blocked | Run tests against an environment with CAPTCHA disabled |
+| Email/SMS verification | "Open the OTP email and enter the code" | Requires reading from an external mailbox or SMS gateway | Bypass via a test backdoor or mock the verification endpoint |
+| Real-time multi-user sync | "User A sees User B typing instantly" | Requires coordinated browser sessions in lockstep | Custom multi-context Playwright code |
+| Native browser dialogs | "Verify the print dialog appears" | The dialog UI is browser-controlled and outside the page DOM | Test the trigger only (e.g. that `window.print` is called), not the dialog |
+| Hardware integration | "Scan a fingerprint", "Tap an NFC card" | Requires platform/device APIs the browser doesn't expose | Mock at the integration layer |
 
 ## Rules for writing documents
 
@@ -162,6 +175,63 @@ If you're writing from memory, design docs, or mockups, note which claims are as
 
 Mark unverified claims: "Assumed: the phone field accepts formatted input — verify against the live site."
 
+### 11. Describe waits as observable transitions
+
+If a step depends on the UI finishing something (a save, a load, a fetch), name the observable signal that ends the wait — a spinner appearing then disappearing, a button becoming enabled, a row appearing in a list. Don't write "wait a moment" or "after the page loads."
+
+**Bad:**
+- Action: Click 'Save'.
+- Action: Continue to the next page.
+
+**Good:**
+- Action: Click 'Save'.
+- Expected: A "Saving…" spinner (`aria-label="Saving"`) appears, then disappears.
+- Expected: The 'Continue' button becomes enabled.
+- Action: Click 'Continue'.
+
+This is the single biggest source of flaky generated tests; without an observable end-condition the generator falls back to fixed sleeps.
+
+### 12. Note modal and dialog boundaries
+
+If an action opens a modal, dialog, drawer, or popover, say so explicitly and note that subsequent selectors apply inside it. Modals frequently shadow outer-page elements with the same labels, and selectors that worked before the modal opened may now match the wrong element.
+
+**Example:** "Clicking 'Delete account' opens a confirmation modal with heading 'Confirm account deletion'. All actions in the rest of this test happen inside that modal until it closes on confirm."
+
+Then qualify each step inside the modal: "Click the 'Confirm' button inside the modal." Note where the modal closes (on confirm, on a successful network response, on Escape).
+
+This is the same kind of selector-scope issue as Rule 5 (iframes), one level less severe — but still a common source of "I can't find this element" debugging time.
+
+### 13. Specify the navigation type
+
+When an action causes the page to leave or change, say which kind of navigation it triggers:
+
+- **Same-tab navigation** — full-page load to a new URL
+- **Client-side route change** — URL changes without a full reload (SPA behavior)
+- **New tab/window** — link opens in a separate tab
+- **Download** — a file is downloaded; the current page does not change
+- **External redirect** — navigation leaves the origin
+
+**Example:** "Clicking 'Privacy Policy' opens a **new browser tab** to `https://example.com/privacy`. The original tab stays on the current page."
+
+**Example:** "Clicking 'Export CSV' triggers a **download** of `report.csv`. No URL change occurs."
+
+Without this, the generated test waits for the wrong event — e.g. a same-tab URL change that never happens because the link opened in a new tab — and either hangs or fails for a misleading reason.
+
+### 14. Use deterministic test data for idempotent reruns
+
+Choose test data values that won't collide between runs. For flows that **create** resources (signup, account creation, content creation, anything with a uniqueness constraint), append a stable suffix or timestamp so reruns don't collide with prior state.
+
+**Bad** (second run fails: "email already in use"):
+- Email: `alex@example.com`
+
+**Good** (stable suffix — predictable across runs):
+- Email: `alex-playwright-001@example.com`
+
+**Also good** (timestamp — fully unique per run):
+- Email: `{{timestamp}}-alex@example.com`
+
+For non-creating flows (login, browse, search), reusable seeded data is fine — see the Pre-set state row in the capabilities table.
+
 ## Document template
 
 ```markdown
@@ -182,10 +252,16 @@ Mark unverified claims: "Assumed: the phone field accepts formatted input — ve
 
 ## Test 1: [Short description]
 
+Preconditions:
+- [Optional. Per-test state required before any action runs — feature flag on, specific user role, seeded data, prior test must have completed. Omit the section if there are no preconditions.]
+
 - Action: [what the user does — use exact button/link text]
 - Expected: [what should happen — specific, assertable]
 
 ## Test 2: [Short description]
+
+Preconditions:
+- ...
 
 - Action: ...
 - Expected: ...
@@ -202,7 +278,11 @@ Before finalizing a document, verify:
 - [ ] Every action uses exact DOM text (not paraphrased labels)
 - [ ] Every expected outcome is specific enough to assert (not "it works")
 - [ ] Iframe/architecture boundaries are noted prominently
-- [ ] Shared test data is in a fixture table, not repeated per test
+- [ ] Modal and dialog boundaries are noted; selectors qualified to "inside the modal" where relevant
+- [ ] Async/loading states have explicit observable end-conditions (no "wait a moment")
+- [ ] Navigation type (same-tab / client-side / new-tab / download / external) is explicit when the page changes
+- [ ] Shared test data is in a fixture table; values for created resources are deterministic and won't collide between runs
+- [ ] Per-test preconditions are listed in their own section, not woven into the action steps
 - [ ] Known bugs are documented as expected failures
 - [ ] Scope boundaries are defined (in scope / out of scope)
 - [ ] Unverified claims are marked as assumptions
