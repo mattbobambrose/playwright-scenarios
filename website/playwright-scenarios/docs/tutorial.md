@@ -128,6 +128,8 @@ The third path starts from a written description. You can hand it to any LLM (Ch
 
 Paste [`DOC_GUIDE.md`](https://github.com/mattbobambrose/playwright-scenarios/blob/master/plugins/playwright-scenarios/DOC_GUIDE.md) into your LLM's context — system prompt, custom GPT instructions, or the start of a conversation. This teaches the LLM the format, the available tags, and the pitfalls to avoid *before* it writes anything.
 
+> **Tip:** Paste `DOC_GUIDE.md` as a **system prompt or custom instructions** rather than a mid-conversation message — system-prompt placement anchors the framing most reliably and the LLM is more likely to apply the rules than to critique them. If you do paste mid-conversation, include your request in the same message (e.g. "here are the rules, now draft a test document for the checkout flow") instead of pasting the guide alone and waiting. If the LLM still responds with suggestions for improving the guide instead of drafting a document, reply once with "Apply the rules; don't critique them. Draft a test document for [your flow]." and it will correct course. The guide's "How to use this guide" section anchors this, but LLM behavior is probabilistic — these tips compound.
+
 Then ask it to draft a document covering the flows you care about. Save the output to a file in your repo, e.g. `docs/checkout-tests.md`.
 
 ### Convert to scenarios
