@@ -23,7 +23,7 @@ LLM-optimized reference for using the `playwright-scenarios` plugin in a host pr
 
 | If you want to... | Use | Notes |
 |---|---|---|
-| Record a user flow by driving a browser | `/record-scenario [name]` | Opens Playwright codegen. Writes to `<scenario_dir>/record/<name>.md`. |
+| Record a user flow by driving a browser | `/record-scenario [url] [name]` | Opens Playwright codegen. Writes to `<scenario_dir>/record/<name>.md`. Pass a URL to skip the Start URL prompt. |
 | Auto-discover flows on a site | `/crawl-site <url> [description] [--depth=N] [--max-scenarios=N]` | Read-only. Accepts natural-language scope ("focus on checkout"). A bare URL crawls with defaults (depth 1, max 10 scenarios). Writes to `<scenario_dir>/crawl/`. |
 | Check if a doc is testable | `/evaluate-doc` (skill, not command — invoke by asking Claude to evaluate) | Advisory. Reports what converts, what needs changes, what's out of scope. |
 | Convert a doc into scenarios | `/doc-to-scenarios <path> [--skip-evaluation]` | Runs evaluate-doc first. Writes to `<scenario_dir>/convert/`. |

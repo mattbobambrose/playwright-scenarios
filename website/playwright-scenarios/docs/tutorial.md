@@ -13,7 +13,7 @@ By the end you'll have:
 - Tests under `<test_dir>/convert/` from a `/doc-to-scenarios` run.
 - A health dashboard view via `/scenario-status` that ties them all together.
 
-> **Bring your own site.** This tutorial points at the bundled bookshelf demo on `http://localhost:8080` so every step has a concrete target. Anything tied to the demo is swappable: the Docker container, the start URL, the doc path, the recorded flow. Each step calls out what to substitute under a **Customize:** note. If you already have a dev or staging server you want to test, you can replace `http://localhost:8080` with its URL throughout and skip the Docker container in Step 1.
+**Bring your own site.** This tutorial points at the bundled bookshelf demo on `http://localhost:8080` so every step has a concrete target. Anything tied to the demo is swappable: the Docker container, the start URL, the doc path, the recorded flow. Each step calls out what to substitute under a **For your project:** note. If you already have a dev or staging server you want to test, you can replace `http://localhost:8080` with its URL throughout and skip the Docker container in Step 1.
 
 ---
 
@@ -30,7 +30,7 @@ Do this once before working through any of the authoring sections.
     ```
     docker run --rm -p 8080:8080 mattbobambrose/playwright-scenario-playground
     ```
-    > **Customize:** Skip this step if you already have a dev or staging server you want to test. Use that URL anywhere this tutorial says `http://localhost:8080`.
+    **For your project:** Skip this step if you already have a dev or staging server you want to test. Use that URL anywhere this tutorial says `http://localhost:8080`.
 4. Download the Playwright browsers (one-time, ~200 MB):
     ```
     ./gradlew installPlaywrightBrowsers
@@ -55,7 +55,7 @@ Do this once before working through any of the authoring sections.
     ```
     This is your first plugin command, so two prompts fire in sequence: first the config bootstrap (`scenario_dir`, `test_dir`, `test_language`, `test_framework`), then three scaffold customizations (whether the dev server has a `POST /reset` endpoint, lifecycle scope, browser). Accept the defaults at every prompt to follow along with the tutorial. Claude writes `BasePageTest.kt` next to your scenarios package and persists `base_test_class` in the config.
 
-    > **Customize:** The defaults match the kotlin template's layout. If you're applying the plugin to your own project, see the [Configuration table in the README](https://github.com/mattbobambrose/playwright-scenarios#configuration) for what each field controls and override the prompts as needed. You can re-prompt later with `/playwright-scenarios-config`.
+    **For your project:** The defaults match the kotlin template's layout. If you're applying the plugin to your own project, see the [Configuration table in the README](https://github.com/mattbobambrose/playwright-scenarios#configuration) for what each field controls and override the prompts as needed. You can re-prompt later with `/playwright-scenarios-config`.
 
 ---
 
@@ -71,7 +71,11 @@ The first authoring path is the most hands-off: tell `/crawl-site` where to star
 
 Claude inventories the start page, ranks candidate flows, walks each (read-only — no form submits), and writes one scenario per flow to `<scenario_dir>/crawl/`. Respond to any prompts Claude shows along the way — accepting the recommended option each time is fine for a first run.
 
-> **Customize:** Replace `http://localhost:8080` with any URL Claude can reach — your dev server, a staging environment, a public site. You can also append a natural-language description to focus the crawl, e.g. `/crawl-site https://example.com focus on the checkout flow`.
+**For your project:** Replace `http://localhost:8080` with any URL Claude can reach — your dev server, a staging environment, a public site. You can also append a natural-language description to focus the crawl, e.g.:
+
+```
+/crawl-site https://example.com focus on the checkout flow
+```
 
 ### Review the scenarios
 
@@ -100,12 +104,12 @@ For interactive flows (logins, form fills, multi-step purchases) it's faster to 
 ### Record
 
 ```
-/record-scenario
+/record-scenario http://localhost:8080
 ```
 
-A Chromium window opens with the Playwright Inspector. Drive the browser through the flow you want to test — click links, fill forms, mark assertions using the Inspector's "Assert visibility / text / value" toolbar buttons. Close the browser when done.
+A Chromium window opens with the Playwright Inspector pointed at the Start URL you passed. Drive the browser through the flow you want to test — click links, fill forms, mark assertions using the Inspector's "Assert visibility / text / value" toolbar buttons. Close the browser when done.
 
-> **Customize:** Drive the browser to whichever flow you actually care about — login, checkout, a multi-step form, anything you'd test by hand. The recorded flow is whatever you do in the window; there's no fixed script.
+**For your project:** Drive the browser to whichever flow you actually care about — login, checkout, a multi-step form, anything you'd test by hand. The recorded flow is whatever you do in the window; there's no fixed script.
 
 Claude converts the recorded actions into a scenario markdown file at `<scenario_dir>/record/<name>.md`. You'll be prompted to confirm the inferred name if you didn't supply one.
 
@@ -128,7 +132,7 @@ The third path starts from a written description. You can hand it to any LLM (Ch
 
 Paste [`DOC_GUIDE.md`](https://github.com/mattbobambrose/playwright-scenarios/blob/master/plugins/playwright-scenarios/DOC_GUIDE.md) into your LLM's context — system prompt, custom GPT instructions, or the start of a conversation. This teaches the LLM the format, the available tags, and the pitfalls to avoid *before* it writes anything.
 
-> **Tip:** Paste `DOC_GUIDE.md` as a **system prompt or custom instructions** rather than a mid-conversation message — system-prompt placement anchors the framing most reliably and the LLM is more likely to apply the rules than to critique them. If you do paste mid-conversation, include your request in the same message (e.g. "here are the rules, now draft a test document for the checkout flow") instead of pasting the guide alone and waiting. If the LLM still responds with suggestions for improving the guide instead of drafting a document, reply once with "Apply the rules; don't critique them. Draft a test document for [your flow]." and it will correct course. The guide's "How to use this guide" section anchors this, but LLM behavior is probabilistic — these tips compound.
+**Tip:** Paste `DOC_GUIDE.md` as a **system prompt or custom instructions** rather than a mid-conversation message — system-prompt placement anchors the framing most reliably and the LLM is more likely to apply the rules than to critique them. If you do paste mid-conversation, include your request in the same message (e.g. "here are the rules, now draft a test document for the checkout flow") instead of pasting the guide alone and waiting. If the LLM still responds with suggestions for improving the guide instead of drafting a document, reply once with "Apply the rules; don't critique them. Draft a test document for [your flow]." and it will correct course. The guide's "How to use this guide" section anchors this, but LLM behavior is probabilistic — these tips compound.
 
 Then ask it to draft a document covering the flows you care about. Save the output to a file in your repo, e.g. `docs/checkout-tests.md`.
 
@@ -138,7 +142,7 @@ Then ask it to draft a document covering the flows you care about. Save the outp
 /doc-to-scenarios docs/checkout-tests.md
 ```
 
-> **Customize:** `docs/checkout-tests.md` is illustrative — pass any path to your own document. Existing test plans, requirements docs, meeting notes, and acceptance criteria all work as input.
+**For your project:** `docs/checkout-tests.md` is illustrative — pass any path to your own document. Existing test plans, requirements docs, meeting notes, and acceptance criteria all work as input.
 
 Claude runs `evaluate-doc` first (a sanity check that the doc is well-formed for conversion), pauses for your approval, then writes one scenario per flow to `<scenario_dir>/convert/`.
 

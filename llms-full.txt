@@ -15,7 +15,7 @@ Author browser-driven scenarios as markdown, audit them against the live site, a
 
 | Command | Description |
 |---------|-------------|
-| `/record-scenario [name]` | Launch Playwright codegen, capture a real user flow, and write a scenario markdown file to `<scenario_dir>/record/<name>.md`. |
+| `/record-scenario [url] [name]` | Launch Playwright codegen, capture a real user flow, and write a scenario markdown file to `<scenario_dir>/record/<name>.md`. Optionally accepts a Start URL so the browser opens straight to it. |
 | `/crawl-site <start-url> [description] [--depth=N] [--max-scenarios=N]` | Read-only crawl (start URL + same-origin links one hop out by default). Emits user-flow-oriented scenarios to `<scenario_dir>/crawl/`. |
 | `/doc-to-scenarios <source> [--skip-evaluation]` | Convert any document into scenario markdown files under `<scenario_dir>/convert/`. |
 | `/review-scenario [names...]` | Audit scenarios across `<scenario_dir>/{record,crawl,convert}/` against the live site and apply improvements. A bare partition name scopes the review to that partition. |
@@ -168,13 +168,13 @@ Scenario creation commands write to one of three partitions: `<scenario_dir>/{re
 
 ### /record-scenario
 
-**Description:** Record a new website validation scenario by driving a real browser. Launches Playwright codegen, captures clicks/typing/assertions, then writes a scenario markdown file to `<SCENARIO_DIR>/record/<name>.md`.
+**Description:** Record a new website validation scenario by driving a real browser. Launches Playwright codegen, captures clicks/typing/assertions, then writes a scenario markdown file to `<SCENARIO_DIR>/record/<name>.md`. Accepts an optional Start URL so the codegen browser opens directly there instead of prompting.
 
-**Arguments:** optional `name` (kebab-case scenario filename; inferred from recorded actions if omitted). No flags.
+**Arguments:** optional `url` (a token starting with `http://` or `https://` — used as the Start URL) and optional `name` (kebab-case scenario filename; inferred from recorded actions if omitted). Order doesn't matter; tokens are content-detected. No flags.
 
 **Phases:**
 0. **Load config.** Invoke `loading-config` to resolve `<SCENARIO_DIR>` and bootstrap if missing. Abort on `MALFORMED_CONFIG`.
-1. **Determine scenario name.** Validate kebab-case if supplied; otherwise defer inference to step 6. Always prompt for the start URL — no default.
+1. **Determine scenario name and Start URL.** Validate name as kebab-case if supplied; otherwise defer inference to step 6. If a URL was supplied as an argument, use it as the Start URL; otherwise prompt — no default.
 2. **Collision check.** If name is known and `<SCENARIO_DIR>/record/<name>.md` exists, ask before overwriting.
 3. **Brief the user on Playwright Inspector controls** (Assert visibility / text / value toolbar buttons).
 4. **Run the recorder.** `./gradlew recordScenario -Purl=<start-url> -Pout=build/recordings/<filename>.java` with a long timeout. If the browser binary is missing, prompt the user to run `./gradlew installPlaywrightBrowsers`.

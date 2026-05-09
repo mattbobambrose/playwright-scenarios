@@ -30,7 +30,7 @@ This repository is a Claude Code plugin marketplace (no application source). It 
 
 ## Commands
 
-- [/record-scenario](plugins/playwright-scenarios/commands/record-scenario.md): Launch Playwright codegen, capture a real user flow, and write a scenario to `<scenario_dir>/record/<name>.md`.
+- [/record-scenario](plugins/playwright-scenarios/commands/record-scenario.md): Launch Playwright codegen, capture a real user flow, and write a scenario to `<scenario_dir>/record/<name>.md`. Optionally accepts a Start URL so the browser opens straight to it.
 - [/crawl-site](plugins/playwright-scenarios/commands/crawl-site.md): Read-only site crawl; emits user-flow-oriented scenarios to `<scenario_dir>/crawl/`. Accepts an optional natural-language description plus `--depth` and `--max-scenarios`. Bare URL = default crawl (depth 1, max 10 scenarios).
 - [/doc-to-scenarios](plugins/playwright-scenarios/commands/doc-to-scenarios.md): Convert any document into scenario markdown files under `<scenario_dir>/convert/` with proper tag mapping. Accepts `--skip-evaluation`.
 - [/generate-fixture](plugins/playwright-scenarios/commands/generate-fixture.md): Scaffold a JSON fixture file from a scenario, document, or interactively. Accepts `--name`.
