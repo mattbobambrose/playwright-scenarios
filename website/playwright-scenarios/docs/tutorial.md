@@ -104,10 +104,16 @@ For interactive flows (logins, form fills, multi-step purchases) it's faster to 
 ### Record
 
 ```
-/record-scenario http://localhost:8080
+/record-scenario
 ```
 
-A Chromium window opens with the Playwright Inspector pointed at the Start URL you passed. Drive the browser through the flow you want to test — click links, fill forms, mark assertions using the Inspector's "Assert visibility / text / value" toolbar buttons. Close the browser when done.
+Claude prompts you for a Start URL — paste `http://localhost:8080`. A Chromium window then opens with the Playwright Inspector pointed at that URL. Drive the browser through the flow you want to test — click links, fill forms, mark assertions using the Inspector's "Assert visibility / text / value" toolbar buttons. Close the browser when done.
+
+You can also pass the Start URL as an argument to skip the prompt:
+
+```
+/record-scenario http://localhost:8080
+```
 
 **For your project:** Drive the browser to whichever flow you actually care about — login, checkout, a multi-step form, anything you'd test by hand. The recorded flow is whatever you do in the window; there's no fixed script.
 
