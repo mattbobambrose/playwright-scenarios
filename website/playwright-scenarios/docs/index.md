@@ -16,7 +16,7 @@ The plugin works with any project that uses Playwright for browser automation. T
 
 ``` mermaid
 graph TD
-    A[User wants to<br/>test a website]
+    A[Your website]
     A -->|"/crawl-site"| B[Scenario]
     A -->|"/record-scenario"| B
     A -->|"/doc-to-scenarios"| B
