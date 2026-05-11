@@ -187,6 +187,7 @@ Initial release.
 - Host-project setup documentation covering the required Gradle `recordScenario` and `installPlaywrightBrowsers` tasks, Playwright / Kotest dependencies, `scenarios/` directory convention, and base test class pattern.
 - MIT license.
 
+[0.8.0]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.7.0...0.8.0
 [0.7.0]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.6.1...0.7.0
 [0.6.1]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.6.0...0.6.1
 [0.6.0]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.5.1...0.6.0
