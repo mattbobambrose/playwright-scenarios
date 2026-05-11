@@ -177,5 +177,6 @@ You'll see all three batches grouped by partition — review dates, test file ex
 
 - **[Workflow](workflow.md)** — the conceptual map of all four paths to a reviewed scenario, including a fourth path (migrating existing docs that weren't written for this framework) that this tutorial skips.
 - **[Commands & Skills](commands.md)** — full reference for every command and skill, including flags and prerequisites.
+- **[FAQ](faq.md)** — conceptual and scope questions ("Do I have to use the bookshelf demo?", "What if my project isn't Kotlin?", "Why do I need Node.js?").
 - **[Writing Docs](writing-docs.md)** — guidance on writing or refining input documents that convert cleanly via `/doc-to-scenarios`.
 - **[Troubleshooting](troubleshooting.md)** — Symptom → Cause → Fix entries for the failures you're most likely to hit at setup and runtime.

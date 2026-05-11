@@ -190,7 +190,7 @@ The file is checked into git by default so contributors share the same layout. A
 
 ## Documentation
 
-For detailed guides — terminology, workflow, the full command and skill reference, capabilities, writing effective docs, and troubleshooting — see the [project website](website/playwright-scenarios/docs/index.md).
+For detailed guides — terminology, workflow, the full command and skill reference, capabilities, writing effective docs, FAQ, and troubleshooting — see the [project website](website/playwright-scenarios/docs/index.md).
 
 ## Changelog
 
