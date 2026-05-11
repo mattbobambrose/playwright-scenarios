@@ -40,7 +40,7 @@ Author browser-driven scenarios as markdown, audit them against the live site, a
 1. `testImplementation("com.microsoft.playwright:playwright:...")` and `testImplementation("io.kotest:kotest-runner-junit5")` in `build.gradle.kts`.
 2. Gradle tasks `recordScenario` (wraps `com.microsoft.playwright.CLI codegen`, driven by `-Purl=` / `-Pout=` properties) and `installPlaywrightBrowsers` (runs `CLI install`, required once before first recording).
 3. `playwright-cli` binary (via `npm install -g @playwright/cli@latest` or `npx playwright-cli`). Required by `/review-scenario`, `/scenario-to-tests`, and `/crawl-site`. `/record-scenario` uses Gradle codegen instead.
-4. Scenario directory — configured via `scenario_dir` (default `src/test/scenarios/`). Three command-keyed subdirectories live underneath: `record/`, `crawl/`, `convert/`. The bootstrap creates them. There is no draft state — scenarios are canonical from the moment a creation command writes them; users hand-edit or delete in place if they want.
+4. Scenario directory — configured via `scenario_dir` (default `src/test/scenarios/`). Three command-keyed subdirectories live underneath: `record/`, `crawl/`, `convert/`. The bootstrap creates them. Scenarios are canonical from the moment a creation command writes them; users hand-edit or delete in place if they want.
 5. A base test class extending Kotest's `StringSpec` that owns the Playwright browser lifecycle. Auto-detected and persisted as `base_test_class` in the config; if none exists, `loading-config` offers to scaffold one via `/scaffold-base-test`.
 
 **Configuration** (`.claude/playwright-scenarios.local.md`)
@@ -61,7 +61,7 @@ Four required fields (`scenario_dir`, `test_dir`, `test_language`, `test_framewo
 
 **Workflow**
 1. Seed: `/record-scenario checkout-flow` writes to `<scenario_dir>/record/checkout-flow.md`. `/crawl-site https://example.com` writes to `<scenario_dir>/crawl/`. `/doc-to-scenarios path/to/doc.md` writes to `<scenario_dir>/convert/`.
-2. (Optional) Hand-edit or delete scenarios in place. There is no draft step.
+2. (Optional) Hand-edit or delete scenarios in place.
 3. Review: `/review-scenario checkout-flow` validates claims against the live site and rewrites the markdown in place. Pass a partition name (`record`, `crawl`, `convert`) to scope.
 4. Generate: `/scenario-to-tests checkout-flow` emits `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`.
 
@@ -116,7 +116,7 @@ Pages live under `website/playwright-scenarios/docs/`. Nav order is set in `webs
 
 ## Source partitions
 
-Scenario creation commands write to one of three partitions: `<scenario_dir>/{record,crawl,convert}/`. Generated tests mirror at `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. Use `<command>` (not `<partition>`) as the placeholder in path templates everywhere. There is no draft step — the scenario in its partition is the canonical artifact; users hand-edit or delete in place before `/review-scenario`.
+Scenario creation commands write to one of three partitions: `<scenario_dir>/{record,crawl,convert}/`. Generated tests mirror at `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. Use `<command>` (not `<partition>`) as the placeholder in path templates everywhere. The scenario in its partition is the canonical artifact; users hand-edit or delete in place before `/review-scenario`.
 
 ## Scenario format extensions
 

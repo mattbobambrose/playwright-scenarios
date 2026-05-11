@@ -12,7 +12,7 @@ LLM-optimized reference for using the `playwright-scenarios` plugin in a host pr
 **Plugin artifacts** (what the plugin works with)
 - **Scenario** — a flat markdown file (`# Title`, `**URL:**`, `## Test N:` blocks with Action/Expected pairs). The central artifact.
 - **Test case** — a single `## Test N:` section inside a scenario. Each becomes one test function.
-- **Source partition** — the subdirectory under `<scenario_dir>` that records which command produced the scenario: `<scenario_dir>/record/`, `<scenario_dir>/crawl/`, `<scenario_dir>/convert/`. Generated tests mirror the partition under `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. There is no draft state — scenarios are canonical from the moment they're written.
+- **Source partition** — the subdirectory under `<scenario_dir>` that records which command produced the scenario: `<scenario_dir>/record/`, `<scenario_dir>/crawl/`, `<scenario_dir>/convert/`. Generated tests mirror the partition under `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`.
 - **Fixture** — a JSON file (`<scenario_dir>/fixtures/<name>.json`) with structured test data. Referenced via `**Fixture:** fixtures/<name>`.
 - **Tag** — a bold-label directive (`**Iframe:**`, `**Intercept:**`, etc.) that controls test generation beyond Action/Expected.
 

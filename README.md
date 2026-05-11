@@ -152,7 +152,7 @@ Scenario markdown files live in the project's configured scenario directory (`sc
 - `<scenario_dir>/crawl/` — written to by `/crawl-site`
 - `<scenario_dir>/convert/` — written to by `/doc-to-scenarios`
 
-There is no draft step. The scenario in its partition is the canonical artifact. If you want to hand-edit or delete a scenario before review, do it in place, then run `/review-scenario`.
+The scenario in its partition is the canonical artifact. If you want to hand-edit or delete a scenario before review, do it in place, then run `/review-scenario`.
 
 ### 5. A base test class
 
