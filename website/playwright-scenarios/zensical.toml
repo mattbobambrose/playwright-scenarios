@@ -52,6 +52,7 @@ nav = [
   { "Commands & Skills" = "commands.md" },
   { "Capabilities" = "capabilities.md" },
   { "Writing Docs" = "writing-docs.md" },
+  { "FAQ" = "faq.md" },
   { "Troubleshooting" = "troubleshooting.md" },
 ]
 
