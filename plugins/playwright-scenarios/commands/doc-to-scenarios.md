@@ -13,7 +13,7 @@ arguments:
 
 Convert any document into scenario markdown files under `<SCENARIO_DIR>/convert/`, feeding the `/review-scenario` → `/scenario-to-tests` pipeline. The input can be a test plan, requirements doc, meeting notes, acceptance criteria, or any structured description of what to test. This is the automated counterpart to hand-writing scenarios.
 
-The scenario is the canonical artifact — there is no draft step. If the user wants to inspect or hand-edit the converted scenarios before running `/review-scenario`, they do so in place.
+The scenario is the canonical artifact. If the user wants to inspect or hand-edit the converted scenarios before running `/review-scenario`, they do so in place.
 
 ## Argument parsing
 

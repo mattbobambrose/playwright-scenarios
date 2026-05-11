@@ -13,7 +13,7 @@ arguments:
 
 Create a new scenario by *demonstrating* it in a browser instead of writing markdown from scratch. This command launches Playwright codegen, lets the user drive a real browser, captures their actions and marked assertions, and writes the result to `<SCENARIO_DIR>/record/<name>.md`.
 
-The scenario is the canonical artifact — there is no draft step. If the user wants to eyeball or hand-edit it before running `/review-scenario`, they do so in place.
+The scenario is the canonical artifact. If the user wants to eyeball or hand-edit it before running `/review-scenario`, they do so in place.
 
 ## Argument parsing
 

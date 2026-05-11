@@ -11,7 +11,7 @@ arguments:
 
 # Crawl Site
 
-Drive a site from a starting URL, observe its interactive surface, and write scenarios that represent **plausible user flows** (not a page enumeration). The output is written to `<SCENARIO_DIR>/crawl/` and feeds the `/review-scenario` → `/scenario-to-tests` pipeline. The scenario is the canonical artifact — there is no draft step. If the user wants to delete crawl-emitted scenarios they don't care about (or hand-edit them) before running `/review-scenario`, they do so in place.
+Drive a site from a starting URL, observe its interactive surface, and write scenarios that represent **plausible user flows** (not a page enumeration). The output is written to `<SCENARIO_DIR>/crawl/` and feeds the `/review-scenario` → `/scenario-to-tests` pipeline. The scenario is the canonical artifact. If the user wants to delete crawl-emitted scenarios they don't care about (or hand-edit them) before running `/review-scenario`, they do so in place.
 
 This command is strictly **read-only**: it navigates, scrolls, and observes, but never fills inputs, never submits forms, and never clicks buttons whose text suggests state change (submit, delete, buy, subscribe, sign up, log in, etc.). For flows that require interaction, use `/record-scenario`.
 
