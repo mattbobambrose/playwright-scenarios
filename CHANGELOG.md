@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-05-11
+
 ### Added
 
 - New website FAQ page at `website/playwright-scenarios/docs/faq.md` covering conceptual / scope questions that aren't runtime errors: "Do I have to use the bookshelf demo from the tutorial?", "Why do I need Node.js?", "What if my project isn't Kotlin?", "Which command should I use to author a scenario?", and "Does the plugin send my code or scenarios anywhere?". Wired into the Zensical sidebar nav between Writing Docs and Troubleshooting, linked from the tutorial's "Where to go next" section, and listed alongside the other detailed guides in the README's Documentation paragraph.
