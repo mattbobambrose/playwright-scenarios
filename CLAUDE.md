@@ -11,7 +11,7 @@ Claude Code plugin marketplace. No application source — just plugin definition
 
 ## Version bumps
 
-When bumping a plugin version, update **both** `plugin.json` and the matching entry in `marketplace.json`, then add a `CHANGELOG.md` entry.
+When bumping a plugin version, update **both** `plugin.json` and the matching entry in `marketplace.json`, the embedded `"version": "..."` strings inside `llms-full.txt`'s annotated source-file snippets for those two files, and the bottom-of-file reference-link block in `CHANGELOG.md` (add `[X.Y.Z]: https://github.com/mattbobambrose/playwright-scenarios/compare/<previous>...X.Y.Z`). Then seal the `## [Unreleased]` section as `## [X.Y.Z] - YYYY-MM-DD` and add a fresh empty `## [Unreleased]` above it.
 
 ## Testing plugin changes
 
