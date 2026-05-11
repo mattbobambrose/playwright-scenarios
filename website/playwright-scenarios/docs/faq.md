@@ -42,7 +42,7 @@ The rest of the pipeline is language-agnostic — `/crawl-site`, `/record-scenar
 |---|---|---|
 | You have a written document (test plan, requirements doc, meeting notes, ACs) | [`/doc-to-scenarios <path>`](commands.md#doc-to-scenarios) | `<scenario_dir>/convert/` |
 | You know the flow but have no document | [`/record-scenario [url]`](commands.md#record-scenario) | `<scenario_dir>/record/` |
-| You don't know what flows exist yet | [`/crawl-site <url>`](commands.md#crawl-site) | `<scenario_dir>/crawl/` |
+| You don't know what flows exist yet | [`/crawl-site <start-url>`](commands.md#crawl-site) | `<scenario_dir>/crawl/` |
 
 All three feed the same downstream pipeline: `/review-scenario` to audit against the live site, then `/scenario-to-tests` to generate executable tests. For the full decision tree, see [Workflow](workflow.md).
 

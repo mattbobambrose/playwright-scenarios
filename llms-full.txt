@@ -16,8 +16,8 @@ Author browser-driven scenarios as markdown, audit them against the live site, a
 | Command | Description |
 |---------|-------------|
 | `/record-scenario [url] [name]` | Launch Playwright codegen, capture a real user flow, and write a scenario markdown file to `<scenario_dir>/record/<name>.md`. Optionally accepts a Start URL so the browser opens straight to it. |
-| `/crawl-site <start-url> [description] [--depth=N] [--max-scenarios=N]` | Read-only crawl (start URL + same-origin links one hop out by default). Emits user-flow-oriented scenarios to `<scenario_dir>/crawl/`. |
-| `/doc-to-scenarios <source> [--skip-evaluation]` | Convert any document into scenario markdown files under `<scenario_dir>/convert/`. |
+| `/crawl-site <start-url> [description] [--depth=N] [--max-scenarios=N]` | Read-only crawl of a site. Accepts a natural-language description ("focus on checkout flow") to guide scope. A bare URL crawls with defaults (depth 1, max 10 scenarios, no filtering). Emits scenarios to `<scenario_dir>/crawl/`. |
+| `/doc-to-scenarios <path> [--skip-evaluation]` | Convert any document into scenario markdown files under `<scenario_dir>/convert/`. |
 | `/review-scenario [names...]` | Audit scenarios across `<scenario_dir>/{record,crawl,convert}/` against the live site and apply improvements. A bare partition name scopes the review to that partition. |
 | `/scenario-to-tests [names...] [--dry-run]` | Generate tests (defaults: Kotlin + Kotest StringSpec with Playwright-for-Java) at `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. `--dry-run` writes files but skips the test run. |
 | `/scenario-status [description]` | Health dashboard grouped by partition: review dates, test status, pass/fail, coverage gaps. Optional natural-language description biases the rendering. |
@@ -220,7 +220,7 @@ Scenario creation commands write to one of three partitions: `<scenario_dir>/{re
 
 **Description:** Convert any document into scenario markdown files under `<SCENARIO_DIR>/convert/` with proper tag mapping.
 
-**Arguments:** required `<source-path>`, plus flag: `--skip-evaluation` (skip the inline evaluate-doc pass).
+**Arguments:** required `<path>`, plus flag: `--skip-evaluation` (skip the inline evaluate-doc pass).
 
 **Phases:**
 0. Load config, resolve `<SCENARIO_DIR>`. Ensure `<SCENARIO_DIR>/convert/` exists.

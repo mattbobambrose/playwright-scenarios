@@ -228,5 +228,5 @@ Based on the dashboard, suggest the most impactful next steps (up to 7, ordered 
 2. Regenerate stale tests: `/scenario-to-tests <name>` for scenarios newer than their test files.
 3. Generate tests for untested scenarios: `/scenario-to-tests <command>` to cover a whole partition, or `/scenario-to-tests <name>` for a single scenario.
 4. Cover missing flow types: suggest `/crawl-site` with a description targeting the uncovered type (e.g., "focus on auth flows").
-5. Deepen the crawl: if `max_depth_reached < max_depth_available`, suggest `/crawl-site <url> deep dive --depth=<available>`.
+5. Deepen the crawl: if `max_depth_reached < max_depth_available`, suggest `/crawl-site <start-url> deep dive --depth=<available>`.
 6. Define critical paths: if `.critical-paths.md` doesn't exist, suggest creating it.
