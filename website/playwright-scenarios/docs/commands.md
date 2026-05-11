@@ -176,7 +176,7 @@ Crawl a site starting from a URL, identify plausible user flows, and write scena
 ### `/doc-to-scenarios`
 
 ```
-/doc-to-scenarios <source> [--skip-evaluation]
+/doc-to-scenarios <path> [--skip-evaluation]
 ```
 
 Convert any document (test plan, requirements doc, meeting notes, acceptance criteria) into one or more scenario markdown files under `<SCENARIO_DIR>/convert/`. By default runs the `evaluate-doc` skill first and pauses for review.

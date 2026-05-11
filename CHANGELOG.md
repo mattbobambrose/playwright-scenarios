@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Cross-surface signature drift on `/crawl-site` and `/doc-to-scenarios`. `/crawl-site`'s frontmatter signature is now `<start-url>` to match the `arguments.name` field, the command body's "Start URL" prose, and every surface that already used the longer form (website `commands.md`, `llms-full.txt`, USAGE.md, `scenario-status.md` recommended-actions output, `faq.md`). `/doc-to-scenarios` is now `<path>` consistently — three drifting surfaces (`commands.md`, two spots in `llms-full.txt`) were using `<source>` or `<source-path>`. `llms-full.txt`'s `/crawl-site` table-row description was stale (missing the natural-language description argument); rewritten to match the README/USAGE wording. Plus a couple of nits: `evaluate-doc` row in `USAGE.md` no longer wears a slash that suggested it's a command, and `llms.txt` capitalization of "Per spec / Per test" now matches `commands.md`.
 - Tutorial Step 1 now uses the real demo image name (`mattbobambrose/playwright-scenario-playground`) and the required `-p 8080:8080` port mapping, replacing the `<imageName>` placeholder. Adds an `installPlaywrightBrowsers` step so users who jump to the tutorial without reading the template README don't hit a missing-browser error on `/record-scenario`.
 
 ## [0.7.0] - 2026-05-02

@@ -38,7 +38,7 @@ This repository is a Claude Code plugin marketplace (no application source). It 
 - [/scenario-to-tests](plugins/playwright-scenarios/commands/scenario-to-tests.md): Generate tests from reviewed scenarios. Output partitioned at `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. Accepts `--dry-run`.
 - [/scenario-status](plugins/playwright-scenarios/commands/scenario-status.md): Health dashboard grouped by partition — review dates, test file status, pass/fail results, coverage gaps. Optional natural-language description biases what's emphasized ("focus on what's broken", "executive summary").
 - [/playwright-scenarios-config](plugins/playwright-scenarios/commands/config.md): View or update per-project settings. Recovery path for malformed config files.
-- [/scaffold-base-test](plugins/playwright-scenarios/commands/scaffold-base-test.md): Generate a Kotlin `BasePageTest` so generated tests have a base class to extend. Prompts for `/reset` endpoint, lifecycle scope (per-spec / per-test), and browser. Persists `base_test_class` in the config. Currently `kotlin` + `kotest-stringspec` only. Auto-offered by `loading-config` when no base class is found.
+- [/scaffold-base-test](plugins/playwright-scenarios/commands/scaffold-base-test.md): Generate a Kotlin `BasePageTest` so generated tests have a base class to extend. Prompts for `/reset` endpoint, lifecycle scope (Per spec / Per test), and browser. Persists `base_test_class` in the config. Currently `kotlin` + `kotest-stringspec` only. Auto-offered by `loading-config` when no base class is found.
 
 ## Skills
 
