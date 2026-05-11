@@ -54,7 +54,7 @@ Author browser-driven scenarios as markdown, audit them against the live site, a
 <!-- Source: plugins/playwright-scenarios/commands/*.md frontmatter (`summary`, `signature`). -->
 | Command | Description |
 |---------|-------------|
-| `/record-scenario [name]` | Launch Playwright codegen, capture a real user flow, and write a scenario to `<scenario_dir>/record/<name>.md`. |
+| `/record-scenario [url] [name]` | Launch Playwright codegen, capture a real user flow, and write a scenario to `<scenario_dir>/record/<name>.md`. Optionally accepts a Start URL so the browser opens straight to it. |
 | `/crawl-site <url> [description] [--depth=N] [--max-scenarios=N]` | Read-only crawl of a site. Accepts natural-language descriptions ("focus on checkout flow") to guide scope. A bare URL crawls with default settings (depth 1, max 10 scenarios, no filtering). Emits scenarios to `<scenario_dir>/crawl/`. |
 | `/doc-to-scenarios <path> [--skip-evaluation]` | Convert any document into scenario markdown files under `<scenario_dir>/convert/`. Runs `evaluate-doc` first, then maps test cases to the scenario format with proper tags. |
 | `/generate-fixture <source \| interactive> [--name=N]` | Scaffold a fixture JSON file from a scenario's data bullets, a document's persona table, or interactive prompts. |

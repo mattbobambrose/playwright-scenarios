@@ -109,15 +109,16 @@ The scaffolded file is yours to edit. Common follow-ups:
 ### `/record-scenario`
 
 ```
-/record-scenario [name]
+/record-scenario [url] [name]
 ```
 
 Create a scenario by demonstrating a flow in a real browser. Launches Playwright codegen, captures clicks/typing/marked assertions, and writes a scenario file to `<SCENARIO_DIR>/record/<name>.md`.
 
-**Arguments:**
+**Arguments:** order doesn't matter; tokens are content-detected.
 
 | Argument | Type | Description |
 |---|---|---|
+| `url` | optional | A token starting with `http://` or `https://`. Used as the Start URL; if supplied, skips the Start URL prompt. |
 | `name` | optional, kebab-case | Scenario filename without `.md`. If omitted, inferred from the recorded actions. |
 
 **Flags:** none.
@@ -127,6 +128,9 @@ Create a scenario by demonstrating a flow in a real browser. Launches Playwright
 ```
 /record-scenario
 /record-scenario checkout-flow
+/record-scenario http://localhost:8080
+/record-scenario http://localhost:8080 checkout-flow
+/record-scenario checkout-flow http://localhost:8080
 ```
 
 **Prerequisites:** The host project must define a `recordScenario` Gradle task. The language template repos linked from the [Tutorial](tutorial.md) include this task pre-configured.

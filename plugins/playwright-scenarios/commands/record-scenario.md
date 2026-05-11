@@ -1,9 +1,12 @@
 ---
 name: record-scenario
-description: Record a new website validation scenario by driving a real browser. Launches Playwright codegen, captures clicks/typing/assertions, then writes a scenario markdown file to <SCENARIO_DIR>/record/.
-summary: Launch Playwright codegen, capture a real user flow, and write a scenario to `<scenario_dir>/record/<name>.md`.
-signature: /record-scenario [name]
+description: Record a new website validation scenario by driving a real browser. Launches Playwright codegen, captures clicks/typing/assertions, then writes a scenario markdown file to <SCENARIO_DIR>/record/. Accepts an optional Start URL so the codegen browser opens directly there instead of prompting.
+summary: Launch Playwright codegen, capture a real user flow, and write a scenario to `<scenario_dir>/record/<name>.md`. Optionally accepts a Start URL so the browser opens straight to it.
+signature: /record-scenario [url] [name]
 arguments:
+  - name: url
+    description: Optional Start URL (`http://...` or `https://...`). If supplied, the codegen browser opens there directly. If omitted, you'll be prompted for one.
+    required: false
   - name: name
     description: Optional kebab-case scenario name. If omitted, it is inferred from the recorded actions.
     required: false
@@ -17,9 +20,22 @@ The scenario is the canonical artifact — there is no draft step. If the user w
 
 ## Argument parsing
 
-The argument string is the **name** (the first non-flag token, if any). No flags are supported.
+Tokens are content-detected; order does not matter:
 
-Any unknown `--`-prefixed token should be reported as an error before doing any work.
+- A token that starts with `http://` or `https://` is the **Start URL**.
+- A non-URL, non-flag token is the **name** (must be kebab-case — no spaces, uppercase, or extensions).
+
+All flag-prefixed tokens (`--*`) are unknown — report as an error before doing any work.
+
+**Examples:**
+
+```
+/record-scenario
+/record-scenario checkout-flow
+/record-scenario http://localhost:8080
+/record-scenario http://localhost:8080 checkout-flow
+/record-scenario checkout-flow http://localhost:8080
+```
 
 ## Prerequisites
 
@@ -32,12 +48,17 @@ Any unknown `--`-prefixed token should be reported as an error before doing any 
 
 Invoke the `loading-config` skill to resolve `<SCENARIO_DIR>`, `<TEST_DIR>`, `<TEST_LANGUAGE>`, and `<TEST_FRAMEWORK>`. If `.claude/playwright-scenarios.local.md` is missing, the skill prompts the user and creates it before returning. If `loading-config` returns `MALFORMED_CONFIG`, abort and tell the user to run `/playwright-scenarios-config` to repair. Only `<SCENARIO_DIR>` is needed for this command, but the bootstrap happens here rather than later so the user sees the prompts before the browser window opens.
 
-### Phase 1: Determine scenario name
+### Phase 1: Determine scenario name and Start URL
 
-- **If the user invoked the command with an argument**, treat it as the scenario name. Validate it is kebab-case (no spaces, uppercase, or extensions); reject and ask for a clean name if not.
-- **If no argument was provided**, defer naming. Do not ask the user for a name up front — you will infer it from the recorded actions in Phase 6. Use a temporary recording filename (e.g. `build/recordings/untitled-<timestamp>.java`) for Phase 4.
+**Scenario name:**
 
-Always prompt for the **Start URL**. Do not supply a default — require the user to enter one.
+- **If the parsed argument string included a name token**, treat it as the scenario name. Validate it is kebab-case (no spaces, uppercase, or extensions); reject and ask for a clean name if not.
+- **If no name was provided**, defer naming. Do not ask the user for a name up front — you will infer it from the recorded actions in Phase 6. Use a temporary recording filename (e.g. `build/recordings/untitled-<timestamp>.java`) for Phase 4.
+
+**Start URL:**
+
+- **If the parsed argument string included a URL token**, use it as the Start URL.
+- **Otherwise**, prompt the user to enter one. Do not supply a default.
 
 ### Phase 2: Check for collisions (only if name is known)
 
