@@ -13,7 +13,7 @@ By the end you'll have:
 - Tests under `<test_dir>/convert/` from a `/doc-to-scenarios` run.
 - A health dashboard view via `/scenario-status` that ties them all together.
 
-**Bring your own site.** This tutorial points at the bundled bookshelf demo on `http://localhost:8080` so every step has a concrete target. Anything tied to the demo is swappable: the Docker container, the start URL, the doc path, the recorded flow. Each step calls out what to substitute under a **For your project:** note. If you already have a dev or staging server you want to test, you can replace `http://localhost:8080` with its URL throughout and skip the Docker container in Step 1.
+**Bring your own site.** This tutorial points at the bundled bookstore demo on `http://localhost:8080` so every step has a concrete target. Anything tied to the demo is swappable: the Docker container, the start URL, the doc path, the recorded flow. Each step calls out what to substitute under a **For your project:** note. If you already have a dev or staging server you want to test, you can replace `http://localhost:8080` with its URL throughout and skip the Docker container in Step 1.
 
 ---
 
@@ -21,17 +21,17 @@ By the end you'll have:
 
 Do this once before working through any of the authoring sections.
 
-1. Install Git, Docker, Node.js, and Claude. Then install the `playwright-cli` prerequisite (used by `/review-scenario`, `/scenario-to-tests`, and `/crawl-site` for live-site exploration):
+1. Install Git, Docker, Node.js, and Claude. Then install `playwright-cli` (used by `/crawl-site`, `/review-scenario`, and `/scenario-to-tests` for live-site exploration):
     ```
     npm install -g @playwright/cli@latest
     ```
-2. Use the [Kotlin template repo](https://github.com/mattbobambrose/playwright-scenarios-kotlin-template) as the starting point. Click **Use this template → Create a new repository** on the GitHub page to get your own copy, then clone it locally. (You can also `git clone` the template directly if you don't want a fresh repo of your own.) Kotlin is the supported stack today — Python and TypeScript templates are planned but not yet available.
-3. Start the demo site in a Docker container. It serves a small bookshelf app at `http://localhost:8080`:
+2. Use the [Playwright Scenarios Kotlin template](https://github.com/mattbobambrose/playwright-scenarios-kotlin-template) as the starting point. Click **Use this template → Create a new repository** on the GitHub page to get your own copy, then clone it locally. Kotlin is the supported language today, but Python and TypeScript will be available soon.
+3. Start the demo site in a Docker container. It serves a small bookstore app at `http://localhost:8080`:
     ```
     docker run --rm -p 8080:8080 mattbobambrose/playwright-scenario-playground
     ```
     **For your project:** Skip this step if you already have a dev or staging server you want to test. Use that URL anywhere this tutorial says `http://localhost:8080`.
-4. Download the Playwright browsers (one-time, ~200 MB):
+4. Install the Playwright browsers (one-time, ~200 MB):
     ```
     ./gradlew installPlaywrightBrowsers
     ```
@@ -177,6 +177,6 @@ You'll see all three batches grouped by partition — review dates, test file ex
 
 - **[Workflow](workflow.md)** — the conceptual map of all four paths to a reviewed scenario, including a fourth path (migrating existing docs that weren't written for this framework) that this tutorial skips.
 - **[Commands & Skills](commands.md)** — full reference for every command and skill, including flags and prerequisites.
-- **[FAQ](faq.md)** — conceptual and scope questions ("Do I have to use the bookshelf demo?", "What if my project isn't Kotlin?", "Why do I need Node.js?").
+- **[FAQ](faq.md)** — conceptual and scope questions ("Do I have to use the bookstore demo?", "What if my project isn't Kotlin?", "Why do I need Node.js?").
 - **[Writing Docs](writing-docs.md)** — guidance on writing or refining input documents that convert cleanly via `/doc-to-scenarios`.
 - **[Troubleshooting](troubleshooting.md)** — Symptom → Cause → Fix entries for the failures you're most likely to hit at setup and runtime.
