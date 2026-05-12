@@ -59,7 +59,7 @@ Setup-time and operational failures, with a fix for each.
 
 > **Symptom:** Generated tests have no `extends` clause and a TODO comment at the top of every file. Or `loading-config` warned during bootstrap that no base class was found and you said "No" to the offer to create one.<br>
 > **Cause:** The host project doesn't yet define a Playwright + Kotest base class.<br>
-> **Fix:** Run `/create-base-test`. It prompts for three customizations (whether the dev server has a `POST /reset` endpoint, whether the browser lifecycle runs per-spec or per-test, and which Playwright browser to launch), writes a `BasePageTest.kt` at the parent of `<test_dir>`, and persists the FQN to `base_test_class`. Re-run `/scenario-to-tests` afterwards — generated tests will now extend the new class.
+> **Fix:** Run `/create-base-test`. It prompts for three customizations (whether the dev server has a `POST /reset` endpoint, whether the browser lifecycle runs per-spec or per-test, and which Playwright browser to launch), writes a `BasePageTest.kt` inside `<test_dir>` (sibling to the partition subdirs), and persists the FQN to `base_test_class`. Re-run `/scenario-to-tests` afterwards — generated tests will now extend the new class.
 
 ### "Couldn't infer the source root from `test_dir=…`"
 

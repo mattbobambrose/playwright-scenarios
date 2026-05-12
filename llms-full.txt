@@ -453,7 +453,7 @@ Scenario creation commands write to one of three partitions: `<scenario_dir>/{cr
 **Guards:** abort if `test_language` ≠ `kotlin` / `test_framework` ≠ `kotest-stringspec`, or if the target file already exists. Never overwrites.
 
 **Procedure:**
-1. **Resolve target path and package.** `base_dir` = parent of `test_dir`; `target_file` = `<base_dir>/BasePageTest.kt`; `package_name` = `<base_dir>` with `<source_root>` prefix stripped, `/` → `.`. Empty package → emit no `package` line.
+1. **Resolve target path and package.** `target_file` = `<test_dir>/BasePageTest.kt` (sibling to the partition subdirs); `package_name` = `<test_dir>` with `<source_root>` prefix stripped, `/` → `.`. Empty package → emit no `package` line.
 2. **Three prompts** (single `AskUserQuestion`): `/reset` endpoint (Yes/No, default Yes), lifecycle (per-spec/per-test, default per-spec), browser (Chromium/Firefox/Webkit, default Chromium).
 3. **Render** the canonical template (Yes-reset, per-spec, Chromium) and apply variant rules: drop `resetServerState()` and its imports if `/reset = No`; swap `beforeSpec`/`afterSpec` for `beforeTest`/`afterTest` (and swap `Spec` import for `TestCase` + `TestResult`) if `lifecycle = per-test`; substitute browser method (`chromium()` / `firefox()` / `webkit()`). Imports stay alphabetically sorted in a single flat block.
 4. **Write** the file via the Write tool, creating intermediate directories as needed.

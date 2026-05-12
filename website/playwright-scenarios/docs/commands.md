@@ -76,7 +76,7 @@ Most users hit this skill indirectly: when [`loading-config`](#loading-config) r
 
 1. Loads the project config and aborts if the language/framework combo isn't `kotlin` + `kotest-stringspec` (the only combo currently wired).
 2. Aborts if `base_test_class` is already set in the config — to regenerate, remove that line from `.claude/playwright-scenarios.local.md` first.
-3. Resolves where the file should go: parent of `<test_dir>`, sibling to the scenarios directory. For example, `<test_dir> = src/test/kotlin/com/example/qa/scenarios` produces `src/test/kotlin/com/example/qa/BasePageTest.kt`.
+3. Resolves where the file should go: inside `<test_dir>`, sibling to the partition subdirs (`crawl/`, `record/`, `convert/`). For example, `<test_dir> = src/test/kotlin/com/example/qa/scenarios` produces `src/test/kotlin/com/example/qa/scenarios/BasePageTest.kt` in package `com.example.qa.scenarios`.
 4. Prompts for three customizations:
 
     | Prompt | Choices | Default |

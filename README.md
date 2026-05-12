@@ -158,7 +158,7 @@ The scenario in its partition is the canonical artifact. If you want to hand-edi
 
 For the Kotlin + Kotest default, `/scenario-to-tests` generates tests that extend a project-provided base class (typically `BasePageTest`) which owns the Playwright browser lifecycle. The first time you run any plugin command you'll be asked where to emit these tests (`test_dir`); that path is saved to `.claude/playwright-scenarios.local.md` and reused thereafter.
 
-If your project doesn't have a base test class yet, run `/create-base-test` — it prompts for three customizations (whether your dev server has a `POST /reset` endpoint, whether to run the browser lifecycle per-spec or per-test, and which Playwright browser to launch) and writes a `BasePageTest.kt` at the parent of `<test_dir>`. The `loading-config` skill also auto-offers to create one during the first-run bootstrap when no candidates are found in the project — so you can usually just answer Yes when prompted, no need to invoke the command explicitly. The created file is yours to edit afterwards.
+If your project doesn't have a base test class yet, run `/create-base-test` — it prompts for three customizations (whether your dev server has a `POST /reset` endpoint, whether to run the browser lifecycle per-spec or per-test, and which Playwright browser to launch) and writes a `BasePageTest.kt` inside `<test_dir>` (sibling to the partition subdirs). The `loading-config` skill also auto-offers to create one during the first-run bootstrap when no candidates are found in the project — so you can usually just answer Yes when prompted, no need to invoke the command explicitly. The created file is yours to edit afterwards.
 
 ## Configuration
 
