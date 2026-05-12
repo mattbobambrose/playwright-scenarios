@@ -28,7 +28,9 @@ Do this once before working through any of the authoring sections. Each command 
     ```
     npm install -g @playwright/cli@latest
     ```
+
 2. **Browser:** Create your repo from the [Playwright Scenarios Kotlin template](https://github.com/mattbobambrose/playwright-scenarios-kotlin-template). Open the template page on GitHub and click **Use this template → Create a new repository** to spin up your own copy. Kotlin is the supported language today, but Python and TypeScript will be available soon.
+
 3. Start the demo site in a Docker container. It serves a small bookstore app at `http://localhost:8080`:
 
     **Terminal:**
@@ -38,6 +40,7 @@ Do this once before working through any of the authoring sections. Each command 
     ```
 
     **For your project:** Skip this step if you already have a dev or staging server you want to test. Use that URL anywhere this tutorial says `http://localhost:8080`.
+
 4. Clone the new repo locally and `cd` into it:
 
     **Terminal:**
@@ -46,6 +49,7 @@ Do this once before working through any of the authoring sections. Each command 
     git clone <your-new-repo-url>
     cd <your-new-repo-name>
     ```
+
 5. Install the Playwright browsers (one-time, ~200 MB):
 
     **Terminal:**
@@ -53,6 +57,7 @@ Do this once before working through any of the authoring sections. Each command 
     ```
     ./gradlew installPlaywrightBrowsers
     ```
+
 6. Start a Claude Code session at the repo root with permission prompts disabled:
 
     **Terminal:**
@@ -62,6 +67,7 @@ Do this once before working through any of the authoring sections. Each command 
     ```
 
     The plugin commands kick off many tool calls per invocation (file reads, file writes, `playwright-cli` launches, Gradle runs). The `--dangerously-skip-permissions` flag bypasses every prompt for the session — safe to use in a disposable / sandboxed checkout like the template repo you just cloned.
+
 7. Install the plugin:
 
     **Claude Code:**
@@ -70,6 +76,7 @@ Do this once before working through any of the authoring sections. Each command 
     /plugin marketplace add mattbobambrose/playwright-scenarios
     /plugin install playwright-scenarios@playwright-scenarios
     ```
+
 8. Create a base test class so generated tests have something to extend:
 
     **Claude Code:**
