@@ -24,6 +24,7 @@ Do this once before working through any of the authoring sections. Each command 
 1. Install Git, Docker, Node.js, and Claude. Then install `playwright-cli` (used by `/crawl-site`, `/review-scenario`, and `/scenario-to-tests` for live-site exploration):
 
     **Terminal:**
+
     ```
     npm install -g @playwright/cli@latest
     ```
@@ -31,13 +32,16 @@ Do this once before working through any of the authoring sections. Each command 
 3. Start the demo site in a Docker container. It serves a small bookstore app at `http://localhost:8080`:
 
     **Terminal:**
+
     ```
     docker run --rm -p 8080:8080 mattbobambrose/playwright-scenario-playground
     ```
+
     **For your project:** Skip this step if you already have a dev or staging server you want to test. Use that URL anywhere this tutorial says `http://localhost:8080`.
 4. Clone the new repo locally and `cd` into it:
 
     **Terminal:**
+
     ```
     git clone <your-new-repo-url>
     cd <your-new-repo-name>
@@ -45,19 +49,23 @@ Do this once before working through any of the authoring sections. Each command 
 5. Install the Playwright browsers (one-time, ~200 MB):
 
     **Terminal:**
+
     ```
     ./gradlew installPlaywrightBrowsers
     ```
 6. Start a Claude Code session at the repo root with permission prompts disabled:
 
     **Terminal:**
+
     ```
     claude --dangerously-skip-permissions
     ```
+
     The plugin commands kick off many tool calls per invocation (file reads, file writes, `playwright-cli` launches, Gradle runs). The `--dangerously-skip-permissions` flag bypasses every prompt for the session — safe to use in a disposable / sandboxed checkout like the template repo you just cloned.
 7. Install the plugin:
 
     **Claude Code:**
+
     ```
     /plugin marketplace add mattbobambrose/playwright-scenarios
     /plugin install playwright-scenarios@playwright-scenarios
@@ -65,9 +73,11 @@ Do this once before working through any of the authoring sections. Each command 
 8. Create a base test class so generated tests have something to extend:
 
     **Claude Code:**
+
     ```
     /create-base-test
     ```
+
     This is your first plugin command, so two prompts fire in sequence: first the config bootstrap (`scenario_dir`, `test_dir`, `test_language`, `test_framework`), then three customizations (whether the dev server has a `POST /reset` endpoint, lifecycle scope, browser). Accept the defaults at every prompt to follow along with the tutorial. Claude writes `BasePageTest.kt` next to your scenarios package and persists `base_test_class` in the config.
 
     **For your project:** The defaults match the kotlin template's layout. If you're applying the plugin to your own project, see the [Configuration table in the README](https://github.com/mattbobambrose/playwright-scenarios#configuration) for what each field controls and override the prompts as needed. You can re-prompt later with `/playwright-scenarios-config`.
@@ -81,6 +91,7 @@ The first authoring path is the most hands-off: tell `/crawl-site` where to star
 ### Run the crawl
 
 **Claude Code:**
+
 ```
 /crawl-site http://localhost:8080
 ```
@@ -96,6 +107,7 @@ Claude inventories the start page, ranks candidate flows, walks each (read-only 
 ### Review the scenarios
 
 **Claude Code:**
+
 ```
 /review-scenario crawl
 ```
@@ -105,6 +117,7 @@ The `crawl` argument scopes the review to scenarios in the crawl partition. Clau
 ### Generate tests
 
 **Claude Code:**
+
 ```
 /scenario-to-tests crawl
 ```
@@ -122,6 +135,7 @@ For interactive flows (logins, form fills, multi-step purchases) it's faster to 
 ### Record
 
 **Claude Code:**
+
 ```
 /record-scenario
 ```
@@ -141,6 +155,7 @@ Claude converts the recorded actions into a scenario markdown file at `<scenario
 ### Review and generate
 
 **Claude Code:**
+
 ```
 /review-scenario record
 /scenario-to-tests record
@@ -165,6 +180,7 @@ Then ask it to draft a document covering the flows you care about. Save the outp
 ### Convert to scenarios
 
 **Claude Code:**
+
 ```
 /doc-to-scenarios docs/checkout-tests.md
 ```
@@ -176,6 +192,7 @@ Claude runs `evaluate-doc` first (a sanity check that the doc is well-formed for
 ### Review and generate
 
 **Claude Code:**
+
 ```
 /review-scenario convert
 /scenario-to-tests convert
@@ -188,6 +205,7 @@ The third batch of tests lands at `<test_dir>/convert/<scenario-name>/<ClassName
 ## Step 5: Check the dashboard
 
 **Claude Code:**
+
 ```
 /scenario-status
 ```
