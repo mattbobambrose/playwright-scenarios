@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-05-12
+
 ### Changed
 
 - **`/create-base-test` writes `BasePageTest.kt` inside `<test_dir>`** (sibling to the `crawl/`, `record/`, `convert/` partition subdirs) instead of at the parent of `<test_dir>`. The package becomes `<test_dir>` minus `<source_root>` — for the playwright-scenarios-kotlin-template's stripped-down layout (`<test_dir> = src/test/kotlin/scenarios`), that means `BasePageTest.kt` lands at `src/test/kotlin/scenarios/BasePageTest.kt` in package `scenarios`, no more default-package code. For a typical host project with `<test_dir> = src/test/kotlin/com/example/qa/scenarios`, the file lands at `src/test/kotlin/com/example/qa/scenarios/BasePageTest.kt` in package `com.example.qa.scenarios`. Generated tests in `<package>.crawl/.record/.convert` import `BasePageTest` as a sibling. The `create-base-test` skill, `commands/create-base-test.md` frontmatter, README's Host Project Setup section, USAGE.md, llms-full.txt skill detail, website `commands.md`, and `troubleshooting.md` all updated. The kotlin template's README reference is bumped in its tracking PR.
@@ -192,6 +194,7 @@ Initial release.
 - Host-project setup documentation covering the required Gradle `recordScenario` and `installPlaywrightBrowsers` tasks, Playwright / Kotest dependencies, `scenarios/` directory convention, and base test class pattern.
 - MIT license.
 
+[0.9.0]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.8.0...0.9.0
 [0.8.0]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.7.0...0.8.0
 [0.7.0]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.6.1...0.7.0
 [0.6.1]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.6.0...0.6.1
