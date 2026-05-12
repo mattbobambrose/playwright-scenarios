@@ -25,7 +25,7 @@ If `<TEST_LANGUAGE>` ≠ `kotlin` or `<TEST_FRAMEWORK>` ≠ `kotest-stringspec`,
 
 ### 2. Resolve target file path and package
 
-The base class goes **inside `<TEST_DIR>`** — sibling to the `crawl/`, `record/`, and `convert/` partition subdirs, in the package that matches `<TEST_DIR>`. The reference layout is `src/test/kotlin/com/example/qa/scenarios/BasePageTest.kt` (package `com.example.qa.scenarios`) paired with `src/test/kotlin/com/example/qa/scenarios/{crawl,record,convert}/` (packages `com.example.qa.scenarios.crawl`, etc.). For a stripped-down template like the playwright-scenarios-kotlin-template (where `<TEST_DIR>` is `src/test/kotlin/scenarios`), the file lands at `src/test/kotlin/scenarios/BasePageTest.kt` in package `scenarios`.
+The base class goes **inside `<TEST_DIR>`** — sibling to the `crawl/`, `record/`, and `convert/` partition subdirs, in the package that matches `<TEST_DIR>`. The reference layout is `src/test/kotlin/com/example/qa/scenarios/BasePageTest.kt` (package `com.example.qa.scenarios`) paired with `src/test/kotlin/com/example/qa/scenarios/{crawl,record,convert}/` (packages `com.example.qa.scenarios.crawl`, etc.). The playwright-scenarios-kotlin-template uses an analogous layout under `src/test/kotlin/com/bookshelf/scenarios/`.
 
 Compute:
 
