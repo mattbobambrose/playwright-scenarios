@@ -1,6 +1,6 @@
 ---
 name: create-base-test
-description: Create a Kotlin BasePageTest class into the consuming project so generated tests have a base class to extend. Currently supports kotlin + kotest-stringspec only. Writes a single .kt file at the parent of <test_dir> and persists base_test_class in the config. Refuses to overwrite an existing file.
+description: Create a Kotlin BasePageTest class into the consuming project so generated tests have a base class to extend. Currently supports kotlin + kotest-stringspec only. Writes a single .kt file inside <test_dir> and persists base_test_class in the config. Refuses to overwrite an existing file.
 summary: Generate a Kotlin `BasePageTest` so generated tests have a base class to extend. Prompts for `/reset` endpoint, lifecycle scope, and browser. Persists `base_test_class` in the config. Currently `kotlin` + `kotest-stringspec` only. Auto-offered by `loading-config` when no base class is found in the project.
 signature: /create-base-test
 ---

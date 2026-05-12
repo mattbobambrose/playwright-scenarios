@@ -1,6 +1,6 @@
 ---
 name: create-base-test
-description: Create a Kotlin BasePageTest class into the consuming project so generated tests have something to extend. Currently supports kotlin + kotest-stringspec only. Invoked by /create-base-test (explicit) and by loading-config (auto-offered when zero base-test-class candidates are found in the project). Owns three customization prompts (`/reset` endpoint, lifecycle scope, browser) and writes a single .kt file at the parent of <TEST_DIR>.
+description: Create a Kotlin BasePageTest class into the consuming project so generated tests have something to extend. Currently supports kotlin + kotest-stringspec only. Invoked by /create-base-test (explicit) and by loading-config (auto-offered when zero base-test-class candidates are found in the project). Owns three customization prompts (`/reset` endpoint, lifecycle scope, browser) and writes a single .kt file inside <TEST_DIR>.
 ---
 
 # Create Base Test
@@ -25,16 +25,15 @@ If `<TEST_LANGUAGE>` ≠ `kotlin` or `<TEST_FRAMEWORK>` ≠ `kotest-stringspec`,
 
 ### 2. Resolve target file path and package
 
-The base class goes at the **parent of `<TEST_DIR>`** — sibling to the scenarios directory. The reference layout is `src/test/kotlin/com/example/qa/BasePageTest.kt` paired with `src/test/kotlin/com/example/qa/scenarios/`.
+The base class goes **inside `<TEST_DIR>`** — sibling to the `crawl/`, `record/`, and `convert/` partition subdirs, in the package that matches `<TEST_DIR>`. The reference layout is `src/test/kotlin/com/example/qa/scenarios/BasePageTest.kt` (package `com.example.qa.scenarios`) paired with `src/test/kotlin/com/example/qa/scenarios/{crawl,record,convert}/` (packages `com.example.qa.scenarios.crawl`, etc.). For a stripped-down template like the playwright-scenarios-kotlin-template (where `<TEST_DIR>` is `src/test/kotlin/scenarios`), the file lands at `src/test/kotlin/scenarios/BasePageTest.kt` in package `scenarios`.
 
 Compute:
 
-- `base_dir` = `<TEST_DIR>` with the trailing path component removed (e.g., `src/test/kotlin/com/example/qa/scenarios` → `src/test/kotlin/com/example/qa`).
-- `target_file` = `<base_dir>/BasePageTest.kt`.
-- `package_name` = `<base_dir>` with the `<SOURCE_ROOT>` prefix stripped, leading/trailing `/` removed, `/` replaced by `.` (e.g., `com.example.qa`). Empty if `base_dir == <SOURCE_ROOT>`.
+- `target_file` = `<TEST_DIR>/BasePageTest.kt`.
+- `package_name` = `<TEST_DIR>` with the `<SOURCE_ROOT>` prefix stripped, leading/trailing `/` removed, `/` replaced by `.` (e.g., `com.example.qa.scenarios`). Empty if `<TEST_DIR> == <SOURCE_ROOT>`.
 - `fqn` = `<package_name>.BasePageTest`, or just `BasePageTest` if `package_name` is empty.
 
-If stripping `<SOURCE_ROOT>` doesn't yield a clean prefix match (shouldn't happen if `loading-config` resolved the source root correctly, but defend), prompt with `AskUserQuestion`: "Couldn't derive a package from `<base_dir>` and `<SOURCE_ROOT>`. Where should `BasePageTest.kt` go?" with the inferred path, the source root, and "Other".
+If stripping `<SOURCE_ROOT>` doesn't yield a clean prefix match (shouldn't happen if `loading-config` resolved the source root correctly, but defend), prompt with `AskUserQuestion`: "Couldn't derive a package from `<TEST_DIR>` and `<SOURCE_ROOT>`. Where should `BasePageTest.kt` go?" with the inferred path, the source root, and "Other".
 
 If `target_file` already exists on disk, return `TARGET_EXISTS: <target_file>` to the caller and stop. Never overwrite.
 
