@@ -4,7 +4,7 @@ icon: lucide/rocket
 
 # playwright-scenarios
 
-Claude Code plugin for scenario-driven Playwright testing — record, crawl, evaluate, convert, review, and generate tests from human-readable scenario markdown.
+Claude Code plugin for scenario-driven Playwright testing — crawl, record, evaluate, convert, review, and generate tests from human-readable scenario markdown.
 
 ## What is it?
 
@@ -26,7 +26,7 @@ graph TD
 
 Three quick-start authoring paths converge on `/scenario-to-tests`. See the [Workflow](workflow.md) page for a fourth path (LLM-authored documents, which routes through `/doc-to-scenarios`) and a side-by-side comparison.
 
-A **scenario** is an LLM-optimized markdown representation of the flow you want to test — readable by humans, mechanically processable by Claude. You produce one by recording a browser session, crawling the site, or converting an existing document — each writes to its own partition (`scenarios/record/`, `scenarios/crawl/`, `scenarios/convert/`). Hand-edit or delete in place if you want; then `/review-scenario` audits against the live site, and `/scenario-to-tests` turns the reviewed scenarios into a runnable test suite at `<test_dir>/<command>/<scenario-name>/`.
+A **scenario** is an LLM-optimized markdown representation of the flow you want to test — readable by humans, mechanically processable by Claude. You produce one by recording a browser session, crawling the site, or converting an existing document — each writes to its own partition (`scenarios/crawl/`, `scenarios/record/`, `scenarios/convert/`). Hand-edit or delete in place if you want; then `/review-scenario` audits against the live site, and `/scenario-to-tests` turns the reviewed scenarios into a runnable test suite at `<test_dir>/<command>/<scenario-name>/`.
 
 ## Quick start
 

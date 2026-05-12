@@ -191,7 +191,7 @@ Setup-time and operational failures, with a fix for each.
 ### "I ran `/review-scenario` but it can't find my file"
 
 > **Symptom:** `/review-scenario foo` reports that `foo` doesn't exist anywhere under `<SCENARIO_DIR>`.<br>
-> **Cause:** Scenarios live under one of the three command-keyed subdirectories (`<SCENARIO_DIR>/record/`, `<SCENARIO_DIR>/crawl/`, or `<SCENARIO_DIR>/convert/`). A flat `<SCENARIO_DIR>/foo.md` won't be picked up.<br>
+> **Cause:** Scenarios live under one of the three command-keyed subdirectories (`<SCENARIO_DIR>/crawl/`, `<SCENARIO_DIR>/record/`, or `<SCENARIO_DIR>/convert/`). A flat `<SCENARIO_DIR>/foo.md` won't be picked up.<br>
 > **Fix:** Move the file into the appropriate partition (e.g. `mv src/test/scenarios/foo.md src/test/scenarios/record/foo.md`). Then re-run.
 
 ### Same scenario name in multiple partitions

@@ -14,7 +14,7 @@ graph TD
     D -->|"/scenario-status"| E[Health<br/>dashboard]
 ```
 
-Every creation command writes its scenario directly to its own **source partition** — `<scenario_dir>/record/`, `<scenario_dir>/crawl/`, or `<scenario_dir>/convert/`. The scenario is the canonical artifact; if you want to hand-edit or delete some before review, you do so in place.
+Every creation command writes its scenario directly to its own **source partition** — `<scenario_dir>/crawl/`, `<scenario_dir>/record/`, or `<scenario_dir>/convert/`. The scenario is the canonical artifact; if you want to hand-edit or delete some before review, you do so in place.
 
 The question is: **how do you get to a scenario in the first place?** Four paths, depending on where you're starting from.
 

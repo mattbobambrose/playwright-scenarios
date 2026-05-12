@@ -1,6 +1,6 @@
 # playwright-scenarios
 
-> Claude Code plugin marketplace for scenario-driven Playwright testing — record, crawl, evaluate, convert, review, and generate tests from human-readable scenario markdown.
+> Claude Code plugin marketplace for scenario-driven Playwright testing — crawl, record, evaluate, convert, review, and generate tests from human-readable scenario markdown.
 
 This repository is a Claude Code plugin marketplace (no application source). It ships a single plugin, `playwright-scenarios`, that lets projects author browser-driven test scenarios as flat markdown files (manually, via autonomous crawl, or by converting existing QA specs), audit those scenarios against the live site, and translate them into test classes. 13 extended tags cover iframe boundaries, alternate paths, network mocking, state pre-seeding, device emulation, and test lifecycle. Per-project behavior is driven by `.claude/playwright-scenarios.local.md` (default stack: Kotlin + Kotest StringSpec + Playwright-for-Java).
 
@@ -17,7 +17,7 @@ This repository is a Claude Code plugin marketplace (no application source). It 
 - [index](website/playwright-scenarios/docs/index.md): Site landing page — elevator pitch, quick start, links to each section.
 - [tutorial](website/playwright-scenarios/docs/tutorial.md): Step-by-step walkthrough from installation to generated tests.
 - [terminology](website/playwright-scenarios/docs/terminology.md): Definitions for scenario, test case, source partition, fixture, tag, generated test.
-- [workflow](website/playwright-scenarios/docs/workflow.md): The four paths to a reviewed scenario (LLM-authored, existing-doc migration, record, crawl).
+- [workflow](website/playwright-scenarios/docs/workflow.md): The four paths to a reviewed scenario (LLM-authored, existing-doc migration, crawl, record).
 - [commands](website/playwright-scenarios/docs/commands.md): Per-command and per-skill reference — signatures, args, flags, examples.
 - [capabilities](website/playwright-scenarios/docs/capabilities.md): What the plugin can and can't test, with the full extended-tag table.
 - [writing-docs](website/playwright-scenarios/docs/writing-docs.md): Guidance for writing input documents that convert cleanly into scenarios.
@@ -34,7 +34,7 @@ This repository is a Claude Code plugin marketplace (no application source). It 
 - [/crawl-site](plugins/playwright-scenarios/commands/crawl-site.md): Read-only site crawl; emits user-flow-oriented scenarios to `<scenario_dir>/crawl/`. Accepts an optional natural-language description plus `--depth` and `--max-scenarios`. Bare URL = default crawl (depth 1, max 10 scenarios).
 - [/doc-to-scenarios](plugins/playwright-scenarios/commands/doc-to-scenarios.md): Convert any document into scenario markdown files under `<scenario_dir>/convert/` with proper tag mapping. Accepts `--skip-evaluation`.
 - [/generate-fixture](plugins/playwright-scenarios/commands/generate-fixture.md): Scaffold a JSON fixture file from a scenario, document, or interactively. Accepts `--name`.
-- [/review-scenario](plugins/playwright-scenarios/commands/review-scenario.md): Audit scenarios across `<scenario_dir>/{record,crawl,convert}/` against the live site and apply improvements. Pass a partition name to scope.
+- [/review-scenario](plugins/playwright-scenarios/commands/review-scenario.md): Audit scenarios across `<scenario_dir>/{crawl,record,convert}/` against the live site and apply improvements. Pass a partition name to scope.
 - [/scenario-to-tests](plugins/playwright-scenarios/commands/scenario-to-tests.md): Generate tests from reviewed scenarios. Output partitioned at `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. Accepts `--dry-run`.
 - [/scenario-status](plugins/playwright-scenarios/commands/scenario-status.md): Health dashboard grouped by partition — review dates, test file status, pass/fail results, coverage gaps. Optional natural-language description biases what's emphasized ("focus on what's broken", "executive summary").
 - [/playwright-scenarios-config](plugins/playwright-scenarios/commands/config.md): View or update per-project settings. Recovery path for malformed config files.

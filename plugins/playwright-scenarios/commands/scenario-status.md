@@ -1,6 +1,6 @@
 ---
 name: scenario-status
-description: Display a health dashboard for all scenarios across record/crawl/convert partitions — last reviewed, test file existence, test pass/fail status, coverage completeness (crawl depth, flow types, conversion rate, critical paths). Accepts an optional natural-language description that biases the report ("focus on what's broken", "give me a one-paragraph executive summary", "what should I work on this week?", "only the checkout-related scenarios"). Use when the user asks "what's the status of my scenarios?" or "what's stale/missing/broken?" or "how much of the site is covered?" or asks for a tailored summary.
+description: Display a health dashboard for all scenarios across crawl/record/convert partitions — last reviewed, test file existence, test pass/fail status, coverage completeness (crawl depth, flow types, conversion rate, critical paths). Accepts an optional natural-language description that biases the report ("focus on what's broken", "give me a one-paragraph executive summary", "what should I work on this week?", "only the checkout-related scenarios"). Use when the user asks "what's the status of my scenarios?" or "what's stale/missing/broken?" or "how much of the site is covered?" or asks for a tailored summary.
 summary: 'Health dashboard grouped by partition: review dates, test status, pass/fail, plus coverage completeness (crawl depth, flow types, conversion rate, critical paths). Accepts a natural-language description ("focus on what''s broken") to bias the rendering.'
 signature: /scenario-status [description]
 arguments:
@@ -11,7 +11,7 @@ arguments:
 
 # Scenario Status
 
-Show a single-view dashboard of every scenario's health across the record / crawl / convert partitions, plus coverage completeness metrics from crawl history.
+Show a single-view dashboard of every scenario's health across the crawl / record / convert partitions, plus coverage completeness metrics from crawl history.
 
 ## Argument parsing
 
@@ -35,9 +35,9 @@ Invoke `loading-config` to resolve `<SCENARIO_DIR>` and `<TEST_DIR>`. If `loadin
 
 ## Phase 1: Inventory scenarios
 
-Glob `<SCENARIO_DIR>/{record,crawl,convert}/*.md`. Skip any `SCENARIOS.md` and `.crawl-meta.json`. For each file, record:
+Glob `<SCENARIO_DIR>/{crawl,record,convert}/*.md`. Skip any `SCENARIOS.md` and `.crawl-meta.json`. For each file, record:
 
-- **Partition** — `record`, `crawl`, or `convert`, derived from the parent directory.
+- **Partition** — `crawl`, `record`, or `convert`, derived from the parent directory.
 - **File path** (relative to `<SCENARIO_DIR>`).
 - **Scenario name** (filename without `.md`).
 - **Title** — from the `# <Title>` line.
@@ -65,7 +65,7 @@ For each scenario, derive the expected test file path:
 
 ## Phase 4: Check test results (optional)
 
-Look for the most recent Gradle test report at `build/reports/tests/test/index.html` or `build/test-results/test/*.xml` (JUnit XML format). If found, parse it for pass/fail status of test classes matching `<SCENARIOS_PACKAGE>.{record,crawl,convert}.*`.
+Look for the most recent Gradle test report at `build/reports/tests/test/index.html` or `build/test-results/test/*.xml` (JUnit XML format). If found, parse it for pass/fail status of test classes matching `<SCENARIOS_PACKAGE>.{crawl,record,convert}.*`.
 
 If no test report is found, skip this phase and report "no test results available — run `/scenario-to-tests` to generate and execute."
 
@@ -132,7 +132,7 @@ Read `<SCENARIO_DIR>/.critical-paths.md` if it exists. This file lists the user'
 ```
 
 For each path, check whether every scenario in the chain:
-1. Exists (in any partition under `<SCENARIO_DIR>/{record,crawl,convert}/`).
+1. Exists (in any partition under `<SCENARIO_DIR>/{crawl,record,convert}/`).
 2. Has been reviewed recently (last-modified date) or has a test file.
 3. Has a generated test file.
 4. Has passing tests (if test results are available from Phase 4).
@@ -157,9 +157,9 @@ If `.critical-paths.md` doesn't exist, skip this section and suggest creating on
 
 ### Output invariants (apply in all modes)
 
-Regardless of `<FOCUS>` or formatting choice, every reference to a scenario in the report must make its **source partition** (`record`, `crawl`, or `convert`) visible to the user. This rule applies to:
+Regardless of `<FOCUS>` or formatting choice, every reference to a scenario in the report must make its **source partition** (`crawl`, `record`, or `convert`) visible to the user. This rule applies to:
 
-- The per-partition tables — render the `=== record ===` / `=== crawl ===` / `=== convert ===` headers even when one partition is empty (write `(no scenarios)` underneath rather than dropping the section).
+- The per-partition tables — render the `=== crawl ===` / `=== record ===` / `=== convert ===` headers even when one partition is empty (write `(no scenarios)` underneath rather than dropping the section).
 - The leading prose summary (when `<FOCUS>` is set) — name partitions when citing counts, e.g. "3 stale scenarios, all in `crawl/`" rather than "3 stale scenarios."
 - Any per-scenario callout in **Recommended actions** — qualify the scenario name with its partition, e.g. `record/checkout-happy-path` or "the crawl scenario `nav-to-pricing`."
 - Filtered views — keep partition headers (or partition badges per row) so a filtered list still tells the user which command produced each scenario.
@@ -183,16 +183,16 @@ After the prose summary, render the kept sections in the same order as the defau
 ### Scenario health table — grouped by partition
 
 ```
+=== crawl ===
+| Scenario | Status | Tests | Test file | Last reviewed | Test result |
+|----------|--------|-------|-----------|---------------|-------------|
+| nav-to-pricing | ⚠ no tests | 1 | — | 2026-04-20 | — |
+
 === record ===
 | Scenario | Status | Tests | Test file | Last reviewed | Test result |
 |----------|--------|-------|-----------|---------------|-------------|
 | checkout-happy-path | ✓ active | 4 | ✓ current | 2026-04-15 | ✓ pass |
 | book-search-filters | ✓ active | 6 | ⚠ stale | 2026-04-14 | ✗ 2 fail |
-
-=== crawl ===
-| Scenario | Status | Tests | Test file | Last reviewed | Test result |
-|----------|--------|-------|-----------|---------------|-------------|
-| nav-to-pricing | ⚠ no tests | 1 | — | 2026-04-20 | — |
 
 === convert ===
 | Scenario | Status | Tests | Test file | Last reviewed | Test result |
@@ -208,7 +208,7 @@ Status values:
 ### Summary stats
 
 ```
-Scenarios: 12 total (4 record, 6 crawl, 2 convert)
+Scenarios: 12 total (6 crawl, 4 record, 2 convert)
 Tests: 24 test cases across 8 files (6 passing, 2 failing)
 Coverage: 15 of 22 crawled URLs covered (68%)
 Crawl depth: 3 of ~5 levels (60%)

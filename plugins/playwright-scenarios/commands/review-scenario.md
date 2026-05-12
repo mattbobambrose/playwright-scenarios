@@ -1,17 +1,17 @@
 ---
 name: review-scenario
-description: Audit website validation scenarios across <SCENARIO_DIR>/{record,crawl,convert}/ against the live site and apply improvements to the markdown. Zero arguments = review every scenario across all three partitions.
-summary: Audit scenarios across `<scenario_dir>/{record,crawl,convert}/` against the live site and apply improvements to the markdown. A bare partition name scopes the review to that partition.
+description: Audit website validation scenarios across <SCENARIO_DIR>/{crawl,record,convert}/ against the live site and apply improvements to the markdown. Zero arguments = review every scenario across all three partitions.
+summary: Audit scenarios across `<scenario_dir>/{crawl,record,convert}/` against the live site and apply improvements to the markdown. A bare partition name scopes the review to that partition.
 signature: /review-scenario [names...]
 arguments:
   - name: scenarios
-    description: Zero or more scenario names (without .md extension), space-separated. Zero names = review every scenario across <SCENARIO_DIR>/{record,crawl,convert}/. A bare partition name (record, crawl, or convert) limits the review to that partition.
+    description: Zero or more scenario names (without .md extension), space-separated. Zero names = review every scenario across <SCENARIO_DIR>/{crawl,record,convert}/. A bare partition name (record, crawl, or convert) limits the review to that partition.
     required: false
 ---
 
 # Review Scenario
 
-Audit website validation scenarios under `<SCENARIO_DIR>/{record,crawl,convert}/` by checking each scenario's claims against the live site, proposing improvements, and applying them to the scenario `.md` file. This command does **not** generate tests — use `/scenario-to-tests` for that.
+Audit website validation scenarios under `<SCENARIO_DIR>/{crawl,record,convert}/` by checking each scenario's claims against the live site, proposing improvements, and applying them to the scenario `.md` file. This command does **not** generate tests — use `/scenario-to-tests` for that.
 
 ## Argument parsing
 
@@ -19,7 +19,7 @@ Split the argument string into **flags** (tokens starting with `--`) and **names
 
 Any unknown `--`-prefixed token should be reported as an error before doing any work.
 
-The names list has special handling for **partition names**: if a name is exactly one of `record`, `crawl`, or `convert`, it's interpreted as a directive to review every scenario in that partition (rather than a single scenario file named `record.md`).
+The names list has special handling for **partition names**: if a name is exactly one of `crawl`, `record`, or `convert`, it's interpreted as a directive to review every scenario in that partition (rather than a single scenario file named `record.md`).
 
 ## Phase 0: Load project config and preflight
 
@@ -40,9 +40,9 @@ Phase 2 shells out to `playwright-cli` via the skill of the same name. Verify it
 
 Using the names parsed from the argument-parsing step:
 
-- **Zero names:** glob `<SCENARIO_DIR>/{record,crawl,convert}/*.md`. Review every scenario across all three partitions.
-- **A partition name (`record`, `crawl`, or `convert`):** glob `<SCENARIO_DIR>/<command>/*.md`. Review every scenario in that partition only. Multiple partition names can be combined.
-- **One or more scenario names:** for each name, look up `<SCENARIO_DIR>/{record,crawl,convert}/<name>.md`. If exactly one match exists, include it. If a name matches in multiple partitions, prompt the user to disambiguate (or accept a `partition/name` form). If no match is found, report it and continue with the rest.
+- **Zero names:** glob `<SCENARIO_DIR>/{crawl,record,convert}/*.md`. Review every scenario across all three partitions.
+- **A partition name (`crawl`, `record`, or `convert`):** glob `<SCENARIO_DIR>/<command>/*.md`. Review every scenario in that partition only. Multiple partition names can be combined.
+- **One or more scenario names:** for each name, look up `<SCENARIO_DIR>/{crawl,record,convert}/<name>.md`. If exactly one match exists, include it. If a name matches in multiple partitions, prompt the user to disambiguate (or accept a `partition/name` form). If no match is found, report it and continue with the rest.
 
 Skip any `SCENARIOS.md` (hand-maintained index) and any `.crawl-meta.json` (crawl metadata) encountered during the glob.
 
@@ -75,7 +75,7 @@ Each subagent receives:
 
 - The original scenario markdown
 - The findings list from Phase 2 for that scenario
-- Up to two existing style-reference scenario files from `<SCENARIO_DIR>/{record,crawl,convert}/` (whichever are present, excluding `SCENARIOS.md`) so the subagent can match the host project's formatting conventions; if none exist, point the subagent at the `authoring-scenarios` skill instead
+- Up to two existing style-reference scenario files from `<SCENARIO_DIR>/{crawl,record,convert}/` (whichever are present, excluding `SCENARIOS.md`) so the subagent can match the host project's formatting conventions; if none exist, point the subagent at the `authoring-scenarios` skill instead
 - Instructions to rewrite the scenario `.md` in place
 
 Subagent rules:

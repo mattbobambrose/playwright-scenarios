@@ -46,7 +46,7 @@ Pages live under `website/playwright-scenarios/docs/`. Nav order is set in `webs
 
 ## Source partitions
 
-Scenario creation commands write to one of three partitions: `<scenario_dir>/{record,crawl,convert}/`. Generated tests mirror at `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. Use `<command>` (not `<partition>`) as the placeholder in path templates everywhere. The scenario in its partition is the canonical artifact; users hand-edit or delete in place before `/review-scenario`.
+Scenario creation commands write to one of three partitions: `<scenario_dir>/{crawl,record,convert}/`. Generated tests mirror at `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. Use `<command>` (not `<partition>`) as the placeholder in path templates everywhere. The scenario in its partition is the canonical artifact; users hand-edit or delete in place before `/review-scenario`.
 
 ## Scenario format extensions
 

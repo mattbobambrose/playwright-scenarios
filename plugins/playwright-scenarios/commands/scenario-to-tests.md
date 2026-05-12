@@ -1,11 +1,11 @@
 ---
 name: scenario-to-tests
-description: Generate tests in the project's configured language and framework from website validation scenarios under <SCENARIO_DIR>/{record,crawl,convert}/. Writes tests to <TEST_DIR>/<command>/<scenario-name>/<ClassName>.kt — partitioned by source command and by scenario. Assumes scenarios have already been reviewed.
+description: Generate tests in the project's configured language and framework from website validation scenarios under <SCENARIO_DIR>/{crawl,record,convert}/. Writes tests to <TEST_DIR>/<command>/<scenario-name>/<ClassName>.kt — partitioned by source command and by scenario. Assumes scenarios have already been reviewed.
 summary: Generate tests (defaults: Kotlin + Kotest StringSpec with Playwright-for-Java) at `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. A bare partition name scopes generation to that partition.
 signature: /scenario-to-tests [names...] [--dry-run]
 arguments:
   - name: scenarios
-    description: Zero or more scenario names (without .md extension), space-separated. Zero names = all scenarios across record / crawl / convert. A bare partition name (record, crawl, or convert) limits generation to that partition. Supported flag - --dry-run (skip Phase 4 test execution).
+    description: Zero or more scenario names (without .md extension), space-separated. Zero names = all scenarios across crawl / record / convert. A bare partition name (record, crawl, or convert) limits generation to that partition. Supported flag - --dry-run (skip Phase 4 test execution).
     required: false
 ---
 
@@ -21,7 +21,7 @@ Split the argument string into **flags** (tokens starting with `--`) and **names
 
 Any unknown `--`-prefixed token should be reported as an error before doing any work.
 
-The names list has special handling for **partition names**: if a name is exactly one of `record`, `crawl`, or `convert`, it's interpreted as a directive to generate tests for every scenario in that partition.
+The names list has special handling for **partition names**: if a name is exactly one of `crawl`, `record`, or `convert`, it's interpreted as a directive to generate tests for every scenario in that partition.
 
 ## Phase 0: Load project config and preflight
 
@@ -29,8 +29,8 @@ The names list has special handling for **partition names**: if a name is exactl
 
 Invoke the `loading-config` skill to resolve the four required config values:
 
-- **`<SCENARIO_DIR>`** — root of the scenario tree. Scenarios live under `<SCENARIO_DIR>/{record,crawl,convert}/`.
-- **`<TEST_DIR>`** — root of the generated-test tree. Tests will be written under `<TEST_DIR>/{record,crawl,convert}/<scenario-name>/`.
+- **`<SCENARIO_DIR>`** — root of the scenario tree. Scenarios live under `<SCENARIO_DIR>/{crawl,record,convert}/`.
+- **`<TEST_DIR>`** — root of the generated-test tree. Tests will be written under `<TEST_DIR>/{crawl,record,convert}/<scenario-name>/`.
 - **`<TEST_LANGUAGE>`** — drives the file extension and syntax.
 - **`<TEST_FRAMEWORK>`** — drives the test shape (class, decorators, imports).
 
@@ -71,11 +71,11 @@ Phase 2 shells out to `playwright-cli` via the skill of the same name. Verify it
 
 Using the names parsed from the argument-parsing step:
 
-- **Zero names:** glob `<SCENARIO_DIR>/{record,crawl,convert}/*.md`. Process every scenario across all three partitions.
-- **A partition name (`record`, `crawl`, or `convert`):** glob `<SCENARIO_DIR>/<command>/*.md`. Process every scenario in that partition only. Multiple partition names can be combined.
-- **One or more scenario names:** for each name, look up `<SCENARIO_DIR>/{record,crawl,convert}/<name>.md`. If exactly one match exists, include it. If a name matches in multiple partitions, prompt the user to disambiguate (or accept a `partition/name` form). If no match is found, report it and continue with the rest.
+- **Zero names:** glob `<SCENARIO_DIR>/{crawl,record,convert}/*.md`. Process every scenario across all three partitions.
+- **A partition name (`crawl`, `record`, or `convert`):** glob `<SCENARIO_DIR>/<command>/*.md`. Process every scenario in that partition only. Multiple partition names can be combined.
+- **One or more scenario names:** for each name, look up `<SCENARIO_DIR>/{crawl,record,convert}/<name>.md`. If exactly one match exists, include it. If a name matches in multiple partitions, prompt the user to disambiguate (or accept a `partition/name` form). If no match is found, report it and continue with the rest.
 
-For each selected scenario, retain its **source partition** (`record`, `crawl`, or `convert`) — derived from its parent directory under `<SCENARIO_DIR>/`. Phase 3 needs the partition to compute the output path and package.
+For each selected scenario, retain its **source partition** (`crawl`, `record`, or `convert`) — derived from its parent directory under `<SCENARIO_DIR>/`. Phase 3 needs the partition to compute the output path and package.
 
 Skip any `SCENARIOS.md` and `.crawl-meta.json` encountered during the glob.
 
@@ -102,7 +102,7 @@ Each subagent receives:
 - The scenario file content
 - The browser observations collected in Phase 2
 - The resolved config values (`<TEST_DIR>`, `SCENARIOS_PACKAGE`, `BASE_TEST_CLASS`, `BASE_PACKAGE`, `<TEST_LANGUAGE>`, `<TEST_FRAMEWORK>`)
-- The scenario's **source partition** (`record`, `crawl`, or `convert`) and **scenario-name** (filename without `.md`)
+- The scenario's **source partition** (`crawl`, `record`, or `convert`) and **scenario-name** (filename without `.md`)
 - The test generation rules below (including the scenario-name → class-name conversion rules)
 
 Subagents write the test file but do NOT run the build tool.
@@ -119,7 +119,7 @@ Otherwise, run the project's test command:
   ./gradlew test --tests "com.example.qa.scenarios.record.LoginInvalidCredentialsTest" --tests "com.example.qa.scenarios.convert.EmailSignupFormTest"
   ```
 
-- **If a partition name was passed** (`record`, `crawl`, or `convert`), target that subpackage:
+- **If a partition name was passed** (`crawl`, `record`, or `convert`), target that subpackage:
 
   ```
   ./gradlew test --tests "<SCENARIOS_PACKAGE>.<command>.*"

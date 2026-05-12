@@ -1,6 +1,6 @@
 ---
 name: loading-config
-description: Load per-project configuration for the playwright-scenarios plugin from .claude/playwright-scenarios.local.md. Triggers automatically at the start of any playwright-scenarios command (/record-scenario, /crawl-site, /doc-to-scenarios, /review-scenario, /scenario-to-tests, /scenario-status, /generate-fixture, /scaffold-base-test, /playwright-scenarios-config). Prompts the user for the four required fields (scenario_dir, test_dir, test_language, test_framework) on first run, persists them, and scaffolds the record/crawl/convert subdirectories under both <scenario_dir> and <test_dir>. Additional optional fields (source_root, base_test_class) are auto-inferred when needed and persisted on disambiguation. When base-test-class discovery finds zero candidates, offers to scaffold one via the scaffold-base-test skill.
+description: Load per-project configuration for the playwright-scenarios plugin from .claude/playwright-scenarios.local.md. Triggers automatically at the start of any playwright-scenarios command (/crawl-site, /record-scenario, /doc-to-scenarios, /review-scenario, /scenario-to-tests, /scenario-status, /generate-fixture, /scaffold-base-test, /playwright-scenarios-config). Prompts the user for the four required fields (scenario_dir, test_dir, test_language, test_framework) on first run, persists them, and scaffolds the crawl/record/convert subdirectories under both <scenario_dir> and <test_dir>. Additional optional fields (source_root, base_test_class) are auto-inferred when needed and persisted on disambiguation. When base-test-class discovery finds zero candidates, offers to scaffold one via the scaffold-base-test skill.
 ---
 
 # Loading Plugin Configuration
@@ -31,7 +31,7 @@ Edit the YAML frontmatter to reconfigure, or run `/playwright-scenarios-config` 
 
 | Field | Required | Default offered | Purpose |
 |-------|----------|-----------------|---------|
-| `scenario_dir` | **yes** | `src/test/scenarios` | Root directory (relative to repo root) for scenario `.md` files. Scenarios live under three command-keyed subdirectories: `<scenario_dir>/record/` (from `/record-scenario`), `<scenario_dir>/crawl/` (from `/crawl-site`), and `<scenario_dir>/convert/` (from `/doc-to-scenarios`). The bootstrap creates these subdirectories. |
+| `scenario_dir` | **yes** | `src/test/scenarios` | Root directory (relative to repo root) for scenario `.md` files. Scenarios live under three command-keyed subdirectories: `<scenario_dir>/crawl/` (from `/crawl-site`), `<scenario_dir>/record/` (from `/record-scenario`), and `<scenario_dir>/convert/` (from `/doc-to-scenarios`). The bootstrap creates these subdirectories. |
 | `test_dir` | **yes** | none (must be entered) | Root directory (relative to repo root) for generated test files. Tests are written under `<test_dir>/<command>/<scenario-name>/<ClassName>.<ext>` — partitioned by source command and by scenario. The bootstrap creates the three top-level subdirectories. |
 | `test_language` | **yes** | `kotlin` | One of: `kotlin`, `java`, `typescript`, `python`, or any free-form value. |
 | `test_framework` | **yes** | `kotest-stringspec` | One of: `kotest-stringspec`, `junit5`, `playwright-test`, `jest`, `pytest`, or any free-form value. |
