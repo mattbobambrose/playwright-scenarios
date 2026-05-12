@@ -31,7 +31,7 @@ Do this once before working through any of the authoring sections. Each command 
 
 2. **Browser:** Create your repo from the [Playwright Scenarios Kotlin template](https://github.com/mattbobambrose/playwright-scenarios-kotlin-template). Open the template page on GitHub and click **Use this template → Create a new repository** to spin up your own copy. Kotlin is the supported language today, but Python and TypeScript will be available soon.
 
-3. Start the demo site in a Docker container. It serves a small bookstore app at `http://localhost:8080`:
+3. Start the Bookshelf app in a Docker container. It serves a small bookstore at `http://localhost:8080`:
 
     **Terminal:**
 
