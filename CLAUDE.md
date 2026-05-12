@@ -38,7 +38,7 @@ When adding or changing a command, skill, or config field, update all of: README
 
 ## Website docs (Zensical)
 
-Pages live under `website/playwright-scenarios/docs/`. Nav order is set in `website/playwright-scenarios/zensical.toml` — new pages must be added to the `nav = [...]` array or they won't appear in the sidebar. Avoid backticks, dots, slashes, and parens in `##`/`###` headings if anything cross-links to them — slugs become fragile (the `## Config` section in `troubleshooting.md` was simplified for this reason). When a command and a skill share a name (e.g. `### /scaffold-base-test` and `### scaffold-base-test`), they slugify to the same anchor; disambiguate with `attr_list` (`### scaffold-base-test {: #scaffold-base-test-skill }`). In Mermaid diagrams, never use `(...)` inside `[...]` node labels — it silently breaks rendering. Strip the parenthetical or move it to surrounding prose.
+Pages live under `website/playwright-scenarios/docs/`. Nav order is set in `website/playwright-scenarios/zensical.toml` — new pages must be added to the `nav = [...]` array or they won't appear in the sidebar. Avoid backticks, dots, slashes, and parens in `##`/`###` headings if anything cross-links to them — slugs become fragile (the `## Config` section in `troubleshooting.md` was simplified for this reason). When a command and a skill share a name (e.g. `### /create-base-test` and `### create-base-test`), they slugify to the same anchor; disambiguate with `attr_list` (`### create-base-test {: #create-base-test-skill }`). In Mermaid diagrams, never use `(...)` inside `[...]` node labels — it silently breaks rendering. Strip the parenthetical or move it to surrounding prose.
 
 ## External dependency
 

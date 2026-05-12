@@ -33,12 +33,12 @@ This repository is a Claude Code plugin marketplace (no application source). It 
 - [/record-scenario](plugins/playwright-scenarios/commands/record-scenario.md): Launch Playwright codegen, capture a real user flow, and write a scenario to `<scenario_dir>/record/<name>.md`. Optionally accepts a Start URL so the browser opens straight to it.
 - [/crawl-site](plugins/playwright-scenarios/commands/crawl-site.md): Read-only site crawl; emits user-flow-oriented scenarios to `<scenario_dir>/crawl/`. Accepts an optional natural-language description plus `--depth` and `--max-scenarios`. Bare URL = default crawl (depth 1, max 10 scenarios).
 - [/doc-to-scenarios](plugins/playwright-scenarios/commands/doc-to-scenarios.md): Convert any document into scenario markdown files under `<scenario_dir>/convert/` with proper tag mapping. Accepts `--skip-evaluation`.
-- [/generate-fixture](plugins/playwright-scenarios/commands/generate-fixture.md): Scaffold a JSON fixture file from a scenario, document, or interactively. Accepts `--name`.
+- [/generate-fixture](plugins/playwright-scenarios/commands/generate-fixture.md): Generate a JSON fixture file from a scenario, document, or interactively. Accepts `--name`.
 - [/review-scenario](plugins/playwright-scenarios/commands/review-scenario.md): Audit scenarios across `<scenario_dir>/{crawl,record,convert}/` against the live site and apply improvements. Pass a partition name to scope.
 - [/scenario-to-tests](plugins/playwright-scenarios/commands/scenario-to-tests.md): Generate tests from reviewed scenarios. Output partitioned at `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. Accepts `--dry-run`.
 - [/scenario-status](plugins/playwright-scenarios/commands/scenario-status.md): Health dashboard grouped by partition — review dates, test file status, pass/fail results, coverage gaps. Optional natural-language description biases what's emphasized ("focus on what's broken", "executive summary").
 - [/playwright-scenarios-config](plugins/playwright-scenarios/commands/config.md): View or update per-project settings. Recovery path for malformed config files.
-- [/scaffold-base-test](plugins/playwright-scenarios/commands/scaffold-base-test.md): Generate a Kotlin `BasePageTest` so generated tests have a base class to extend. Prompts for `/reset` endpoint, lifecycle scope (Per spec / Per test), and browser. Persists `base_test_class` in the config. Currently `kotlin` + `kotest-stringspec` only. Auto-offered by `loading-config` when no base class is found.
+- [/create-base-test](plugins/playwright-scenarios/commands/create-base-test.md): Generate a Kotlin `BasePageTest` so generated tests have a base class to extend. Prompts for `/reset` endpoint, lifecycle scope (Per spec / Per test), and browser. Persists `base_test_class` in the config. Currently `kotlin` + `kotest-stringspec` only. Auto-offered by `loading-config` when no base class is found.
 
 ## Skills
 
@@ -47,7 +47,7 @@ This repository is a Claude Code plugin marketplace (no application source). It 
 - [evaluate-doc](plugins/playwright-scenarios/skills/evaluate-doc/SKILL.md): Evaluates a QA document against the plugin's capabilities. Structured testability report.
 - [fixture-format](plugins/playwright-scenarios/skills/fixture-format/SKILL.md): Defines the canonical JSON fixture format shared across all test generators.
 - [debugging-scenarios](plugins/playwright-scenarios/skills/debugging-scenarios/SKILL.md): Guides troubleshooting when generated tests fail — iframe detection, selector drift, timing, stale fixtures.
-- [scaffold-base-test](plugins/playwright-scenarios/skills/scaffold-base-test/SKILL.md): Renders the Kotlin `BasePageTest` template into the consuming project. Owns the three customization prompts (reset endpoint, lifecycle scope, browser) and the file write. Caller persists `base_test_class`.
+- [create-base-test](plugins/playwright-scenarios/skills/create-base-test/SKILL.md): Renders the Kotlin `BasePageTest` template into the consuming project. Owns the three customization prompts (reset endpoint, lifecycle scope, browser) and the file write. Caller persists `base_test_class`.
 
 ## Optional
 

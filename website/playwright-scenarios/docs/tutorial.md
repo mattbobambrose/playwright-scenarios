@@ -19,41 +19,56 @@ By the end you'll have:
 
 ## Step 1: Setup
 
-Do this once before working through any of the authoring sections.
+Do this once before working through any of the authoring sections. Each command is prefaced with **Terminal:**, **Browser:**, or **Claude Code:** to indicate where to run it. (Steps 7 and 8 run inside the Claude Code session you started in step 6.)
 
 1. Install Git, Docker, Node.js, and Claude. Then install `playwright-cli` (used by `/crawl-site`, `/review-scenario`, and `/scenario-to-tests` for live-site exploration):
+
+    **Terminal:**
     ```
     npm install -g @playwright/cli@latest
     ```
-2. Use the [Playwright Scenarios Kotlin template](https://github.com/mattbobambrose/playwright-scenarios-kotlin-template) as the starting point. Click **Use this template → Create a new repository** on the GitHub page to get your own copy, then clone it locally. Kotlin is the supported language today, but Python and TypeScript will be available soon.
+2. **Browser:** Create your repo from the [Playwright Scenarios Kotlin template](https://github.com/mattbobambrose/playwright-scenarios-kotlin-template). Open the template page on GitHub and click **Use this template → Create a new repository** to spin up your own copy. Kotlin is the supported language today, but Python and TypeScript will be available soon.
 3. Start the demo site in a Docker container. It serves a small bookstore app at `http://localhost:8080`:
+
+    **Terminal:**
     ```
     docker run --rm -p 8080:8080 mattbobambrose/playwright-scenario-playground
     ```
     **For your project:** Skip this step if you already have a dev or staging server you want to test. Use that URL anywhere this tutorial says `http://localhost:8080`.
-4. Install the Playwright browsers (one-time, ~200 MB):
+4. Clone the new repo locally and `cd` into it:
+
+    **Terminal:**
+    ```
+    git clone <your-new-repo-url>
+    cd <your-new-repo-name>
+    ```
+5. Install the Playwright browsers (one-time, ~200 MB):
+
+    **Terminal:**
     ```
     ./gradlew installPlaywrightBrowsers
     ```
-5. Start a Claude Code session at the repo root:
-    ```
-    claude
-    ```
-    Alternatively, run with permission prompts disabled:
+6. Start a Claude Code session at the repo root with permission prompts disabled:
+
+    **Terminal:**
     ```
     claude --dangerously-skip-permissions
     ```
-    The plugin commands kick off many tool calls per invocation (file reads, file writes, `playwright-cli` launches, Gradle runs). With the default `claude`, you'll click **Approve** for each one. The `--dangerously-skip-permissions` flag bypasses every prompt for the session — use it only in a disposable / sandboxed checkout like the template repo you just cloned.
-6. Install the plugin:
+    The plugin commands kick off many tool calls per invocation (file reads, file writes, `playwright-cli` launches, Gradle runs). The `--dangerously-skip-permissions` flag bypasses every prompt for the session — safe to use in a disposable / sandboxed checkout like the template repo you just cloned.
+7. Install the plugin:
+
+    **Claude Code:**
     ```
     /plugin marketplace add mattbobambrose/playwright-scenarios
     /plugin install playwright-scenarios@playwright-scenarios
     ```
-7. Scaffold a base test class so generated tests have something to extend:
+8. Create a base test class so generated tests have something to extend:
+
+    **Claude Code:**
     ```
-    /scaffold-base-test
+    /create-base-test
     ```
-    This is your first plugin command, so two prompts fire in sequence: first the config bootstrap (`scenario_dir`, `test_dir`, `test_language`, `test_framework`), then three scaffold customizations (whether the dev server has a `POST /reset` endpoint, lifecycle scope, browser). Accept the defaults at every prompt to follow along with the tutorial. Claude writes `BasePageTest.kt` next to your scenarios package and persists `base_test_class` in the config.
+    This is your first plugin command, so two prompts fire in sequence: first the config bootstrap (`scenario_dir`, `test_dir`, `test_language`, `test_framework`), then three customizations (whether the dev server has a `POST /reset` endpoint, lifecycle scope, browser). Accept the defaults at every prompt to follow along with the tutorial. Claude writes `BasePageTest.kt` next to your scenarios package and persists `base_test_class` in the config.
 
     **For your project:** The defaults match the kotlin template's layout. If you're applying the plugin to your own project, see the [Configuration table in the README](https://github.com/mattbobambrose/playwright-scenarios#configuration) for what each field controls and override the prompts as needed. You can re-prompt later with `/playwright-scenarios-config`.
 
@@ -65,6 +80,7 @@ The first authoring path is the most hands-off: tell `/crawl-site` where to star
 
 ### Run the crawl
 
+**Claude Code:**
 ```
 /crawl-site http://localhost:8080
 ```
@@ -79,6 +95,7 @@ Claude inventories the start page, ranks candidate flows, walks each (read-only 
 
 ### Review the scenarios
 
+**Claude Code:**
 ```
 /review-scenario crawl
 ```
@@ -87,6 +104,7 @@ The `crawl` argument scopes the review to scenarios in the crawl partition. Clau
 
 ### Generate tests
 
+**Claude Code:**
 ```
 /scenario-to-tests crawl
 ```
@@ -103,6 +121,7 @@ For interactive flows (logins, form fills, multi-step purchases) it's faster to 
 
 ### Record
 
+**Claude Code:**
 ```
 /record-scenario
 ```
@@ -121,6 +140,7 @@ Claude converts the recorded actions into a scenario markdown file at `<scenario
 
 ### Review and generate
 
+**Claude Code:**
 ```
 /review-scenario record
 /scenario-to-tests record
@@ -136,7 +156,7 @@ The third path starts from a written description. You can hand it to any LLM (Ch
 
 ### Generate a document
 
-Paste [`DOC_GUIDE.md`](https://github.com/mattbobambrose/playwright-scenarios/blob/master/plugins/playwright-scenarios/DOC_GUIDE.md) into your LLM's context — system prompt, custom GPT instructions, or the start of a conversation. This teaches the LLM the format, the available tags, and the pitfalls to avoid *before* it writes anything.
+**Browser (external LLM):** Paste [`DOC_GUIDE.md`](https://github.com/mattbobambrose/playwright-scenarios/blob/master/plugins/playwright-scenarios/DOC_GUIDE.md) into your LLM's context — system prompt, custom GPT instructions, or the start of a conversation. This teaches the LLM the format, the available tags, and the pitfalls to avoid *before* it writes anything.
 
 **Tip:** Paste `DOC_GUIDE.md` as a **system prompt or custom instructions** rather than a mid-conversation message — system-prompt placement anchors the framing most reliably and the LLM is more likely to apply the rules than to critique them. If you do paste mid-conversation, include your request in the same message (e.g. "here are the rules, now draft a test document for the checkout flow") instead of pasting the guide alone and waiting. If the LLM still responds with suggestions for improving the guide instead of drafting a document, reply once with "Apply the rules; don't critique them. Draft a test document for [your flow]." and it will correct course. The guide's "How to use this guide" section anchors this, but LLM behavior is probabilistic — these tips compound.
 
@@ -144,6 +164,7 @@ Then ask it to draft a document covering the flows you care about. Save the outp
 
 ### Convert to scenarios
 
+**Claude Code:**
 ```
 /doc-to-scenarios docs/checkout-tests.md
 ```
@@ -154,6 +175,7 @@ Claude runs `evaluate-doc` first (a sanity check that the doc is well-formed for
 
 ### Review and generate
 
+**Claude Code:**
 ```
 /review-scenario convert
 /scenario-to-tests convert
@@ -165,6 +187,7 @@ The third batch of tests lands at `<test_dir>/convert/<scenario-name>/<ClassName
 
 ## Step 5: Check the dashboard
 
+**Claude Code:**
 ```
 /scenario-status
 ```

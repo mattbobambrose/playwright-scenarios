@@ -1,7 +1,7 @@
 ---
 name: generate-fixture
-description: Scaffold a fixture JSON file from a scenario's input data bullets, a document's persona table, or interactive prompts. Outputs the standardized fixture format defined by the fixture-format skill.
-summary: Scaffold a fixture JSON file from a scenario's data bullets, a document's persona table, or interactive prompts.
+description: Generate a fixture JSON file from a scenario's input data bullets, a document's persona table, or interactive prompts. Outputs the standardized fixture format defined by the fixture-format skill.
+summary: Generate a fixture JSON file from a scenario's data bullets, a document's persona table, or interactive prompts.
 signature: /generate-fixture <source | interactive> [--name=N]
 arguments:
   - name: source

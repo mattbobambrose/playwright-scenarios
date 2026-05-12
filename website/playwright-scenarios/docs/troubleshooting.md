@@ -57,9 +57,9 @@ Setup-time and operational failures, with a fix for each.
 
 ### No base test class exists in the project
 
-> **Symptom:** Generated tests have no `extends` clause and a TODO comment at the top of every file. Or `loading-config` warned during bootstrap that no base class was found and you said "No" to the scaffold offer.<br>
+> **Symptom:** Generated tests have no `extends` clause and a TODO comment at the top of every file. Or `loading-config` warned during bootstrap that no base class was found and you said "No" to the offer to create one.<br>
 > **Cause:** The host project doesn't yet define a Playwright + Kotest base class.<br>
-> **Fix:** Run `/scaffold-base-test`. It prompts for three customizations (whether the dev server has a `POST /reset` endpoint, whether the browser lifecycle runs per-spec or per-test, and which Playwright browser to launch), writes a `BasePageTest.kt` at the parent of `<test_dir>`, and persists the FQN to `base_test_class`. Re-run `/scenario-to-tests` afterwards — generated tests will now extend the new class.
+> **Fix:** Run `/create-base-test`. It prompts for three customizations (whether the dev server has a `POST /reset` endpoint, whether the browser lifecycle runs per-spec or per-test, and which Playwright browser to launch), writes a `BasePageTest.kt` at the parent of `<test_dir>`, and persists the FQN to `base_test_class`. Re-run `/scenario-to-tests` afterwards — generated tests will now extend the new class.
 
 ### "Couldn't infer the source root from `test_dir=…`"
 
@@ -70,7 +70,7 @@ Setup-time and operational failures, with a fix for each.
 ### "I want to use this in a project with no build file yet"
 
 > **Symptom:** Bootstrap completes, but `/scenario-to-tests` writes Kotlin files that have nowhere to compile.<br>
-> **Cause:** The plugin needs a host project that can run the generated tests. It does not scaffold the project for you.<br>
+> **Cause:** The plugin needs a host project that can run the generated tests. It does not create the project for you.<br>
 > **Fix:** Clone one of the language template repos linked from the [Tutorial](tutorial.md) — they include the build configuration you need. Then run `/playwright-scenarios-config` to point the plugin at the new layout.
 
 ---
