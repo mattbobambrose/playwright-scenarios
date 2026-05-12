@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Renamed `/scaffold-base-test` → `/create-base-test`.** The command and its backing skill (formerly `scaffold-base-test`, now `create-base-test`) generate a Kotlin `BasePageTest` class — "create" reads more directly than "scaffold". The slash command, the skill name, the command file, and the skill directory are all renamed. All cross-surface references updated (README auto-table, llms.txt, llms-full.txt, USAGE.md, CLAUDE.md, website commands.md, troubleshooting.md, tutorial.md, loading-config skill). The script `scripts/gen-command-table.py` is updated to reference the new command name. The kotlin template's README reference is also bumped in its repo's tracking PR. **Breaking** for anyone who has muscle-memorized `/scaffold-base-test` — the old slash command no longer resolves. While renaming, "scaffold" was also swept out of prose: scaffolded → created/generated; "scaffold the partition subdirectories" → "create the partition subdirectories"; `/generate-fixture`'s description verb "Scaffold" → "Generate".
+
 ## [0.8.0] - 2026-05-11
 
 ### Added

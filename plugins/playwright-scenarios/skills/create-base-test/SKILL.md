@@ -1,13 +1,13 @@
 ---
-name: scaffold-base-test
-description: Scaffold a Kotlin BasePageTest class into the consuming project so generated tests have something to extend. Currently supports kotlin + kotest-stringspec only. Invoked by /scaffold-base-test (explicit) and by loading-config (auto-offered when zero base-test-class candidates are found in the project). Owns three customization prompts (`/reset` endpoint, lifecycle scope, browser) and writes a single .kt file at the parent of <TEST_DIR>.
+name: create-base-test
+description: Create a Kotlin BasePageTest class into the consuming project so generated tests have something to extend. Currently supports kotlin + kotest-stringspec only. Invoked by /create-base-test (explicit) and by loading-config (auto-offered when zero base-test-class candidates are found in the project). Owns three customization prompts (`/reset` endpoint, lifecycle scope, browser) and writes a single .kt file at the parent of <TEST_DIR>.
 ---
 
-# Scaffold Base Test
+# Create Base Test
 
 ## When this skill is invoked
 
-- **Explicitly** by `/scaffold-base-test`.
+- **Explicitly** by `/create-base-test`.
 - **Automatically** by `loading-config`'s base-test-class discovery when zero candidates are found.
 
 ## Inputs from caller
@@ -172,7 +172,7 @@ Return `{fqn, target_file, choices: {reset, lifecycle, browser}}`. The caller pe
 Print:
 
 ```
-Scaffolded BasePageTest at <target_file>
+Created BasePageTest at <target_file>
   Package: <package_name> (FQN: <fqn>)
   Reset endpoint: <Yes|No>
   Lifecycle: <Per spec|Per test>

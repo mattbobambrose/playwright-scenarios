@@ -40,7 +40,7 @@ ORDERINGS = {
         "scenario-to-tests",
         "scenario-status",
         "playwright-scenarios-config",
-        "scaffold-base-test",
+        "create-base-test",
     ],
     "USAGE": [
         "record-scenario",
@@ -51,7 +51,7 @@ ORDERINGS = {
         "scenario-to-tests",
         "scenario-status",
         "playwright-scenarios-config",
-        "scaffold-base-test",
+        "create-base-test",
     ],
 }
 

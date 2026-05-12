@@ -11,11 +11,11 @@ Every component shipped by the `playwright-scenarios` plugin, with signatures, f
 | Command | Purpose |
 |---|---|
 | [`/playwright-scenarios-config`](#playwright-scenarios-config) | View or change the plugin's per-project settings |
-| [`/scaffold-base-test`](#scaffold-base-test) | Generate a Kotlin `BasePageTest` so generated tests have something to extend |
+| [`/create-base-test`](#create-base-test) | Generate a Kotlin `BasePageTest` so generated tests have something to extend |
 | [`/record-scenario`](#record-scenario) | Capture a flow by driving a real browser (writes to `record/`) |
 | [`/crawl-site`](#crawl-site) | Auto-discover flows by exploring a site (writes to `crawl/`, read-only) |
 | [`/doc-to-scenarios`](#doc-to-scenarios) | Convert a document into scenarios (writes to `convert/`) |
-| [`/generate-fixture`](#generate-fixture) | Scaffold a fixture JSON file |
+| [`/generate-fixture`](#generate-fixture) | Generate a fixture JSON file |
 | [`/review-scenario`](#review-scenario) | Audit a scenario against the live site |
 | [`/scenario-to-tests`](#scenario-to-tests) | Generate test code from reviewed scenarios |
 | [`/scenario-status`](#scenario-status) | Health dashboard across scenarios and tests |
@@ -27,7 +27,7 @@ Every component shipped by the `playwright-scenarios` plugin, with signatures, f
 | [`fixture-format`](#fixture-format) | Canonical JSON fixture schema |
 | [`evaluate-doc`](#evaluate-doc) | Score a document's testability before conversion |
 | [`debugging-scenarios`](#debugging-scenarios) | Diagnose failing generated tests |
-| [`scaffold-base-test`](#scaffold-base-test-skill) | Render and write the Kotlin `BasePageTest` template |
+| [`create-base-test`](#create-base-test-skill) | Render and write the Kotlin `BasePageTest` template |
 
 ## Argument-syntax conventions
 
@@ -60,15 +60,15 @@ View or change the plugin's per-project settings stored in `.claude/playwright-s
 
 ---
 
-### `/scaffold-base-test`
+### `/create-base-test`
 
 ```
-/scaffold-base-test
+/create-base-test
 ```
 
 Generate a Kotlin `BasePageTest` class so [`/scenario-to-tests`](#scenario-to-tests) has a base class to extend. Without one, generated tests are emitted with no `extends` clause and a TODO comment at the top of every file. Run this once per project; the resulting class is registered as `base_test_class` in `.claude/playwright-scenarios.local.md` and reused thereafter.
 
-Most users hit this skill indirectly: when [`loading-config`](#loading-config) runs its base-test-class discovery and finds zero candidates, it offers to scaffold one. Run the command explicitly only when you want to (re)generate the file or when you originally said "No" to the auto-offer.
+Most users hit this skill indirectly: when [`loading-config`](#loading-config) runs its base-test-class discovery and finds zero candidates, it offers to create one. Run the command explicitly only when you want to (re)generate the file or when you originally said "No" to the auto-offer.
 
 **Arguments:** none.
 
@@ -81,23 +81,23 @@ Most users hit this skill indirectly: when [`loading-config`](#loading-config) r
 
     | Prompt | Choices | Default |
     |---|---|---|
-    | Reset endpoint | Whether the dev server has a `POST /reset` that clears state between specs. Most don't — it's a deliberate test affordance some fixture / demo apps add. If yes, the scaffold emits `resetServerState()` and calls it from the lifecycle hook. | No |
+    | Reset endpoint | Whether the dev server has a `POST /reset` that clears state between specs. Most don't — it's a deliberate test affordance some fixture / demo apps add. If yes, the generated file emits `resetServerState()` and calls it from the lifecycle hook. | No |
     | Lifecycle scope | `Per spec` (one Browser/Page per spec class, faster, shared state across tests in the spec) or `Per test` (fresh Browser/Page per test, slower, full isolation). | Per spec |
     | Browser | `Chromium`, `Firefox`, or `Webkit`. | Chromium |
 
 5. Writes the rendered `BasePageTest.kt` and persists the new FQN to `base_test_class` in the config.
 
-**Prerequisites:** `test_language = kotlin` and `test_framework = kotest-stringspec` in the project config. No external binaries — the scaffold is pure file generation.
+**Prerequisites:** `test_language = kotlin` and `test_framework = kotest-stringspec` in the project config. No external binaries — the command is pure file generation.
 
 **Refusals:**
 
 - Target file `BasePageTest.kt` already exists at the resolved path → asks you to delete it first. Existing customizations are never silently overwritten.
 - `base_test_class` already set in config → asks you to remove that line first.
-- `test_language` ≠ `kotlin` or `test_framework` ≠ `kotest-stringspec` → no Kotlin scaffold is appropriate; nothing is written.
+- `test_language` ≠ `kotlin` or `test_framework` ≠ `kotest-stringspec` → no Kotlin BasePageTest can be generated; nothing is written.
 
 **Customizing further:**
 
-The scaffolded file is yours to edit. Common follow-ups:
+The created file is yours to edit. Common follow-ups:
 
 - Override `baseUrl` in your concrete test class to point at a different server.
 - Read the headless flag from an env var instead of `System.getProperty("playwright.headless", "true")`.
@@ -211,7 +211,7 @@ Convert any document (test plan, requirements doc, meeting notes, acceptance cri
 /generate-fixture <source | interactive> [--name=<fixture-name>]
 ```
 
-Scaffold a fixture JSON file in the format defined by the [`fixture-format`](#fixture-format) skill. Output lands at `<SCENARIO_DIR>/fixtures/<name>.json`.
+Generate a fixture JSON file in the format defined by the [`fixture-format`](#fixture-format) skill. Output lands at `<SCENARIO_DIR>/fixtures/<name>.json`.
 
 **Arguments:**
 
@@ -346,6 +346,6 @@ Reads any document and produces a structured testability report — what convert
 
 Diagnoses tests generated by `/scenario-to-tests` that fail. Triggers when the user reports test failures. Works through common root causes in order — undeclared iframe, stale selectors, race conditions, base-class misconfiguration, missing fixture data — with detection method and fix for each.
 
-### `scaffold-base-test` {: #scaffold-base-test-skill }
+### `create-base-test` {: #create-base-test-skill }
 
-Renders the Kotlin `BasePageTest` template and writes it to disk. Owns the three customization prompts (`/reset` endpoint, lifecycle scope, browser) and the variant rules that compose them with the canonical template. Invoked by [`/scaffold-base-test`](#scaffold-base-test) (explicit) and by [`loading-config`](#loading-config) (auto-offered when zero base-test-class candidates are found in the project). Currently supports `kotlin` + `kotest-stringspec` only; additional language/framework variants will land alongside their `/scenario-to-tests` generation paths. After scaffolding, `base_test_class` is recorded in `.claude/playwright-scenarios.local.md` automatically.
+Renders the Kotlin `BasePageTest` template and writes it to disk. Owns the three customization prompts (`/reset` endpoint, lifecycle scope, browser) and the variant rules that compose them with the canonical template. Invoked by [`/create-base-test`](#create-base-test) (explicit) and by [`loading-config`](#loading-config) (auto-offered when zero base-test-class candidates are found in the project). Currently supports `kotlin` + `kotest-stringspec` only; additional language/framework variants will land alongside their `/scenario-to-tests` generation paths. After creation, `base_test_class` is recorded in `.claude/playwright-scenarios.local.md` automatically.
