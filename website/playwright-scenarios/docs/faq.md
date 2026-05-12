@@ -6,9 +6,9 @@ icon: lucide/circle-help
 
 Conceptual and scope questions about the `playwright-scenarios` plugin. For runtime errors and "I tried X and got Y" debugging, see [Troubleshooting](troubleshooting.md) instead.
 
-## Do I have to use the bookshelf demo from the tutorial?
+## Do I have to use the bookstore demo from the tutorial?
 
-No — the bookshelf demo is just a concrete target for the tutorial. Any URL Claude can reach via Playwright is fair game: your local dev server, a staging environment, a public site. Wherever the tutorial says `http://localhost:8080`, substitute your own URL. You can skip the `docker run` step in Step 1 entirely if you already have a server running.
+No — the bookstore demo is just a concrete target for the tutorial. Any URL Claude can reach via Playwright is fair game: your local dev server, a staging environment, a public site. Wherever the tutorial says `http://localhost:8080`, substitute your own URL. You can skip the `docker run` step in Step 1 entirely if you already have a server running.
 
 The tutorial calls out every substitution under a **For your project:** note. The [Bring your own site](tutorial.md) preamble at the top of the tutorial summarizes what's swappable.
 
