@@ -241,13 +241,13 @@ Scaffold a fixture JSON file in the format defined by the [`fixture-format`](#fi
 /review-scenario [name1 name2 ...]
 ```
 
-Audit one or more scenario files across `<SCENARIO_DIR>/{record,crawl,convert}/` against the live site, propose improvements, and rewrite the markdown in place. Does **not** generate tests — pair with `/scenario-to-tests` for that.
+Audit one or more scenario files across `<SCENARIO_DIR>/{crawl,record,convert}/` against the live site, propose improvements, and rewrite the markdown in place. Does **not** generate tests — pair with `/scenario-to-tests` for that.
 
 **Arguments:**
 
 | Argument | Type | Description |
 |---|---|---|
-| `name1 name2 ...` | optional, zero or more | Scenario names without `.md`, or a partition name (`record`, `crawl`, `convert`) to scope the review to that partition. Empty = review every scenario across all three partitions. If a name matches in multiple partitions, you'll be prompted to disambiguate or use the `partition/name` form. |
+| `name1 name2 ...` | optional, zero or more | Scenario names without `.md`, or a partition name (`crawl`, `record`, `convert`) to scope the review to that partition. Empty = review every scenario across all three partitions. If a name matches in multiple partitions, you'll be prompted to disambiguate or use the `partition/name` form. |
 
 **Flags:** none.
 
@@ -277,7 +277,7 @@ Generate test code from reviewed scenarios. The output language and framework co
 
 | Argument | Type | Description |
 |---|---|---|
-| `name1 name2 ...` | optional, zero or more | Scenario names without `.md`, or a partition name (`record`, `crawl`, `convert`) to scope generation to that partition. Empty = generate tests for every scenario across all three partitions. |
+| `name1 name2 ...` | optional, zero or more | Scenario names without `.md`, or a partition name (`crawl`, `record`, `convert`) to scope generation to that partition. Empty = generate tests for every scenario across all three partitions. |
 
 **Flags:**
 
@@ -307,7 +307,7 @@ Single-view health dashboard for every scenario and its generated tests, plus cr
 
 **Arguments:** optional free-form English description that biases the rendering. Examples: `/scenario-status focus on what's broken`, `/scenario-status one-paragraph executive summary`, `/scenario-status only the checkout-related scenarios`. Without it, the full default dashboard is rendered. With it, the command leads with a tailored prose summary, condenses or skips tangential sections, may filter per-partition tables, and reorders the recommended actions to match the focus. Phases 1–5 still gather the full picture either way.
 
-In every mode the output keeps each scenario partition-tagged (record / crawl / convert) so it's always clear which command produced a given scenario — partition headers are preserved, prose summaries name partitions when citing counts, and recommended actions qualify scenario names with their partition.
+In every mode the output keeps each scenario partition-tagged (crawl / record / convert) so it's always clear which command produced a given scenario — partition headers are preserved, prose summaries name partitions when citing counts, and recommended actions qualify scenario names with their partition.
 
 **Reports:**
 
