@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-05-12
+
+### Changed
+
+- Tutorial Step 3 wording: "Start the demo site in a Docker container. It serves a small bookstore app at..." → "Start the Bookshelf app in a Docker container. It serves a small bookstore at..." — matches the bookshelf/bookstore naming split established when the kotlin template adopted `com.bookshelf` as its Maven group (Bookshelf = project namespace, bookstore = what kind of app it is).
+- Website (Zensical config): added a GitHub social badge to the site header; configured `repo_url`, `repo_name`, and `edit_uri`; corrected copyright attribution to "Matthew Ambrose". Enabled four feature toggles: `content.action.edit` and `content.action.view` (per-page edit and view-source buttons), `header.autohide`, and `toc.follow`.
+
+### Fixed
+
+- Tutorial Step 1's numbered list rendered incorrectly in some markdown parsers: when a list item's last continuation paragraph (e.g. an indented `**For your project:**` callout) was immediately followed by the next item's marker with no blank line between, the marker got absorbed into the prose. Item 4's `4.` was rendering inline as text inside item 3. Normalized by adding blank-line separation between every block transition inside list items, making the list "loose" — robust across parsers including Zensical's renderer.
+- `create-base-test` skill description's example path reference now reflects the kotlin template's current `com.bookshelf` layout (`src/test/kotlin/com/bookshelf/scenarios/`) instead of the pre-rename `src/test/kotlin/scenarios/` layout. Stale since the kotlin template's group rename in v0.9.0.
+- Zensical `edit_uri` corrected from a leftover `agentmail` path (presumably from another project the config was copied from) to the actual `playwright-scenarios/docs/` path. Dormant under v0.9.0 because the `content.action.edit` feature was commented out; needed because that feature is now enabled in this release.
+
 ## [0.9.0] - 2026-05-12
 
 ### Changed
@@ -194,6 +207,7 @@ Initial release.
 - Host-project setup documentation covering the required Gradle `recordScenario` and `installPlaywrightBrowsers` tasks, Playwright / Kotest dependencies, `scenarios/` directory convention, and base test class pattern.
 - MIT license.
 
+[0.9.1]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.9.0...0.9.1
 [0.9.0]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.8.0...0.9.0
 [0.8.0]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.7.0...0.8.0
 [0.7.0]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.6.1...0.7.0
