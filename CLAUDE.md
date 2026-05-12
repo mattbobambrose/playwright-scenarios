@@ -17,6 +17,10 @@ When bumping a plugin version, update **both** `plugin.json` and the matching en
 
 No automated tests. Validate by installing the plugin locally and running the commands against a real host project.
 
+## Command namespacing when installed
+
+When the plugin is installed via `/plugin install playwright-scenarios@playwright-scenarios`, slash commands are invoked with the namespace prefix: `/playwright-scenarios:crawl-site`, not the bare `/crawl-site`. This is Claude Code's standard plugin-skill namespacing — see [Claude Code's plugin docs](https://code.claude.com/docs/en/plugins). Local development with `claude --plugin-dir ./` may allow the bare form (which is why the tutorial uses bare names — it's authored against the dev-loop path), but anyone who installs from the marketplace will see the namespaced form. If someone reports "installed commands don't work," the first thing to check is whether they're using the namespaced form.
+
 ## Plugin runtime config
 
 The `playwright-scenarios` plugin reads per-project settings from `.claude/playwright-scenarios.local.md` (YAML frontmatter: `scenario_dir`, `test_dir`, `test_language`, `test_framework`). Every command starts by invoking the `loading-config` skill, which prompts the user and creates the file on first use. Use `/playwright-scenarios-config` to re-prompt.
@@ -39,6 +43,8 @@ When adding or changing a command, skill, or config field, update all of: README
 ## Website docs (Zensical)
 
 Pages live under `website/playwright-scenarios/docs/`. Nav order is set in `website/playwright-scenarios/zensical.toml` — new pages must be added to the `nav = [...]` array or they won't appear in the sidebar. Avoid backticks, dots, slashes, and parens in `##`/`###` headings if anything cross-links to them — slugs become fragile (the `## Config` section in `troubleshooting.md` was simplified for this reason). When a command and a skill share a name (e.g. `### /create-base-test` and `### create-base-test`), they slugify to the same anchor; disambiguate with `attr_list` (`### create-base-test {: #create-base-test-skill }`). In Mermaid diagrams, never use `(...)` inside `[...]` node labels — it silently breaks rendering. Strip the parenthetical or move it to surrounding prose.
+
+**Loose lists with multi-paragraph items.** In a numbered list where any item has continuation content (indented paragraphs, code blocks, callouts), use blank-line separation between **every** block transition inside the list — including between adjacent list items. Without blank lines between items that have indented continuation content, Zensical's renderer absorbs the next item's marker into the previous item's prose (so `4. Clone the new repo...` ends up as inline text inside item 3 instead of starting item 4). Tutorial Step 1 hit this exact bug; the rule is mechanical but easy to forget.
 
 ## External dependency
 
