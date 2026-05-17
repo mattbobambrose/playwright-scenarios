@@ -68,6 +68,8 @@ Do this once before working through any of the authoring sections. Each command 
 
     The plugin commands kick off many tool calls per invocation (file reads, file writes, `playwright-cli` launches, Gradle runs). The `--dangerously-skip-permissions` flag bypasses every prompt for the session — safe to use in a disposable / sandboxed checkout like the template repo you just cloned.
 
+    **Best practice:** Run Claude on high effort. The plugin's commands are long, multi-step tasks — a site crawl, a live-site scenario review, a generate-and-fix-tests loop — and they go markedly better with deeper reasoning: wider crawl coverage, sharper reviews, and fewer failing tests to chase down.
+
 7. Install the plugin:
 
     **Claude Code:**
@@ -87,7 +89,7 @@ Do this once before working through any of the authoring sections. Each command 
     /create-base-test
     ```
 
-    This is your first plugin command, so two prompts fire in sequence: first the config bootstrap (`scenario_dir`, `test_dir`, `test_language`, `test_framework`), then three customizations (whether the dev server has a `POST /reset` endpoint, lifecycle scope, browser). Accept the defaults at every prompt to follow along with the tutorial. Claude writes `BasePageTest.kt` next to your scenarios package and persists `base_test_class` in the config.
+    This is your first plugin command, so two prompts fire in sequence: first the config bootstrap (`scenario_dir`, `test_dir`, `test_language`, `test_framework`), then three customizations (whether the dev server has a `POST /reset` endpoint, lifecycle scope, browser). Accept the defaults — **except the `POST /reset` endpoint prompt: answer Yes**. The bookstore demo exposes a reset endpoint, so `BasePageTest` can reset its state between tests; that prompt otherwise defaults to No, since most real dev servers don't have one. Claude writes `BasePageTest.kt` next to your scenarios package and persists `base_test_class` in the config.
 
     **For your project:** The defaults match the kotlin template's layout. If you're applying the plugin to your own project, see the [Configuration table in the README](https://github.com/mattbobambrose/playwright-scenarios#configuration) for what each field controls and override the prompts as needed. You can re-prompt later with `/playwright-scenarios-config`.
 
@@ -131,9 +133,23 @@ The `crawl` argument scopes the review to scenarios in the crawl folder. Claude 
 /scenario-to-tests crawl
 ```
 
-For each reviewed scenario in `<scenario_dir>/crawl/`, Claude generates a test file at `<test_dir>/crawl/<scenario-name>/<ClassName>.kt`, runs the suite, and fixes failures.
+For each reviewed scenario in `<scenario_dir>/crawl/`, Claude:
+
+- generates a test file at `<test_dir>/crawl/<scenario-name>/<ClassName>.kt`
+- runs the suite
+- fixes failures
 
 You now have your first batch of executable tests.
+
+### Run tests
+
+**Terminal:**
+
+```
+make clean test
+```
+
+Claude already ran the suite while generating — run it yourself and watch it go green.
 
 ---
 
@@ -172,6 +188,16 @@ Claude converts the recorded actions into a scenario markdown file at `<scenario
 
 Same shape as Step 2 — scoped this time to the `record` folder. The new tests land at `<test_dir>/record/<scenario-name>/<ClassName>.kt`, alongside the crawl tests from earlier.
 
+### Run tests
+
+**Terminal:**
+
+```
+make clean test
+```
+
+Claude already ran the suite while generating — run it yourself and watch it go green.
+
 ---
 
 ## Step 4: Generate docs with an LLM → tests
@@ -208,6 +234,16 @@ Claude runs `evaluate-doc` first (a sanity check that the doc is well-formed for
 ```
 
 The third batch of tests lands at `<test_dir>/convert/<scenario-name>/<ClassName>.kt`.
+
+### Run tests
+
+**Terminal:**
+
+```
+make clean test
+```
+
+Claude already ran the suite while generating — run it yourself and watch it go green.
 
 ---
 
