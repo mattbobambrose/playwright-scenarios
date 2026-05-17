@@ -29,9 +29,7 @@ Do this once before working through any of the authoring sections. Each command 
     npm install -g @playwright/cli@latest
     ```
 
-2. **Browser:** Create your repo from the [Playwright Scenarios Kotlin template](https://github.com/mattbobambrose/playwright-scenarios-kotlin-template). Open the template page on GitHub and click **Use this template → Create a new repository** to spin up your own copy. Kotlin is the supported language today, but Python and TypeScript will be available soon.
-
-3. Start the Bookshelf app in a Docker container. It serves a small bookstore at `http://localhost:8080`:
+2. Start the Bookshelf app in a Docker container. It serves a small bookstore at `http://localhost:8080`:
 
     **Terminal:**
 
@@ -41,7 +39,9 @@ Do this once before working through any of the authoring sections. Each command 
 
     **For your project:** Skip this step if you already have a dev or staging server you want to test. Use that URL anywhere this tutorial says `http://localhost:8080`.
 
-4. Clone the new repo locally and `cd` into it:
+3. **Browser:** Open the [Playwright Scenarios Kotlin template](https://github.com/mattbobambrose/playwright-scenarios-kotlin-template) in GitHub and click **Use this template → Create a new repository** to spin up your own copy. Kotlin is the supported language today, but Python and TypeScript are in the works.
+
+4. Clone the new repo locally and `cd` into it. You'll find the URL under **Code → Clone → HTTPS**:
 
     **Terminal:**
 
@@ -76,6 +76,8 @@ Do this once before working through any of the authoring sections. Each command 
     /plugin marketplace add mattbobambrose/playwright-scenarios
     /plugin install playwright-scenarios@playwright-scenarios
     ```
+
+    When prompted for the scope of the plugin's install, choose **Install for user (user scope)**
 
 8. Create a base test class so generated tests have something to extend:
 

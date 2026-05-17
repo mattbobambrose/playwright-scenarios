@@ -6,6 +6,8 @@ icon: lucide/terminal
 
 Every component shipped by the `playwright-scenarios` plugin, with signatures, flags, and examples. For walkthrough-style documentation, see the [Tutorial](tutorial.md). For decision trees on which command to reach for, see the [Workflow](workflow.md) page.
 
+**Commands** are the slash commands you invoke explicitly — the entry points to the workflow. **Skills** are supporting capabilities Claude loads and runs on its own, never with a slash: some run inside a command (`loading-config` bootstraps configuration at the start of every one), and others trigger when your request matches their purpose (`evaluate-doc`, when you ask Claude to assess a document).
+
 ## Quick reference
 
 | Command | Purpose |

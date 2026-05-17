@@ -12,7 +12,7 @@ The question is: **how do you get to a scenario in the first place?** Four paths
 
 ---
 
-## Path A: Crawl a site autonomously
+## Path A: Crawl a site
 
 You don't know what flows exist and want Claude to discover them.
 
@@ -91,7 +91,7 @@ This path is **iterative**: `evaluate-doc` acts as a feedback loop that guides y
 | | Path A | Path B | Path C | Path D |
 |---|---|---|---|---|
 | **Starting from** | Unknown site | Known flow | Nothing | Existing docs |
-| **Who writes the document** | Claude (autonomous) | You (in a browser) | Your LLM | A human (already written) |
+| **Who writes the document** | Claude | You (in a browser) | Your LLM | A human (already written) |
 | **Key tool** | /crawl-site | /record-scenario | TEST_DOC_GUIDE.md | evaluate-doc |
 | **Feedback loop** | None | None | Minimal | Iterative |
 | **Output folder** | `crawl/` | `record/` | `convert/` | `convert/` |
