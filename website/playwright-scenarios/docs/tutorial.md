@@ -108,7 +108,7 @@ Claude inventories the start page, ranks candidate flows, walks each (read-only 
 **For your project:** Replace `http://localhost:8080` with any URL Claude can reach — your dev server, a staging environment, a public site. You can also append a natural-language description to focus the crawl, e.g.:
 
 ```
-/crawl-site https://example.com focus on the checkout flow
+/crawl-site https://mysite.com focus on the checkout flow
 ```
 
 ### Review the scenarios
@@ -119,7 +119,7 @@ Claude inventories the start page, ranks candidate flows, walks each (read-only 
 /review-scenario crawl
 ```
 
-The `crawl` argument scopes the review to scenarios in the crawl partition. Claude opens each one against the live site, verifies the claims, tightens vague assertions, and rewrites the markdown in place. You'll see a summary table of what changed.
+The `crawl` argument scopes the review to scenarios in the crawl folder. Claude opens each one against the live site, verifies the claims, tightens vague assertions, and rewrites the markdown in place. You'll see a summary table of what changed.
 
 ### Generate tests
 
@@ -168,7 +168,7 @@ Claude converts the recorded actions into a scenario markdown file at `<scenario
 /scenario-to-tests record
 ```
 
-Same shape as Step 2 — scoped this time to the `record` partition. The new tests land at `<test_dir>/record/<scenario-name>/<ClassName>.kt`, alongside the crawl tests from earlier.
+Same shape as Step 2 — scoped this time to the `record` folder. The new tests land at `<test_dir>/record/<scenario-name>/<ClassName>.kt`, alongside the crawl tests from earlier.
 
 ---
 
@@ -178,9 +178,9 @@ The third path starts from a written description. You can hand it to any LLM (Ch
 
 ### Generate a document
 
-**Browser (external LLM):** Paste [`DOC_GUIDE.md`](https://github.com/mattbobambrose/playwright-scenarios/blob/master/plugins/playwright-scenarios/DOC_GUIDE.md) into your LLM's context — system prompt, custom GPT instructions, or the start of a conversation. This teaches the LLM the format, the available tags, and the pitfalls to avoid *before* it writes anything.
+**Browser (external LLM):** Paste [`TEST_DOC_GUIDE.md`](https://github.com/mattbobambrose/playwright-scenarios/blob/master/plugins/playwright-scenarios/TEST_DOC_GUIDE.md) into your LLM's context — system prompt, custom GPT instructions, or the start of a conversation. This teaches the LLM the format, the available tags, and the pitfalls to avoid *before* it writes anything.
 
-**Tip:** Paste `DOC_GUIDE.md` as a **system prompt or custom instructions** rather than a mid-conversation message — system-prompt placement anchors the framing most reliably and the LLM is more likely to apply the rules than to critique them. If you do paste mid-conversation, include your request in the same message (e.g. "here are the rules, now draft a test document for the checkout flow") instead of pasting the guide alone and waiting. If the LLM still responds with suggestions for improving the guide instead of drafting a document, reply once with "Apply the rules; don't critique them. Draft a test document for [your flow]." and it will correct course. The guide's "How to use this guide" section anchors this, but LLM behavior is probabilistic — these tips compound.
+**Tip:** Paste `TEST_DOC_GUIDE.md` as a **system prompt or custom instructions** rather than a mid-conversation message — system-prompt placement anchors the framing most reliably and the LLM is more likely to apply the rules than to critique them. If you do paste mid-conversation, include your request in the same message (e.g. "here are the rules, now draft a test document for the checkout flow") instead of pasting the guide alone and waiting. If the LLM still responds with suggestions for improving the guide instead of drafting a document, reply once with "Apply the rules; don't critique them. Draft a test document for [your flow]." and it will correct course. The guide's "How to use this guide" section anchors this, but LLM behavior is probabilistic — these tips compound.
 
 Then ask it to draft a document covering the flows you care about. Save the output to a file in your repo, e.g. `docs/checkout-tests.md`.
 
@@ -217,7 +217,7 @@ The third batch of tests lands at `<test_dir>/convert/<scenario-name>/<ClassName
 /scenario-status
 ```
 
-You'll see all three batches grouped by partition — review dates, test file existence, pass/fail, plus coverage signals (crawl depth reached, flow types covered, conversion rate). Run this any time you want a single view of what's reviewed, what's tested, what's stale, and what's missing.
+You'll see all three batches grouped by folder — review dates, test file existence, pass/fail, plus coverage signals (crawl depth reached, flow types covered, conversion rate). Run this any time you want a single view of what's reviewed, what's tested, what's stale, and what's missing.
 
 ---
 
@@ -226,5 +226,5 @@ You'll see all three batches grouped by partition — review dates, test file ex
 - **[Workflow](workflow.md)** — the conceptual map of all four paths to a reviewed scenario, including a fourth path (migrating existing docs that weren't written for this framework) that this tutorial skips.
 - **[Commands & Skills](commands.md)** — full reference for every command and skill, including flags and prerequisites.
 - **[FAQ](faq.md)** — conceptual and scope questions ("Do I have to use the bookstore demo?", "What if my project isn't Kotlin?", "Why do I need Node.js?").
-- **[Writing Docs](writing-docs.md)** — guidance on writing or refining input documents that convert cleanly via `/doc-to-scenarios`.
+- **[Writing Test Docs](writing-test-docs.md)** — guidance on writing or refining test documents that convert cleanly via `/doc-to-scenarios`.
 - **[Troubleshooting](troubleshooting.md)** — Symptom → Cause → Fix entries for the failures you're most likely to hit at setup and runtime.

@@ -26,7 +26,7 @@ graph TD
 
 Three quick-start authoring paths converge on `/scenario-to-tests`. See the [Workflow](workflow.md) page for a fourth path (LLM-authored documents, which routes through `/doc-to-scenarios`) and a side-by-side comparison.
 
-A **scenario** is an LLM-optimized markdown representation of the flow you want to test — readable by humans, mechanically processable by Claude. You produce one by recording a browser session, crawling the site, or converting an existing document — each writes to its own partition (`scenarios/crawl/`, `scenarios/record/`, `scenarios/convert/`). Hand-edit or delete in place if you want; then `/review-scenario` audits against the live site, and `/scenario-to-tests` turns the reviewed scenarios into a runnable test suite at `<test_dir>/<command>/<scenario-name>/`.
+A **scenario** is an LLM-optimized markdown representation of the flow you want to test — readable by humans, mechanically processable by Claude. You produce one by recording a browser session, crawling the site, or converting an existing document — each writes to its own folder (`scenarios/crawl/`, `scenarios/record/`, `scenarios/convert/`). Hand-edit or delete in place if you want; then `/review-scenario` audits against the live site, and `/scenario-to-tests` turns the reviewed scenarios into a runnable test suite at `<test_dir>/<command>/<scenario-name>/`.
 
 ## Quick start
 
@@ -47,7 +47,7 @@ Then seed your first scenario:
 === "Crawl a site"
 
     ```
-    /crawl-site https://your-site.com
+    /crawl-site https://mysite.com
     ```
     Claude explores the site and writes scenarios to `crawl/`.
 
@@ -79,7 +79,7 @@ Then review and generate:
 
     ---
 
-    Definitions for scenario, test case, source partition, fixture, tag, and more.
+    Definitions for scenario, test case, source folder, fixture, tag, and more.
 
 -   :lucide-git-branch: **[Workflow](workflow.md)**
 
@@ -93,10 +93,10 @@ Then review and generate:
 
     What the plugin can test, what it can't, and where gaps live instead.
 
--   :lucide-pencil: **[Writing Docs](writing-docs.md)**
+-   :lucide-pencil: **[Writing Test Docs](writing-test-docs.md)**
 
     ---
 
-    Guidance for writing documents that convert cleanly into scenarios.
+    Guidance for writing test documents that convert cleanly into scenarios.
 
 </div>

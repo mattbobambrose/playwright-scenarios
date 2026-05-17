@@ -18,9 +18,9 @@ Author browser-driven scenarios as markdown, audit them against the live site, a
 | `/record-scenario [url] [name]` | Launch Playwright codegen, capture a real user flow, and write a scenario markdown file to `<scenario_dir>/record/<name>.md`. Optionally accepts a Start URL so the browser opens straight to it. |
 | `/crawl-site <start-url> [description] [--depth=N] [--max-scenarios=N]` | Read-only crawl of a site. Accepts a natural-language description ("focus on checkout flow") to guide scope. A bare URL crawls with defaults (depth 1, max 10 scenarios, no filtering). Emits scenarios to `<scenario_dir>/crawl/`. |
 | `/doc-to-scenarios <path> [--skip-evaluation]` | Convert any document into scenario markdown files under `<scenario_dir>/convert/`. |
-| `/review-scenario [names...]` | Audit scenarios across `<scenario_dir>/{crawl,record,convert}/` against the live site and apply improvements. A bare partition name scopes the review to that partition. |
+| `/review-scenario [names...]` | Audit scenarios across `<scenario_dir>/{crawl,record,convert}/` against the live site and apply improvements. A bare folder name scopes the review to that folder. |
 | `/scenario-to-tests [names...] [--dry-run]` | Generate tests (defaults: Kotlin + Kotest StringSpec with Playwright-for-Java) at `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. `--dry-run` writes files but skips the test run. |
-| `/scenario-status [description]` | Health dashboard grouped by partition: review dates, test status, pass/fail, coverage gaps. Optional natural-language description biases the rendering. |
+| `/scenario-status [description]` | Health dashboard grouped by folder: review dates, test status, pass/fail, coverage gaps. Optional natural-language description biases the rendering. |
 | `/generate-fixture <source \| interactive> [--name=N]` | Generate a JSON fixture file from a scenario, document, or interactive prompts. |
 | `/playwright-scenarios-config` | View or update per-project settings in `.claude/playwright-scenarios.local.md`. Also the recovery path for malformed config files. |
 | `/create-base-test` | Generate a Kotlin `BasePageTest` so generated tests have a base class to extend. Prompts for `/reset` endpoint, lifecycle scope, and browser. Persists `base_test_class` in the config. Currently `kotlin` + `kotest-stringspec` only. Auto-offered by `loading-config` when no base class is found in the project. |
@@ -60,9 +60,9 @@ test_framework: kotest-stringspec
 Four required fields (`scenario_dir`, `test_dir`, `test_language`, `test_framework`), two optional (`source_root`, `base_test_class`). Currently supported for `/scenario-to-tests`: `kotlin` + `kotest-stringspec` only. Other values accepted and persisted but gated.
 
 **Workflow**
-1. Seed: `/crawl-site https://example.com` writes to `<scenario_dir>/crawl/`. `/record-scenario checkout-flow` writes to `<scenario_dir>/record/checkout-flow.md`. `/doc-to-scenarios path/to/doc.md` writes to `<scenario_dir>/convert/`.
+1. Seed: `/crawl-site https://mysite.com` writes to `<scenario_dir>/crawl/`. `/record-scenario checkout-flow` writes to `<scenario_dir>/record/checkout-flow.md`. `/doc-to-scenarios path/to/doc.md` writes to `<scenario_dir>/convert/`.
 2. (Optional) Hand-edit or delete scenarios in place.
-3. Review: `/review-scenario checkout-flow` validates claims against the live site and rewrites the markdown in place. Pass a partition name (`crawl`, `record`, `convert`) to scope.
+3. Review: `/review-scenario checkout-flow` validates claims against the live site and rewrites the markdown in place. Pass a folder name (`crawl`, `record`, `convert`) to scope.
 4. Generate: `/scenario-to-tests checkout-flow` emits `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`.
 
 ---
@@ -83,7 +83,7 @@ Claude Code plugin marketplace. No application source — just plugin definition
 
 ## Version bumps
 
-When bumping a plugin version, update both `plugin.json` and the matching entry in `marketplace.json`, then add a `CHANGELOG.md` entry.
+When bumping a plugin version, update both `plugin.json` and the matching entry in `marketplace.json`, then add a `CHANGELOG.md` entry. When a change renames a file, command, skill, term, or config field, log it under `## [Unreleased]` — don't edit historical `CHANGELOG.md` entries to use the new name.
 
 ## Testing plugin changes
 
@@ -106,6 +106,10 @@ Skills return short structured error codes (e.g. `MALFORMED_CONFIG: <reason>`, `
 
 When adding or changing a command, skill, or config field, update all of: README.md, CHANGELOG.md, llms.txt, llms-full.txt, plus the matching page under `website/playwright-scenarios/docs/` (e.g. `commands.md`, `terminology.md`). When adding a new command, also extend the explicit trigger list inside `loading-config`'s SKILL `description` field — the skill keeps working without it (fuzzy match), but the list is what other docs cite as the canonical command roster.
 
+## Example URLs in docs
+
+Use `https://mysite.com` as the placeholder host in command examples and scenario `**URL:**` lines. Leave functional or illustrative URLs alone: the tutorial's `http://localhost:8080` (the bundled demo's real address), `troubleshooting.md`'s `localhost:3000` entry, `debugging-scenarios`'s cross-origin `auth.provider.com` example, and `@example.com` example emails.
+
 ## Website docs (Zensical)
 
 Pages live under `website/playwright-scenarios/docs/`. Nav order is set in `website/playwright-scenarios/zensical.toml` — new pages must be added to the `nav = [...]` array or they won't appear in the sidebar. Avoid backticks, dots, slashes, and parens in `##`/`###` headings if anything cross-links to them — slugs become fragile. When a command and a skill share a name (e.g. `### /create-base-test` and `### create-base-test`), they slugify to the same anchor; disambiguate with `attr_list` (`### create-base-test {: #create-base-test-skill }`). In Mermaid diagrams, never use `(...)` inside `[...]` node labels — it silently breaks rendering. Strip the parenthetical or move it to surrounding prose.
@@ -114,9 +118,9 @@ Pages live under `website/playwright-scenarios/docs/`. Nav order is set in `webs
 
 `/review-scenario`, `/scenario-to-tests`, and `/crawl-site` require the `playwright-cli` skill (not shipped by this marketplace). It lives at `~/.claude/skills/playwright-cli/` and wraps `@playwright/cli` (`npm install -g @playwright/cli@latest`).
 
-## Source partitions
+## Source folders
 
-Scenario creation commands write to one of three partitions: `<scenario_dir>/{crawl,record,convert}/`. Generated tests mirror at `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. Use `<command>` (not `<partition>`) as the placeholder in path templates everywhere. The scenario in its partition is the canonical artifact; users hand-edit or delete in place before `/review-scenario`.
+Scenario creation commands write to one of three folders: `<scenario_dir>/{crawl,record,convert}/`. Generated tests mirror at `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. Use `<command>` (not `<folder>`) as the placeholder in path templates everywhere. The scenario in its folder is the canonical artifact; users hand-edit or delete in place before `/review-scenario`.
 
 ## Scenario format extensions
 
@@ -236,11 +240,11 @@ Scenario creation commands write to one of three partitions: `<scenario_dir>/{cr
 
 **Description:** Audit website validation scenarios across `<SCENARIO_DIR>/{crawl,record,convert}/` against the live site and apply improvements to the markdown.
 
-**Arguments:** zero or more scenario names (without `.md`), or partition names (`crawl`, `record`, `convert`) to scope the review. No flags.
+**Arguments:** zero or more scenario names (without `.md`), or folder names (`crawl`, `record`, `convert`) to scope the review. No flags.
 
 **Phases:**
 0. **Argument parse + load config + preflight.** `loading-config` resolves `<SCENARIO_DIR>` (abort on `MALFORMED_CONFIG`). Verify `playwright-cli --version` or `npx --no-install playwright-cli --version` works; abort with install guidance if both fail.
-1. **Determine scenarios.** Zero names → glob `<SCENARIO_DIR>/{crawl,record,convert}/*.md`. Partition names → glob that partition. Scenario names → look up across all partitions, prompting on cross-partition ambiguity. Skip `SCENARIOS.md` and `.crawl-meta.json`.
+1. **Determine scenarios.** Zero names → glob `<SCENARIO_DIR>/{crawl,record,convert}/*.md`. Folder names → glob that folder. Scenario names → look up across all folders, prompting on cross-folder ambiguity. Skip `SCENARIOS.md` and `.crawl-meta.json`.
 2. **Live-site verification (main thread).** For each scenario, open the URL via `playwright-cli`, walk the test cases, and collect findings tagged `broken` / `vague` / `missing-coverage` / `style`.
 3. **Improvement generation + auto-apply (parallel subagents).** Launch in batches of at most 5. One subagent per scenario, given the original markdown, its Phase 2 findings, and up to two style-reference scenarios from `<SCENARIO_DIR>/{crawl,record,convert}/`. Rules: preserve title/URL unless broken, preserve extended tags, don't delete tests, fix broken claims, tighten vague expectations, at most one new test per missing-coverage finding, don't reformat for style unless flagged, don't emit test code.
 4. **Summary report.** Per-scenario findings counts, applied changes, deliberately-skipped findings with reasons, as a table. No build/test command.
@@ -249,16 +253,16 @@ Scenario creation commands write to one of three partitions: `<scenario_dir>/{cr
 
 ### /scenario-to-tests
 
-**Description:** Generate tests at `<TEST_DIR>/<command>/<scenario-name>/<ClassName>.kt` from reviewed scenarios. Tests are partitioned by source command and by scenario.
+**Description:** Generate tests at `<TEST_DIR>/<command>/<scenario-name>/<ClassName>.kt` from reviewed scenarios. Tests are organized into folders by source command and by scenario.
 
-**Arguments:** zero or more scenario names (without `.md`) or partition names (`crawl`, `record`, `convert`), plus `--dry-run` to skip the test execution.
+**Arguments:** zero or more scenario names (without `.md`) or folder names (`crawl`, `record`, `convert`), plus `--dry-run` to skip the test execution.
 
 **Phases:**
 0. **Argument parse + load config + resolve + preflight.** `loading-config` resolves `<SCENARIO_DIR>`, `<TEST_DIR>`, `<TEST_LANGUAGE>`, `<TEST_FRAMEWORK>`, and (if set) `<SOURCE_ROOT>` / `<BASE_TEST_CLASS>`. Abort on `MALFORMED_CONFIG`. **Unsupported-combo guard** — if not `kotlin` + `kotest-stringspec`, abort. Resolve `SCENARIOS_PACKAGE` from `<TEST_DIR>` minus the source root. Resolve `BASE_TEST_CLASS` via config or glob; persist discovered class to config. Verify `playwright-cli` is callable.
-1. **Determine scenarios** — same selection rules as `/review-scenario` (zero args / partition names / scenario names). For each, retain the source partition (`crawl`, `record`, or `convert`).
+1. **Determine scenarios** — same selection rules as `/review-scenario` (zero args / folder names / scenario names). For each, retain the source folder (`crawl`, `record`, or `convert`).
 2. **Browser exploration (main thread).** Walk each scenario via `playwright-cli`; record errors, selectors, URLs. Screenshots go in `screenshots/<command>/`.
-3. **Test generation (parallel subagents).** Batches of at most 5 concurrent. Each subagent receives scenario content, observations, partition, scenario-name, and resolved config. Subagents write the test file but don't run the build.
-4. **Run tests.** Skipped entirely if `--dry-run`. Named scenarios → target `<SCENARIOS_PACKAGE>.<command>.<ClassName>` per scenario. Partition names → target `<SCENARIOS_PACKAGE>.<command>.*`. Zero args → target `<SCENARIOS_PACKAGE>.*`. Fix failures sequentially.
+3. **Test generation (parallel subagents).** Batches of at most 5 concurrent. Each subagent receives scenario content, observations, folder, scenario-name, and resolved config. Subagents write the test file but don't run the build.
+4. **Run tests.** Skipped entirely if `--dry-run`. Named scenarios → target `<SCENARIOS_PACKAGE>.<command>.<ClassName>` per scenario. Folder names → target `<SCENARIOS_PACKAGE>.<command>.*`. Zero args → target `<SCENARIOS_PACKAGE>.*`. Fix failures sequentially.
 
 **Scenario-name → class-name conversion:** drop `.md`; treat `-`, `_`, `.` as separators; drop non-alphanumerics; title-case each word; concatenate; prefix `_` if starts with a digit; append `Test`. Examples: `login-invalid-credentials.md` → `LoginInvalidCredentialsTest`, `2fa-setup.md` → `_2faSetupTest`.
 
@@ -290,18 +294,18 @@ Scenario creation commands write to one of three partitions: `<scenario_dir>/{cr
 
 ### /scenario-status
 
-**Description:** Health dashboard for all scenarios across the crawl / record / convert partitions — review dates, test file status, pass/fail, coverage gaps. Accepts an optional free-form English description that biases what the report emphasizes.
+**Description:** Health dashboard for all scenarios across the crawl / record / convert folders — review dates, test file status, pass/fail, coverage gaps. Accepts an optional free-form English description that biases what the report emphasizes.
 
 **Argument:** Everything after the command name, joined into one string, is the optional focus description (`<FOCUS>`). Examples: `/scenario-status focus on what's broken`, `/scenario-status one-paragraph executive summary`, `/scenario-status only the checkout-related scenarios`. Empty `<FOCUS>` → default full dashboard.
 
 **Phases:**
 0. Load config.
-1. Inventory all scenarios under `<SCENARIO_DIR>/{crawl,record,convert}/*.md`. Track partition per file. Skip `SCENARIOS.md` and `.crawl-meta.json`.
+1. Inventory all scenarios under `<SCENARIO_DIR>/{crawl,record,convert}/*.md`. Track folder per file. Skip `SCENARIOS.md` and `.crawl-meta.json`.
 2. Check review status via `git log -1` per file.
 3. Check test file existence and staleness for `<TEST_DIR>/<command>/<scenario-name>/<ClassName>.kt` (scenario newer than test file = stale).
 4. Parse most recent Gradle test report for pass/fail (optional — skipped if no report found). Match classes against `<SCENARIOS_PACKAGE>.{crawl,record,convert}.*`.
-5. Coverage completeness: crawl depth (from `<SCENARIO_DIR>/crawl/.crawl-meta.json`), flow type coverage, conversion rate by partition, critical paths (from `.critical-paths.md`).
-6. Print dashboard. With no `<FOCUS>`: tables grouped by partition + summary stats + recommended actions. With `<FOCUS>`: lead with a tailored 1–3-paragraph prose summary citing concrete numbers, then keep/condense/skip standard sections according to the focus, optionally filter the per-partition tables (e.g. "checkout-related scenarios"), and reorder the recommended actions to match. **Invariant in all modes:** every scenario reference is partition-tagged (crawl / record / convert) so the user always knows which command produced it — partition headers are kept (with `(no scenarios)` if empty), prose summaries name partitions when citing counts, recommended actions qualify scenario names with their partition.
+5. Coverage completeness: crawl depth (from `<SCENARIO_DIR>/crawl/.crawl-meta.json`), flow type coverage, conversion rate by folder, critical paths (from `.critical-paths.md`).
+6. Print dashboard. With no `<FOCUS>`: tables grouped by folder + summary stats + recommended actions. With `<FOCUS>`: lead with a tailored 1–3-paragraph prose summary citing concrete numbers, then keep/condense/skip standard sections according to the focus, optionally filter the per-folder tables (e.g. "checkout-related scenarios"), and reorder the recommended actions to match. **Invariant in all modes:** every scenario reference is folder-tagged (crawl / record / convert) so the user always knows which command produced it — folder headers are kept (with `(no scenarios)` if empty), prose summaries name folders when citing counts, recommended actions qualify scenario names with their folder.
 
 ---
 
@@ -453,7 +457,7 @@ Scenario creation commands write to one of three partitions: `<scenario_dir>/{cr
 **Guards:** abort if `test_language` ≠ `kotlin` / `test_framework` ≠ `kotest-stringspec`, or if the target file already exists. Never overwrites.
 
 **Procedure:**
-1. **Resolve target path and package.** `target_file` = `<test_dir>/BasePageTest.kt` (sibling to the partition subdirs); `package_name` = `<test_dir>` with `<source_root>` prefix stripped, `/` → `.`. Empty package → emit no `package` line.
+1. **Resolve target path and package.** `target_file` = `<test_dir>/BasePageTest.kt` (sibling to the subfolders); `package_name` = `<test_dir>` with `<source_root>` prefix stripped, `/` → `.`. Empty package → emit no `package` line.
 2. **Three prompts** (single `AskUserQuestion`): `/reset` endpoint (Yes/No, default Yes), lifecycle (per-spec/per-test, default per-spec), browser (Chromium/Firefox/Webkit, default Chromium).
 3. **Render** the canonical template (Yes-reset, per-spec, Chromium) and apply variant rules: drop `resetServerState()` and its imports if `/reset = No`; swap `beforeSpec`/`afterSpec` for `beforeTest`/`afterTest` (and swap `Spec` import for `TestCase` + `TestResult`) if `lifecycle = per-test`; substitute browser method (`chromium()` / `firefox()` / `webkit()`). Imports stay alphabetically sorted in a single flat block.
 4. **Write** the file via the Write tool, creating intermediate directories as needed.
@@ -473,9 +477,9 @@ User-facing documentation lives at `website/playwright-scenarios/docs/` and is r
 
 - **index** (`website/playwright-scenarios/docs/index.md`): Site landing page — elevator pitch, quick start, links to each section.
 - **tutorial** (`website/playwright-scenarios/docs/tutorial.md`): Step-by-step walkthrough from installation to generated tests.
-- **terminology** (`website/playwright-scenarios/docs/terminology.md`): Definitions for scenario, test case, draft, fixture, tag, generated test.
-- **workflow** (`website/playwright-scenarios/docs/workflow.md`): The four paths to a reviewed scenario (LLM-authored, existing-doc migration, crawl, record) with Mermaid diagrams.
+- **terminology** (`website/playwright-scenarios/docs/terminology.md`): Definitions for test doc, scenario, test case, source folder, fixture, tag, generated test.
+- **workflow** (`website/playwright-scenarios/docs/workflow.md`): The four paths to a reviewed scenario (LLM-authored, existing-doc migration, crawl, record).
 - **commands** (`website/playwright-scenarios/docs/commands.md`): Per-command and per-skill reference — signatures, arguments, flags, examples for all 9 commands and 6 skills.
 - **capabilities** (`website/playwright-scenarios/docs/capabilities.md`): What the plugin can and can't test, with the full extended-tag table.
-- **writing-docs** (`website/playwright-scenarios/docs/writing-docs.md`): Guidance for writing input documents that convert cleanly into scenarios.
+- **writing-test-docs** (`website/playwright-scenarios/docs/writing-test-docs.md`): Guidance for writing test documents that convert cleanly into scenarios.
 - **troubleshooting** (`website/playwright-scenarios/docs/troubleshooting.md`): Setup-time and operational failures with Symptom→Cause→Fix entries (plugin install, config bootstrap, `playwright-cli`, browser binaries, host-project, non-Kotlin stacks, crawl results, URL reachability, scenario layout, `/scenario-status`).

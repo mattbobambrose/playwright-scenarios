@@ -32,9 +32,9 @@ All flag-prefixed tokens (`--*`) are unknown — report as an error before doing
 ```
 /record-scenario
 /record-scenario checkout-flow
-/record-scenario http://localhost:8080
-/record-scenario http://localhost:8080 checkout-flow
-/record-scenario checkout-flow http://localhost:8080
+/record-scenario https://mysite.com
+/record-scenario https://mysite.com checkout-flow
+/record-scenario checkout-flow https://mysite.com
 ```
 
 ## Prerequisites
@@ -106,7 +106,7 @@ If that task also doesn't exist in the project, point the user at the README's "
 Read the recording file written in Phase 4. It will contain Playwright Java API calls like:
 
 ```java
-page.navigate("https://example.com/home");
+page.navigate("https://mysite.com/home");
 page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("Log In")).click();
 page.getByLabel("Email").fill("test@example.com");
 assertThat(page.getByText("Thank you!")).isVisible();

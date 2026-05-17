@@ -2,7 +2,7 @@
 
 [![GitHub Release](https://img.shields.io/github/v/release/mattbobambrose/playwright-scenarios)](https://github.com/mattbobambrose/playwright-scenarios/releases)
 
-Claude Code marketplace for scenario-driven Playwright testing — record scenarios by driving a browser, audit them against the live site, and generate JVM Playwright + Kotest tests from the reviewed markdown.
+Claude Code plugin for scenario-driven Playwright testing — record scenarios by driving a browser, audit them against the live site, and generate JVM Playwright + Kotest tests from the reviewed markdown.
 
 ## Tutorial
 
@@ -12,7 +12,7 @@ Start with the **[step-by-step tutorial](https://mattbobambrose.github.io/playwr
 
 Two reference documents ship with the plugin for different stages of the workflow:
 
-- **[DOC_GUIDE.md](plugins/playwright-scenarios/DOC_GUIDE.md)** — Paste into any LLM's system prompt (ChatGPT, Claude, Gemini, Copilot) when writing test documents. LLM-agnostic. Covers what the test framework can and can't handle, 10 authoring rules, a document template, and a self-evaluation checklist. Use this *before* testing, when generating the docs that eventually become scenarios.
+- **[TEST_DOC_GUIDE.md](plugins/playwright-scenarios/TEST_DOC_GUIDE.md)** — Paste into any LLM's system prompt (ChatGPT, Claude, Gemini, Copilot) when writing test documents. LLM-agnostic. Covers what the test framework can and can't handle, 10 authoring rules, a document template, and a self-evaluation checklist. Use this *before* testing, when generating the docs that eventually become scenarios.
 
 - **[USAGE.md](plugins/playwright-scenarios/USAGE.md)** — Add to your project's CLAUDE.md so Claude Code knows how to use the plugin. Covers all 9 commands, 13 tags, workflow, do's/don'ts, and troubleshooting. Use this *during* testing, when running the plugin commands.
 
@@ -58,9 +58,9 @@ Author browser-driven scenarios as markdown, audit them against the live site, a
 | `/crawl-site <start-url> [description] [--depth=N] [--max-scenarios=N]` | Read-only crawl of a site. Accepts natural-language descriptions ("focus on checkout flow") to guide scope. A bare URL crawls with default settings (depth 1, max 10 scenarios, no filtering). Emits scenarios to `<scenario_dir>/crawl/`. |
 | `/doc-to-scenarios <path> [--skip-evaluation]` | Convert any document into scenario markdown files under `<scenario_dir>/convert/`. Runs `evaluate-doc` first, then maps test cases to the scenario format with proper tags. |
 | `/generate-fixture <source \| interactive> [--name=N]` | Generate a fixture JSON file from a scenario's data bullets, a document's persona table, or interactive prompts. |
-| `/review-scenario [names...]` | Audit scenarios across `<scenario_dir>/{crawl,record,convert}/` against the live site and apply improvements to the markdown. A bare partition name scopes the review to that partition. |
-| `/scenario-to-tests [names...] [--dry-run]` | Generate tests (defaults: Kotlin + Kotest StringSpec with Playwright-for-Java) at `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. A bare partition name scopes generation to that partition. |
-| `/scenario-status [description]` | Health dashboard grouped by partition: review dates, test status, pass/fail, plus coverage completeness (crawl depth, flow types, conversion rate, critical paths). Accepts a natural-language description ("focus on what's broken") to bias the rendering. |
+| `/review-scenario [names...]` | Audit scenarios across `<scenario_dir>/{crawl,record,convert}/` against the live site and apply improvements to the markdown. A bare folder name scopes the review to that folder. |
+| `/scenario-to-tests [names...] [--dry-run]` | Generate tests (defaults: Kotlin + Kotest StringSpec with Playwright-for-Java) at `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. A bare folder name scopes generation to that folder. |
+| `/scenario-status [description]` | Health dashboard grouped by folder: review dates, test status, pass/fail, plus coverage completeness (crawl depth, flow types, conversion rate, critical paths). Accepts a natural-language description ("focus on what's broken") to bias the rendering. |
 | `/playwright-scenarios-config` | View or update per-project settings. Also the recovery path for malformed config files. |
 | `/create-base-test` | Generate a Kotlin `BasePageTest` so generated tests have a base class to extend. Prompts for `/reset` endpoint, lifecycle scope, and browser. Persists `base_test_class` in the config. Currently `kotlin` + `kotest-stringspec` only. Auto-offered by `loading-config` when no base class is found in the project. |
 <!-- COMMANDS:END -->
@@ -152,13 +152,13 @@ Scenario markdown files live in the project's configured scenario directory (`sc
 - `<scenario_dir>/crawl/` — written to by `/crawl-site`
 - `<scenario_dir>/convert/` — written to by `/doc-to-scenarios`
 
-The scenario in its partition is the canonical artifact. If you want to hand-edit or delete a scenario before review, do it in place, then run `/review-scenario`.
+The scenario in its folder is the canonical artifact. If you want to hand-edit or delete a scenario before review, do it in place, then run `/review-scenario`.
 
 ### 5. A base test class
 
 For the Kotlin + Kotest default, `/scenario-to-tests` generates tests that extend a project-provided base class (typically `BasePageTest`) which owns the Playwright browser lifecycle. The first time you run any plugin command you'll be asked where to emit these tests (`test_dir`); that path is saved to `.claude/playwright-scenarios.local.md` and reused thereafter.
 
-If your project doesn't have a base test class yet, run `/create-base-test` — it prompts for three customizations (whether your dev server has a `POST /reset` endpoint, whether to run the browser lifecycle per-spec or per-test, and which Playwright browser to launch) and writes a `BasePageTest.kt` inside `<test_dir>` (sibling to the partition subdirs). The `loading-config` skill also auto-offers to create one during the first-run bootstrap when no candidates are found in the project — so you can usually just answer Yes when prompted, no need to invoke the command explicitly. The created file is yours to edit afterwards.
+If your project doesn't have a base test class yet, run `/create-base-test` — it prompts for three customizations (whether your dev server has a `POST /reset` endpoint, whether to run the browser lifecycle per-spec or per-test, and which Playwright browser to launch) and writes a `BasePageTest.kt` inside `<test_dir>` (sibling to the subfolders). The `loading-config` skill also auto-offers to create one during the first-run bootstrap when no candidates are found in the project — so you can usually just answer Yes when prompted, no need to invoke the command explicitly. The created file is yours to edit afterwards.
 
 ## Configuration
 
@@ -190,7 +190,7 @@ The file is checked into git by default so contributors share the same layout. A
 
 ## Documentation
 
-For detailed guides — terminology, workflow, the full command and skill reference, capabilities, writing effective docs, FAQ, and troubleshooting — see the [project website](website/playwright-scenarios/docs/index.md).
+For detailed guides — terminology, workflow, the full command and skill reference, capabilities, writing effective test docs, FAQ, and troubleshooting — see the [project website](website/playwright-scenarios/docs/index.md).
 
 ## Changelog
 

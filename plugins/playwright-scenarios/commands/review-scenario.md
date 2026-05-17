@@ -1,11 +1,11 @@
 ---
 name: review-scenario
-description: Audit website validation scenarios across <SCENARIO_DIR>/{crawl,record,convert}/ against the live site and apply improvements to the markdown. Zero arguments = review every scenario across all three partitions.
-summary: Audit scenarios across `<scenario_dir>/{crawl,record,convert}/` against the live site and apply improvements to the markdown. A bare partition name scopes the review to that partition.
+description: Audit website validation scenarios across <SCENARIO_DIR>/{crawl,record,convert}/ against the live site and apply improvements to the markdown. Zero arguments = review every scenario across all three folders.
+summary: Audit scenarios across `<scenario_dir>/{crawl,record,convert}/` against the live site and apply improvements to the markdown. A bare folder name scopes the review to that folder.
 signature: /review-scenario [names...]
 arguments:
   - name: scenarios
-    description: Zero or more scenario names (without .md extension), space-separated. Zero names = review every scenario across <SCENARIO_DIR>/{crawl,record,convert}/. A bare partition name (record, crawl, or convert) limits the review to that partition.
+    description: Zero or more scenario names (without .md extension), space-separated. Zero names = review every scenario across <SCENARIO_DIR>/{crawl,record,convert}/. A bare folder name (record, crawl, or convert) limits the review to that folder.
     required: false
 ---
 
@@ -19,7 +19,7 @@ Split the argument string into **flags** (tokens starting with `--`) and **names
 
 Any unknown `--`-prefixed token should be reported as an error before doing any work.
 
-The names list has special handling for **partition names**: if a name is exactly one of `crawl`, `record`, or `convert`, it's interpreted as a directive to review every scenario in that partition (rather than a single scenario file named `record.md`).
+The names list has special handling for **folder names**: if a name is exactly one of `crawl`, `record`, or `convert`, it's interpreted as a directive to review every scenario in that folder (rather than a single scenario file named `record.md`).
 
 ## Phase 0: Load project config and preflight
 
@@ -40,9 +40,9 @@ Phase 2 shells out to `playwright-cli` via the skill of the same name. Verify it
 
 Using the names parsed from the argument-parsing step:
 
-- **Zero names:** glob `<SCENARIO_DIR>/{crawl,record,convert}/*.md`. Review every scenario across all three partitions.
-- **A partition name (`crawl`, `record`, or `convert`):** glob `<SCENARIO_DIR>/<command>/*.md`. Review every scenario in that partition only. Multiple partition names can be combined.
-- **One or more scenario names:** for each name, look up `<SCENARIO_DIR>/{crawl,record,convert}/<name>.md`. If exactly one match exists, include it. If a name matches in multiple partitions, prompt the user to disambiguate (or accept a `partition/name` form). If no match is found, report it and continue with the rest.
+- **Zero names:** glob `<SCENARIO_DIR>/{crawl,record,convert}/*.md`. Review every scenario across all three folders.
+- **A folder name (`crawl`, `record`, or `convert`):** glob `<SCENARIO_DIR>/<command>/*.md`. Review every scenario in that folder only. Multiple folder names can be combined.
+- **One or more scenario names:** for each name, look up `<SCENARIO_DIR>/{crawl,record,convert}/<name>.md`. If exactly one match exists, include it. If a name matches in multiple folders, prompt the user to disambiguate (or accept a `folder/name` form). If no match is found, report it and continue with the rest.
 
 Skip any `SCENARIOS.md` (hand-maintained index) and any `.crawl-meta.json` (crawl metadata) encountered during the glob.
 
