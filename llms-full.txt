@@ -477,7 +477,7 @@ User-facing documentation lives at `website/playwright-scenarios/docs/` and is r
 
 - **index** (`website/playwright-scenarios/docs/index.md`): Site landing page — elevator pitch, quick start, links to each section.
 - **tutorial** (`website/playwright-scenarios/docs/tutorial.md`): Step-by-step walkthrough from installation to generated tests.
-- **terminology** (`website/playwright-scenarios/docs/terminology.md`): Definitions for scenario, test case, fixture, tag, generated test.
+- **terminology** (`website/playwright-scenarios/docs/terminology.md`): Definitions for test doc, scenario, test case, source folder, fixture, tag, generated test.
 - **workflow** (`website/playwright-scenarios/docs/workflow.md`): The four paths to a reviewed scenario (LLM-authored, existing-doc migration, crawl, record).
 - **commands** (`website/playwright-scenarios/docs/commands.md`): Per-command and per-skill reference — signatures, arguments, flags, examples for all 9 commands and 6 skills.
 - **capabilities** (`website/playwright-scenarios/docs/capabilities.md`): What the plugin can and can't test, with the full extended-tag table.
