@@ -45,9 +45,3 @@ The rest of the pipeline is language-agnostic — `/crawl-site`, `/record-scenar
 | You don't know what flows exist yet | [`/crawl-site <start-url>`](commands.md#crawl-site) | `<scenario_dir>/crawl/` |
 
 All three feed the same downstream pipeline: `/review-scenario` to audit against the live site, then `/scenario-to-tests` to generate executable tests. For the full decision tree, see [Workflow](workflow.md).
-
-## Does the plugin send my code or scenarios anywhere?
-
-No. Everything runs locally in your Claude Code session. The only outbound traffic is the live-site exploration that `/review-scenario`, `/scenario-to-tests`, and `/crawl-site` perform against the URL you tell them to visit. Scenarios, generated tests, fixtures, and the config file all stay on your machine.
-
-If you use a remote LLM (e.g. ChatGPT) for the `/doc-to-scenarios` *input* document — i.e. drafting the doc itself via `TEST_DOC_GUIDE.md` — that's a separate step you control. The plugin's own commands don't make outbound calls to any LLM provider beyond the Claude Code session you're already in.

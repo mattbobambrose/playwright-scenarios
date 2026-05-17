@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- The website "Commands & Skills" page (`commands.md`) now opens with a short explanation of how commands and skills differ: commands are the slash commands you invoke explicitly; skills are supporting capabilities Claude loads and runs on its own, inside a command or when a request matches the skill's purpose.
+
 ### Changed
 
 - Renamed `plugins/playwright-scenarios/DOC_GUIDE.md` → `TEST_DOC_GUIDE.md`. The `TEST_` prefix makes explicit that the guide is for authoring *test* input documents (the docs `/doc-to-scenarios` consumes), not project documentation in general. All live references updated — `README.md`, `llms.txt`, and the website pages `faq.md`, `commands.md`, `workflow.md`, `tutorial.md`, `writing-test-docs.md` (link targets, link text, and the workflow comparison-table cell). The two historical `CHANGELOG.md` mentions (the v0.8.0 `Added` entry and the earlier `SPEC_GUIDE.md → DOC_GUIDE.md` rename note) were deliberately left intact — they record the filename as it stood at that point in time.
@@ -16,6 +20,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Terminology: **Source partition** is renamed **Source folder** ("folder" reads more familiarly than "partition"). Swept project-wide — ~160 occurrences across 16 files: the website docs, `README.md`, `CLAUDE.md`, the plugin command/skill source, `USAGE.md`, and `llms.txt`/`llms-full.txt`. Three section headings were renamed (`Source partitions` → `Source folders` and two others); none had inbound anchor links, so no cross-references break. Historical `CHANGELOG.md` entries keep their original "partition" wording — they record the term as it stood at release time.
 - Reworked the website `workflow.md` page: replaced the five Mermaid diagrams with plain command examples and condensed each path's steps. Corrected Path D's entry point — `evaluate-doc` is a skill invoked conversationally, not a `/evaluate-doc` slash command (the same fix was applied to the `USAGE.md` workflow diagram). Path A regained the crawl-plan-approval step it had lost.
 - Standardized example URLs on `https://mysite.com` across the docs and plugin command/skill source — previously a mix of `bookstore.example.com`, `your-site.com`, `example.com`, and `localhost:8080`. Placeholder hosts only: the tutorial's `http://localhost:8080` (the real address of the bundled demo), the localhost-specific troubleshooting entry, the cross-origin auth example in `debugging-scenarios`, and `@example.com` example email addresses were intentionally left unchanged.
+- Tutorial Step 1: reordered the setup steps so the Docker demo app is started before the template repo is created (the clone step now follows repo creation), and noted where to find the clone URL on GitHub (**Code → Clone → HTTPS**).
+- Dropped the word "autonomous"/"autonomously" from the `/crawl-site` descriptions — the `workflow.md` Path A heading and comparison table, plus `llms.txt` and `llms-full.txt`.
+
+### Removed
+
+- The "Quick start" section was removed from the website landing page (`index.md`); the Tutorial is the canonical getting-started path and the page's "Learn more" cards already link to it.
+- The FAQ entry "Does the plugin send my code or scenarios anywhere?" was removed from the website `faq.md` page.
 
 ## [0.9.1] - 2026-05-12
 

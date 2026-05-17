@@ -2,7 +2,7 @@
 
 > Claude Code plugin marketplace for scenario-driven Playwright testing — crawl, record, evaluate, convert, review, and generate tests from human-readable scenario markdown.
 
-This repository is a Claude Code plugin marketplace (no application source). It ships a single plugin, `playwright-scenarios`, that lets projects author browser-driven test scenarios as flat markdown files (manually, via autonomous crawl, or by converting existing QA specs), audit those scenarios against the live site, and translate them into test classes. 13 extended tags cover iframe boundaries, alternate paths, network mocking, state pre-seeding, device emulation, and test lifecycle. Per-project behavior is driven by `.claude/playwright-scenarios.local.md` (default stack: Kotlin + Kotest StringSpec + Playwright-for-Java).
+This repository is a Claude Code plugin marketplace (no application source). It ships a single plugin, `playwright-scenarios`, that lets projects author browser-driven test scenarios as flat markdown files (manually, via crawl, or by converting existing QA specs), audit those scenarios against the live site, and translate them into test classes. 13 extended tags cover iframe boundaries, alternate paths, network mocking, state pre-seeding, device emulation, and test lifecycle. Per-project behavior is driven by `.claude/playwright-scenarios.local.md` (default stack: Kotlin + Kotest StringSpec + Playwright-for-Java).
 
 ## Docs
 
@@ -14,7 +14,7 @@ This repository is a Claude Code plugin marketplace (no application source). It 
 
 ## Website docs
 
-- [index](website/playwright-scenarios/docs/index.md): Site landing page — elevator pitch, quick start, links to each section.
+- [index](website/playwright-scenarios/docs/index.md): Site landing page — elevator pitch, links to each section.
 - [tutorial](website/playwright-scenarios/docs/tutorial.md): Step-by-step walkthrough from installation to generated tests.
 - [terminology](website/playwright-scenarios/docs/terminology.md): Definitions for scenario, test case, source folder, fixture, tag, generated test.
 - [workflow](website/playwright-scenarios/docs/workflow.md): The four paths to a reviewed scenario (LLM-authored, existing-doc migration, crawl, record).
