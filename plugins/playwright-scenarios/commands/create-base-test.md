@@ -41,5 +41,5 @@ Read `.claude/playwright-scenarios.local.md`. Inside the YAML frontmatter, appen
   FQN: <fqn>  (reset=<…>, lifecycle=<…>, browser=<…>)
 ✓ Persisted base_test_class in .claude/playwright-scenarios.local.md
 
-Run /scenario-to-tests next; generated tests will extend <fqn>.
+This is one-time setup. Once you have reviewed scenarios, /scenario-to-tests will generate tests that extend <fqn>.
 ```
