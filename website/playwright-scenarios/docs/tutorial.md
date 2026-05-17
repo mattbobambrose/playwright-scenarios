@@ -8,9 +8,9 @@ A linear walkthrough from a fresh machine to a growing test suite. We'll set up 
 
 By the end you'll have:
 
-- Tests under `<test_dir>/crawl/` from a `/crawl-site` run.
-- Tests under `<test_dir>/record/` from a `/record-scenario` run.
-- Tests under `<test_dir>/convert/` from a `/doc-to-scenarios` run.
+- Tests under `src/test/kotlin/com/bookshelf/scenarios/crawl/` from a `/crawl-site` run.
+- Tests under `src/test/kotlin/com/bookshelf/scenarios/record/` from a `/record-scenario` run.
+- Tests under `src/test/kotlin/com/bookshelf/scenarios/convert/` from a `/doc-to-scenarios` run.
 - A health dashboard view via `/scenario-status` that ties them all together.
 
 **Bring your own site.** This tutorial points at the bundled bookstore demo on `http://localhost:8080` so every step has a concrete target. Anything tied to the demo is swappable: the Docker container, the start URL, the doc path, the recorded flow. Each step calls out what to substitute under a **For your project:** note. If you already have a dev or staging server you want to test, you can replace `http://localhost:8080` with its URL throughout and skip the Docker container in Step 1.
@@ -107,7 +107,9 @@ The first authoring path is the most hands-off: tell `/crawl-site` where to star
 /crawl-site http://localhost:8080
 ```
 
-Claude inventories the start page, ranks candidate flows, walks each (read-only — no form submits), and writes one scenario per flow to `<scenario_dir>/crawl/`. Respond to any prompts Claude shows along the way — accepting the recommended option each time is fine for a first run.
+Claude inventories the start page, ranks candidate flows, walks each (read-only — no form submits), and writes one scenario per flow to `src/test/scenarios/crawl/`. Respond to any prompts Claude shows along the way — accepting the recommended option each time is fine for a first run.
+
+Review the generated scenarios at `src/test/scenarios/crawl`.
 
 **For your project:** Replace `http://localhost:8080` with any URL Claude can reach — your dev server, a staging environment, a public site. You can also append a natural-language description to focus the crawl, e.g.:
 
@@ -123,7 +125,7 @@ Claude inventories the start page, ranks candidate flows, walks each (read-only 
 /review-scenario crawl
 ```
 
-The `crawl` argument scopes the review to scenarios in the crawl folder. Claude opens each one against the live site, verifies the claims, tightens vague assertions, and rewrites the markdown in place. You'll see a summary table of what changed.
+The `crawl` argument scopes the review to scenarios in the crawl folder. You can provide `/review-scenario` with either the name of a folder (`crawl`, `record`, `convert`), the name of a file, or no name. Claude opens each one against the live site, verifies the claims, tightens vague assertions, and rewrites the markdown in place. You'll see a summary table of what changed.
 
 ### Generate tests
 
@@ -133,9 +135,9 @@ The `crawl` argument scopes the review to scenarios in the crawl folder. Claude 
 /scenario-to-tests crawl
 ```
 
-For each reviewed scenario in `<scenario_dir>/crawl/`, Claude:
+For each reviewed scenario in `src/test/scenarios/crawl/`, Claude:
 
-- generates a test file at `<test_dir>/crawl/<scenario-name>/<ClassName>.kt`
+- generates a test file at `src/test/kotlin/com/bookshelf/scenarios/crawl/<scenario-name>/<ClassName>.kt`
 - runs the suite
 - fixes failures
 
@@ -146,7 +148,7 @@ You now have your first batch of executable tests.
 **Terminal:**
 
 ```
-make clean test
+make clean tests
 ```
 
 Claude already ran the suite while generating — run it yourself and watch it go green.
@@ -162,20 +164,14 @@ For interactive flows (logins, form fills, multi-step purchases) it's faster to 
 **Claude Code:**
 
 ```
-/record-scenario
-```
-
-Claude prompts you for a Start URL — paste `http://localhost:8080`. A Chromium window then opens with the Playwright Inspector pointed at that URL. Drive the browser through the flow you want to test — click links, fill forms, mark assertions using the Inspector's "Assert visibility / text / value" toolbar buttons. Close the browser when done.
-
-You can also pass the Start URL as an argument to skip the prompt:
-
-```
 /record-scenario http://localhost:8080
 ```
 
-**For your project:** Drive the browser to whichever flow you actually care about — login, checkout, a multi-step form, anything you'd test by hand. The recorded flow is whatever you do in the window; there's no fixed script.
+A Chromium window will open with the Playwright Inspector pointed at the given URL. Drive the browser through the flow you want to test — click links, fill forms, mark assertions using the Inspector's "Assert visibility / text / value" toolbar buttons. Close the browser when done.
 
-Claude converts the recorded actions into a scenario markdown file at `<scenario_dir>/record/<name>.md`. You'll be prompted to confirm the inferred name if you didn't supply one.
+Claude converts the recorded actions into a scenario markdown file at `src/test/scenarios/record/<name>.md`. You'll be prompted to confirm the inferred name if you didn't supply one.
+
+**For your project:** Drive the browser to whichever flow you actually care about — login, checkout, a multi-step form, anything you'd test by hand. The recorded flow is whatever you do in the window; there's no fixed script.
 
 ### Review and generate
 
@@ -186,17 +182,15 @@ Claude converts the recorded actions into a scenario markdown file at `<scenario
 /scenario-to-tests record
 ```
 
-Same shape as Step 2 — scoped this time to the `record` folder. The new tests land at `<test_dir>/record/<scenario-name>/<ClassName>.kt`, alongside the crawl tests from earlier.
+Same shape as Step 2 — scoped this time to the `record` folder. The new tests land at `src/test/kotlin/com/bookshelf/scenarios/record/<scenario-name>/<ClassName>.kt`, alongside the crawl tests from earlier.
 
 ### Run tests
 
 **Terminal:**
 
 ```
-make clean test
+make clean tests
 ```
-
-Claude already ran the suite while generating — run it yourself and watch it go green.
 
 ---
 
@@ -206,9 +200,17 @@ The third path starts from a written description. You can hand it to any LLM (Ch
 
 ### Generate a document
 
-**Browser (external LLM):** Paste [`TEST_DOC_GUIDE.md`](https://github.com/mattbobambrose/playwright-scenarios/blob/master/plugins/playwright-scenarios/TEST_DOC_GUIDE.md) into your LLM's context — system prompt, custom GPT instructions, or the start of a conversation. This teaches the LLM the format, the available tags, and the pitfalls to avoid *before* it writes anything.
+**Browser (external LLM):** Paste the following into your LLM, substituting the full contents of [`TEST_DOC_GUIDE.md`](https://github.com/mattbobambrose/playwright-scenarios/blob/master/plugins/playwright-scenarios/TEST_DOC_GUIDE.md) where indicated:
 
-**Tip:** Paste `TEST_DOC_GUIDE.md` as a **system prompt or custom instructions** rather than a mid-conversation message — system-prompt placement anchors the framing most reliably and the LLM is more likely to apply the rules than to critique them. If you do paste mid-conversation, include your request in the same message (e.g. "here are the rules, now draft a test document for the checkout flow") instead of pasting the guide alone and waiting. If the LLM still responds with suggestions for improving the guide instead of drafting a document, reply once with "Apply the rules; don't critique them. Draft a test document for [your flow]." and it will correct course. The guide's "How to use this guide" section anchors this, but LLM behavior is probabilistic — these tips compound.
+```
+These are the rules for writing a test document that converts cleanly to scenarios. Follow them as closely as possible. Don't critique the rules or suggest improvements; just apply them and write the document.
+
+[Paste the full contents of TEST_DOC_GUIDE.md here]
+
+Create a user story for the checkout flow, then write a test document covering every element that should appear on the checkout page, every interaction a user can perform, and the expected outcome of each. Apply the rules above for formatting and content, and be as thorough as you can.
+```
+
+**Tip:** Paste the contents of [`TEST_DOC_GUIDE.md`](https://github.com/mattbobambrose/playwright-scenarios/blob/master/plugins/playwright-scenarios/TEST_DOC_GUIDE.md) as a **system prompt or custom instructions** rather than a mid-conversation message — system-prompt placement anchors the framing most reliably and the LLM is more likely to apply the rules than to critique them. If you do paste mid-conversation, include your request in the same message (e.g. "here are the rules, now draft a test document for the checkout flow") instead of pasting the guide alone and waiting. If the LLM still responds with suggestions for improving the guide instead of drafting a document, reply once with "Apply the rules; don't critique them. Draft a test document for [your flow]." and it will correct course. The guide's "How to use this guide" section anchors this, but LLM behavior is probabilistic — these tips compound.
 
 Then ask it to draft a document covering the flows you care about. Save the output to a file in your repo, e.g. `docs/checkout-tests.md`.
 
@@ -222,7 +224,7 @@ Then ask it to draft a document covering the flows you care about. Save the outp
 
 **For your project:** `docs/checkout-tests.md` is illustrative — pass any path to your own document. Existing test plans, requirements docs, meeting notes, and acceptance criteria all work as input.
 
-Claude runs `evaluate-doc` first (a sanity check that the doc is well-formed for conversion), pauses for your approval, then writes one scenario per flow to `<scenario_dir>/convert/`.
+Claude runs `evaluate-doc` first (a sanity check that the doc is well-formed for conversion), pauses for your approval, then writes one scenario per flow to `src/test/scenarios/convert/`.
 
 ### Review and generate
 
@@ -233,17 +235,15 @@ Claude runs `evaluate-doc` first (a sanity check that the doc is well-formed for
 /scenario-to-tests convert
 ```
 
-The third batch of tests lands at `<test_dir>/convert/<scenario-name>/<ClassName>.kt`.
+The third batch of tests lands at `src/test/kotlin/com/bookshelf/scenarios/convert/<scenario-name>/<ClassName>.kt`.
 
 ### Run tests
 
 **Terminal:**
 
 ```
-make clean test
+make clean tests
 ```
-
-Claude already ran the suite while generating — run it yourself and watch it go green.
 
 ---
 
