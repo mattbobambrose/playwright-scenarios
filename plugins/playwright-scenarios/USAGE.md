@@ -7,12 +7,12 @@ LLM-optimized reference for using the `playwright-scenarios` plugin in a host pr
 ## Terminology
 
 **Input** (what enters the plugin)
-- **Doc** — any document describing what to test: requirements doc, test plan, meeting notes, acceptance criteria, Jira tickets. Not in scenario format yet. Input to `evaluate-doc` and `/doc-to-scenarios`. One doc typically contains multiple user flows, each of which becomes one scenario.
+- **Test Doc** — any document describing what to test: requirements doc, test plan, meeting notes, acceptance criteria, Jira tickets. Not in scenario format yet. Input to `evaluate-doc` and `/doc-to-scenarios`. One test doc typically contains multiple user flows, each of which becomes one scenario.
 
 **Plugin artifacts** (what the plugin works with)
 - **Scenario** — a flat markdown file (`# Title`, `**URL:**`, `## Test N:` blocks with Action/Expected pairs). The central artifact.
 - **Test case** — a single `## Test N:` section inside a scenario. Each becomes one test function.
-- **Source partition** — the subdirectory under `<scenario_dir>` that records which command produced the scenario: `<scenario_dir>/crawl/`, `<scenario_dir>/record/`, `<scenario_dir>/convert/`. Generated tests mirror the partition under `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`.
+- **Source folder** — the subdirectory under `<scenario_dir>` that records which command produced the scenario: `<scenario_dir>/crawl/`, `<scenario_dir>/record/`, `<scenario_dir>/convert/`. Generated tests mirror the folder under `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`.
 - **Fixture** — a JSON file (`<scenario_dir>/fixtures/<name>.json`) with structured test data. Referenced via `**Fixture:** fixtures/<name>`.
 - **Tag** — a bold-label directive (`**Iframe:**`, `**Intercept:**`, etc.) that controls test generation beyond Action/Expected.
 
@@ -28,16 +28,16 @@ LLM-optimized reference for using the `playwright-scenarios` plugin in a host pr
 | Check if a doc is testable | `evaluate-doc` (skill — invoke by asking Claude to evaluate the doc, no slash command) | Advisory. Reports what converts, what needs changes, what's out of scope. |
 | Convert a doc into scenarios | `/doc-to-scenarios <path> [--skip-evaluation]` | Runs evaluate-doc first. Writes to `<scenario_dir>/convert/`. |
 | Create a fixture file | `/generate-fixture <source \| interactive> [--name=N]` | From a scenario, document, or interactive prompts. |
-| Audit scenarios against the live site | `/review-scenario [names...]` | Reviews across `crawl/`, `record/`, `convert/`. Pass a partition name to scope. Verifies claims, tightens assertions, adds coverage. |
-| Generate test code | `/scenario-to-tests [names...] [--dry-run]` | Output at `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. Pass a partition name to scope. Currently: Kotlin + Kotest only. |
-| Check scenario health | `/scenario-status [description]` | Dashboard grouped by partition: review dates, test staleness, pass/fail, crawl depth, flow type coverage, conversion rate, critical paths. Optional natural-language description ("focus on what's broken", "executive summary") biases what's emphasized. |
+| Audit scenarios against the live site | `/review-scenario [names...]` | Reviews across `crawl/`, `record/`, `convert/`. Pass a folder name to scope. Verifies claims, tightens assertions, adds coverage. |
+| Generate test code | `/scenario-to-tests [names...] [--dry-run]` | Output at `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. Pass a folder name to scope. Currently: Kotlin + Kotest only. |
+| Check scenario health | `/scenario-status [description]` | Dashboard grouped by folder: review dates, test staleness, pass/fail, crawl depth, flow type coverage, conversion rate, critical paths. Optional natural-language description ("focus on what's broken", "executive summary") biases what's emphasized. |
 | View or change config | `/playwright-scenarios-config` | Also the recovery path for malformed config. |
-| Generate a `BasePageTest` to extend | `/create-base-test` | One-shot setup. Prompts for `/reset` endpoint, lifecycle scope, browser. Writes `BasePageTest.kt` inside `<test_dir>` (sibling to the partition subdirs) and persists `base_test_class`. Currently: Kotlin + Kotest only. Also auto-offered by `loading-config` when no base class is found. |
+| Generate a `BasePageTest` to extend | `/create-base-test` | One-shot setup. Prompts for `/reset` endpoint, lifecycle scope, browser. Writes `BasePageTest.kt` inside `<test_dir>` (sibling to the subfolders) and persists `base_test_class`. Currently: Kotlin + Kotest only. Also auto-offered by `loading-config` when no base class is found. |
 
 ## Workflow
 
 ```
-Document ──→ /evaluate-doc ──→ /doc-to-scenarios ──→ <scenario_dir>/convert/
+Document ──→ evaluate-doc  ──→ /doc-to-scenarios ──→ <scenario_dir>/convert/
                                                                           │
 Browser recording ──→ /record-scenario ────────────→ <scenario_dir>/record/
                                                                           │

@@ -13,6 +13,8 @@ Claude Code plugin marketplace. No application source — just plugin definition
 
 When bumping a plugin version, update **both** `plugin.json` and the matching entry in `marketplace.json`, the embedded `"version": "..."` strings inside `llms-full.txt`'s annotated source-file snippets for those two files, and the bottom-of-file reference-link block in `CHANGELOG.md` (add `[X.Y.Z]: https://github.com/mattbobambrose/playwright-scenarios/compare/<previous>...X.Y.Z`). Then seal the `## [Unreleased]` section as `## [X.Y.Z] - YYYY-MM-DD` and add a fresh empty `## [Unreleased]` above it.
 
+When a change renames a file, command, skill, term, or config field, record it under `## [Unreleased]` — never edit historical `CHANGELOG.md` entries to use the new name. They deliberately record names as of their release.
+
 ## Testing plugin changes
 
 No automated tests. Validate by installing the plugin locally and running the commands against a real host project.
@@ -40,6 +42,10 @@ When adding or changing a command, skill, or config field, update all of: README
 
 **Generated command tables.** The command table in `README.md` is auto-generated from each command's frontmatter (`summary`, `signature` fields) by `scripts/gen-command-table.py`. After editing any of those frontmatter fields, regenerate with `python3 scripts/gen-command-table.py --inplace README.md`. Don't hand-edit the content between `<!-- COMMANDS:BEGIN -->` / `<!-- COMMANDS:END -->` markers — it gets clobbered on the next run. The script also has a `--check` flag for CI ("exit 1 if the file would change") — combine with `--inplace`, e.g. `python3 scripts/gen-command-table.py --inplace README.md --check`. Other table-shaped surfaces (USAGE.md's intent-keyed table, llms.txt's bullet list, the website `commands.md` quick reference) still need hand-editing — they have different shapes; migrate them by adding the right frontmatter fields and a corresponding renderer to the script.
 
+## Example URLs in docs
+
+Use `https://mysite.com` as the placeholder host in command examples and scenario `**URL:**` lines. Leave functional or illustrative URLs alone: the tutorial's `http://localhost:8080` (the bundled demo's real address), `troubleshooting.md`'s `localhost:3000` entry, `debugging-scenarios`'s cross-origin `auth.provider.com` example, and `@example.com` example email addresses.
+
 ## Website docs (Zensical)
 
 Pages live under `website/playwright-scenarios/docs/`. Nav order is set in `website/playwright-scenarios/zensical.toml` — new pages must be added to the `nav = [...]` array or they won't appear in the sidebar. Avoid backticks, dots, slashes, and parens in `##`/`###` headings if anything cross-links to them — slugs become fragile (the `## Config` section in `troubleshooting.md` was simplified for this reason). When a command and a skill share a name (e.g. `### /create-base-test` and `### create-base-test`), they slugify to the same anchor; disambiguate with `attr_list` (`### create-base-test {: #create-base-test-skill }`). In Mermaid diagrams, never use `(...)` inside `[...]` node labels — it silently breaks rendering. Strip the parenthetical or move it to surrounding prose.
@@ -50,9 +56,9 @@ Pages live under `website/playwright-scenarios/docs/`. Nav order is set in `webs
 
 `/review-scenario`, `/scenario-to-tests`, and `/crawl-site` require the `playwright-cli` skill (not shipped by this marketplace). It lives at `~/.claude/skills/playwright-cli/` and wraps `@playwright/cli` (`npm install -g @playwright/cli@latest`).
 
-## Source partitions
+## Source folders
 
-Scenario creation commands write to one of three partitions: `<scenario_dir>/{crawl,record,convert}/`. Generated tests mirror at `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. Use `<command>` (not `<partition>`) as the placeholder in path templates everywhere. The scenario in its partition is the canonical artifact; users hand-edit or delete in place before `/review-scenario`.
+Scenario creation commands write to one of three folders: `<scenario_dir>/{crawl,record,convert}/`. Generated tests mirror at `<test_dir>/<command>/<scenario-name>/<ClassName>.kt`. Use `<command>` (not `<folder>`) as the placeholder in path templates everywhere. The scenario in its folder is the canonical artifact; users hand-edit or delete in place before `/review-scenario`.
 
 ## Scenario format extensions
 

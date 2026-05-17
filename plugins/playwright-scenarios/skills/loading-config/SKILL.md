@@ -32,7 +32,7 @@ Edit the YAML frontmatter to reconfigure, or run `/playwright-scenarios-config` 
 | Field | Required | Default offered | Purpose |
 |-------|----------|-----------------|---------|
 | `scenario_dir` | **yes** | `src/test/scenarios` | Root directory (relative to repo root) for scenario `.md` files. Scenarios live under three command-keyed subdirectories: `<scenario_dir>/crawl/` (from `/crawl-site`), `<scenario_dir>/record/` (from `/record-scenario`), and `<scenario_dir>/convert/` (from `/doc-to-scenarios`). The bootstrap creates these subdirectories. |
-| `test_dir` | **yes** | none (must be entered) | Root directory (relative to repo root) for generated test files. Tests are written under `<test_dir>/<command>/<scenario-name>/<ClassName>.<ext>` — partitioned by source command and by scenario. The bootstrap creates the three top-level subdirectories. |
+| `test_dir` | **yes** | none (must be entered) | Root directory (relative to repo root) for generated test files. Tests are written under `<test_dir>/<command>/<scenario-name>/<ClassName>.<ext>` — organized into folders by source command and by scenario. The bootstrap creates the three top-level subdirectories. |
 | `test_language` | **yes** | `kotlin` | One of: `kotlin`, `java`, `typescript`, `python`, or any free-form value. |
 | `test_framework` | **yes** | `kotest-stringspec` | One of: `kotest-stringspec`, `junit5`, `playwright-test`, `jest`, `pytest`, or any free-form value. |
 | `source_root` | optional | inferred from `test_dir` | Source-set root above the test package (e.g., `src/test/kotlin`). Used to derive the package name from `test_dir`. Only set explicitly when inference fails. |
@@ -121,7 +121,7 @@ Currently only `kotlin` + `kotest-stringspec` has a fully wired test-generation 
 
    f. Write `.claude/playwright-scenarios.local.md` with the four chosen values as YAML frontmatter, followed by the standard markdown body (see "Config file format" above). Do *not* write `source_root` or `base_test_class` at bootstrap — they're added later, only when disambiguation is needed.
 
-   g. **Create the partition subdirectories** under both roots, if they don't already exist:
+   g. **Create the subfolders** under both roots, if they don't already exist:
 
       - `<scenario_dir>/record/`
       - `<scenario_dir>/crawl/`

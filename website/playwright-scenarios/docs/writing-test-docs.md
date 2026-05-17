@@ -2,7 +2,7 @@
 icon: lucide/pencil
 ---
 
-# Writing Effective Input Documents
+# Writing Effective Test Documents
 
 If you're writing a document that will feed into this plugin (either hand-authored as scenario markdown or used as a reference for `/record-scenario`), these patterns produce the best results.
 
@@ -68,7 +68,7 @@ In a scenario file, note the boundary using the `**Iframe:**` tag:
 ```markdown
 # Checkout Flow
 
-**URL:** https://bookstore.example.com/checkout
+**URL:** https://mysite.com/checkout
 **Iframe:** #stripe-payment-iframe
 
 The payment form is hosted inside a cross-origin Stripe iframe.
@@ -84,7 +84,7 @@ When the flow exits the iframe (e.g., a confirmation page outside the payment fo
 
 ## Full authoring rules
 
-The patterns above cover the highest-leverage cases. The complete authoring rule set lives in [`DOC_GUIDE.md`](https://github.com/mattbobambrose/playwright-scenarios/blob/master/plugins/playwright-scenarios/DOC_GUIDE.md), which you paste into your LLM's context when drafting a test document. It covers everything here plus:
+The patterns above cover the highest-leverage cases. The complete authoring rule set lives in [`TEST_DOC_GUIDE.md`](https://github.com/mattbobambrose/playwright-scenarios/blob/master/plugins/playwright-scenarios/TEST_DOC_GUIDE.md), which you paste into your LLM's context when drafting a test document. It covers everything here plus:
 
 - **Async/loading transitions** — name the observable end-condition (a spinner appearing then disappearing, a button enabling) instead of relying on implicit waits.
 - **Modal and dialog boundaries** — qualify selectors to "inside the modal" once a dialog opens; note where it closes.
@@ -92,4 +92,4 @@ The patterns above cover the highest-leverage cases. The complete authoring rule
 - **Deterministic test data** — for resource-creating flows (signup, account creation), use stably-suffixed or timestamped values so reruns don't collide.
 - **Per-test preconditions** — keep setup state (auth, feature flags, seeded data) in a dedicated `Preconditions:` block, separate from the action steps.
 
-`DOC_GUIDE.md` also lists what the framework can and cannot handle (CAPTCHA, OTP/email verification, native browser dialogs, hardware integration are all out of scope) and ends with a self-applied checklist.
+`TEST_DOC_GUIDE.md` also lists what the framework can and cannot handle (CAPTCHA, OTP/email verification, native browser dialogs, hardware integration are all out of scope) and ends with a self-applied checklist.

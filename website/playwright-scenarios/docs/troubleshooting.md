@@ -59,7 +59,7 @@ Setup-time and operational failures, with a fix for each.
 
 > **Symptom:** Generated tests have no `extends` clause and a TODO comment at the top of every file. Or `loading-config` warned during bootstrap that no base class was found and you said "No" to the offer to create one.<br>
 > **Cause:** The host project doesn't yet define a Playwright + Kotest base class.<br>
-> **Fix:** Run `/create-base-test`. It prompts for three customizations (whether the dev server has a `POST /reset` endpoint, whether the browser lifecycle runs per-spec or per-test, and which Playwright browser to launch), writes a `BasePageTest.kt` inside `<test_dir>` (sibling to the partition subdirs), and persists the FQN to `base_test_class`. Re-run `/scenario-to-tests` afterwards — generated tests will now extend the new class.
+> **Fix:** Run `/create-base-test`. It prompts for three customizations (whether the dev server has a `POST /reset` endpoint, whether the browser lifecycle runs per-spec or per-test, and which Playwright browser to launch), writes a `BasePageTest.kt` inside `<test_dir>` (sibling to the subfolders), and persists the FQN to `base_test_class`. Re-run `/scenario-to-tests` afterwards — generated tests will now extend the new class.
 
 ### "Couldn't infer the source root from `test_dir=…`"
 
@@ -192,13 +192,13 @@ Setup-time and operational failures, with a fix for each.
 
 > **Symptom:** `/review-scenario foo` reports that `foo` doesn't exist anywhere under `<SCENARIO_DIR>`.<br>
 > **Cause:** Scenarios live under one of the three command-keyed subdirectories (`<SCENARIO_DIR>/crawl/`, `<SCENARIO_DIR>/record/`, or `<SCENARIO_DIR>/convert/`). A flat `<SCENARIO_DIR>/foo.md` won't be picked up.<br>
-> **Fix:** Move the file into the appropriate partition (e.g. `mv src/test/scenarios/foo.md src/test/scenarios/record/foo.md`). Then re-run.
+> **Fix:** Move the file into the appropriate folder (e.g. `mv src/test/scenarios/foo.md src/test/scenarios/record/foo.md`). Then re-run.
 
-### Same scenario name in multiple partitions
+### Same scenario name in multiple folders
 
 > **Symptom:** `/review-scenario checkout-flow` prompts you to disambiguate between `record/checkout-flow.md` and `convert/checkout-flow.md`.<br>
-> **Cause:** Two creation commands wrote scenarios with the same kebab-case name into different partitions.<br>
-> **Fix:** Either pick one in the prompt, or invoke with the explicit partition form: `/review-scenario record/checkout-flow`. Renaming one of the two scenarios is also fine.
+> **Cause:** Two creation commands wrote scenarios with the same kebab-case name into different folders.<br>
+> **Fix:** Either pick one in the prompt, or invoke with the explicit folder form: `/review-scenario record/checkout-flow`. Renaming one of the two scenarios is also fine.
 
 ---
 

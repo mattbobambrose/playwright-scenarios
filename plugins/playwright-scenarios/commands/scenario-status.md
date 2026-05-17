@@ -1,7 +1,7 @@
 ---
 name: scenario-status
-description: Display a health dashboard for all scenarios across crawl/record/convert partitions — last reviewed, test file existence, test pass/fail status, coverage completeness (crawl depth, flow types, conversion rate, critical paths). Accepts an optional natural-language description that biases the report ("focus on what's broken", "give me a one-paragraph executive summary", "what should I work on this week?", "only the checkout-related scenarios"). Use when the user asks "what's the status of my scenarios?" or "what's stale/missing/broken?" or "how much of the site is covered?" or asks for a tailored summary.
-summary: 'Health dashboard grouped by partition: review dates, test status, pass/fail, plus coverage completeness (crawl depth, flow types, conversion rate, critical paths). Accepts a natural-language description ("focus on what''s broken") to bias the rendering.'
+description: Display a health dashboard for all scenarios across crawl/record/convert folders — last reviewed, test file existence, test pass/fail status, coverage completeness (crawl depth, flow types, conversion rate, critical paths). Accepts an optional natural-language description that biases the report ("focus on what's broken", "give me a one-paragraph executive summary", "what should I work on this week?", "only the checkout-related scenarios"). Use when the user asks "what's the status of my scenarios?" or "what's stale/missing/broken?" or "how much of the site is covered?" or asks for a tailored summary.
+summary: 'Health dashboard grouped by folder: review dates, test status, pass/fail, plus coverage completeness (crawl depth, flow types, conversion rate, critical paths). Accepts a natural-language description ("focus on what''s broken") to bias the rendering.'
 signature: /scenario-status [description]
 arguments:
   - name: description
@@ -11,7 +11,7 @@ arguments:
 
 # Scenario Status
 
-Show a single-view dashboard of every scenario's health across the crawl / record / convert partitions, plus coverage completeness metrics from crawl history.
+Show a single-view dashboard of every scenario's health across the crawl / record / convert folders, plus coverage completeness metrics from crawl history.
 
 ## Argument parsing
 
@@ -37,7 +37,7 @@ Invoke `loading-config` to resolve `<SCENARIO_DIR>` and `<TEST_DIR>`. If `loadin
 
 Glob `<SCENARIO_DIR>/{crawl,record,convert}/*.md`. Skip any `SCENARIOS.md` and `.crawl-meta.json`. For each file, record:
 
-- **Partition** — `crawl`, `record`, or `convert`, derived from the parent directory.
+- **Folder** — `crawl`, `record`, or `convert`, derived from the parent directory.
 - **File path** (relative to `<SCENARIO_DIR>`).
 - **Scenario name** (filename without `.md`).
 - **Title** — from the `# <Title>` line.
@@ -47,7 +47,7 @@ Glob `<SCENARIO_DIR>/{crawl,record,convert}/*.md`. Skip any `SCENARIOS.md` and `
 - **Has Prerequisite?** — whether `**Prerequisite:**` is present.
 - **Has extended tags?** — which extended tags are used.
 - **Provenance** — parse the blockquote for source (`/crawl-site`, `/record-scenario`, `/doc-to-scenarios`, or hand-written).
-- **Flow type** — if the partition is `crawl`, extract the flow type from the filename pattern (nav, hero-cta, footer, auth, content) when available.
+- **Flow type** — if the folder is `crawl`, extract the flow type from the filename pattern (nav, hero-cta, footer, auth, content) when available.
 
 ## Phase 2: Check review status
 
@@ -102,13 +102,13 @@ From `.crawl-meta.json`, aggregate flow types across all crawls. Cross-reference
 | Footer     | 1          | 1           | 0      |
 ```
 
-"Discovered" comes from `.crawl-meta.json`. "In `crawl/`" = crawl-partition scenarios with matching flow type (some may have been deleted by the user). "Tested" = scenarios that have test files.
+"Discovered" comes from `.crawl-meta.json`. "In `crawl/`" = crawl-folder scenarios with matching flow type (some may have been deleted by the user). "Tested" = scenarios that have test files.
 
 If `.crawl-meta.json` doesn't exist, skip this table.
 
 ### 5c. Scenario-to-test conversion rate
 
-Consolidate the Phase 1 + Phase 3 data into a clear metric, broken down by partition:
+Consolidate the Phase 1 + Phase 3 data into a clear metric, broken down by folder:
 
 ```
 Conversion: 8 of 12 scenarios have generated tests (67%)
@@ -121,7 +121,7 @@ This section always runs — it doesn't depend on crawl metadata.
 
 ### 5d. Critical path coverage
 
-Read `<SCENARIO_DIR>/.critical-paths.md` if it exists. This file lists the user's critical user journeys as chains of scenario names (which may live in any partition):
+Read `<SCENARIO_DIR>/.critical-paths.md` if it exists. This file lists the user's critical user journeys as chains of scenario names (which may live in any folder):
 
 ```markdown
 # Critical Paths
@@ -132,7 +132,7 @@ Read `<SCENARIO_DIR>/.critical-paths.md` if it exists. This file lists the user'
 ```
 
 For each path, check whether every scenario in the chain:
-1. Exists (in any partition under `<SCENARIO_DIR>/{crawl,record,convert}/`).
+1. Exists (in any folder under `<SCENARIO_DIR>/{crawl,record,convert}/`).
 2. Has been reviewed recently (last-modified date) or has a test file.
 3. Has a generated test file.
 4. Has passing tests (if test results are available from Phase 4).
@@ -157,12 +157,12 @@ If `.critical-paths.md` doesn't exist, skip this section and suggest creating on
 
 ### Output invariants (apply in all modes)
 
-Regardless of `<FOCUS>` or formatting choice, every reference to a scenario in the report must make its **source partition** (`crawl`, `record`, or `convert`) visible to the user. This rule applies to:
+Regardless of `<FOCUS>` or formatting choice, every reference to a scenario in the report must make its **source folder** (`crawl`, `record`, or `convert`) visible to the user. This rule applies to:
 
-- The per-partition tables — render the `=== crawl ===` / `=== record ===` / `=== convert ===` headers even when one partition is empty (write `(no scenarios)` underneath rather than dropping the section).
-- The leading prose summary (when `<FOCUS>` is set) — name partitions when citing counts, e.g. "3 stale scenarios, all in `crawl/`" rather than "3 stale scenarios."
-- Any per-scenario callout in **Recommended actions** — qualify the scenario name with its partition, e.g. `record/checkout-happy-path` or "the crawl scenario `nav-to-pricing`."
-- Filtered views — keep partition headers (or partition badges per row) so a filtered list still tells the user which command produced each scenario.
+- The per-folder tables — render the `=== crawl ===` / `=== record ===` / `=== convert ===` headers even when one folder is empty (write `(no scenarios)` underneath rather than dropping the section).
+- The leading prose summary (when `<FOCUS>` is set) — name folders when citing counts, e.g. "3 stale scenarios, all in `crawl/`" rather than "3 stale scenarios."
+- Any per-scenario callout in **Recommended actions** — qualify the scenario name with its folder, e.g. `record/checkout-happy-path` or "the crawl scenario `nav-to-pricing`."
+- Filtered views — keep folder headers (or folder badges per row) so a filtered list still tells the user which command produced each scenario.
 
 The user must never have to cross-reference a scenario name back to its source command; the report always answers that question itself.
 
@@ -176,11 +176,11 @@ Interpret the description against the data gathered in Phases 1–5 and decide:
    - Sections that are tangential → condense to a single line, or drop.
    - Sections with no data (no `.crawl-meta.json`, no `.critical-paths.md`, no test report) → still drop, as today.
 3. **Reorder / filter the Recommended actions** so the top items match the focus. Cap at 7. Drop suggestions that don't relate.
-4. **If the focus implies a filter** (e.g. "only the checkout-related scenarios", "stale ones only"), apply it to the per-partition tables — don't show rows that don't match. Note the filter in the section header (e.g. `=== record (filtered: checkout-related) ===`).
+4. **If the focus implies a filter** (e.g. "only the checkout-related scenarios", "stale ones only"), apply it to the per-folder tables — don't show rows that don't match. Note the filter in the section header (e.g. `=== record (filtered: checkout-related) ===`).
 
 After the prose summary, render the kept sections in the same order as the default dashboard below. Don't invent new section types — re-arrange and re-emphasize the existing ones.
 
-### Scenario health table — grouped by partition
+### Scenario health table — grouped by folder
 
 ```
 === crawl ===
@@ -226,7 +226,7 @@ Based on the dashboard, suggest the most impactful next steps (up to 7, ordered 
 
 1. Fix failing tests: `/scenario-to-tests <name>` for scenarios with test failures.
 2. Regenerate stale tests: `/scenario-to-tests <name>` for scenarios newer than their test files.
-3. Generate tests for untested scenarios: `/scenario-to-tests <command>` to cover a whole partition, or `/scenario-to-tests <name>` for a single scenario.
+3. Generate tests for untested scenarios: `/scenario-to-tests <command>` to cover a whole folder, or `/scenario-to-tests <name>` for a single scenario.
 4. Cover missing flow types: suggest `/crawl-site` with a description targeting the uncovered type (e.g., "focus on auth flows").
 5. Deepen the crawl: if `max_depth_reached < max_depth_available`, suggest `/crawl-site <start-url> deep dive --depth=<available>`.
 6. Define critical paths: if `.critical-paths.md` doesn't exist, suggest creating it.

@@ -30,11 +30,11 @@ Any unknown `--`-prefixed token → error before doing any work. Missing start U
 **Examples:**
 
 ```
-/crawl-site https://bookstore.example.com
-/crawl-site https://bookstore.example.com --depth=3
-/crawl-site https://bookstore.example.com focus on the checkout flow for a first-time buyer
-/crawl-site https://bookstore.example.com thorough crawl of all product-related pages --max-scenarios=15
-/crawl-site https://bookstore.example.com shallow overview of the main navigation
+/crawl-site https://mysite.com
+/crawl-site https://mysite.com --depth=3
+/crawl-site https://mysite.com focus on the checkout flow for a first-time buyer
+/crawl-site https://mysite.com thorough crawl of all product-related pages --max-scenarios=15
+/crawl-site https://mysite.com shallow overview of the main navigation
 ```
 
 If a description is provided, Phase 1.5 interprets it. Otherwise, fall back to default behavior (structural crawl, depth 1, max 10 scenarios, no filtering), applying any flag overrides if present.
@@ -223,7 +223,7 @@ If the file exists, read it, append the new crawl entry to the `crawls` array, a
   "crawls": [
     {
       "timestamp": "2026-04-21T14:30:00Z",
-      "start_url": "https://bookstore.example.com",
+      "start_url": "https://mysite.com",
       "description": "focus on the checkout flow for a first-time buyer",
       "effective_depth": 3,
       "effective_max_scenarios": 8,

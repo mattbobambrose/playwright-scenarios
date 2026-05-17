@@ -54,7 +54,7 @@ nav = [
   { "Workflow" = "workflow.md" },
   { "Commands & Skills" = "commands.md" },
   { "Capabilities" = "capabilities.md" },
-  { "Writing Docs" = "writing-docs.md" },
+  { "Writing Test Docs" = "writing-test-docs.md" },
   { "FAQ" = "faq.md" },
   { "Troubleshooting" = "troubleshooting.md" },
 ]

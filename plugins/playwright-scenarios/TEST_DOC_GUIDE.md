@@ -211,7 +211,7 @@ When an action causes the page to leave or change, say which kind of navigation 
 - **Download** — a file is downloaded; the current page does not change
 - **External redirect** — navigation leaves the origin
 
-**Example:** "Clicking 'Privacy Policy' opens a **new browser tab** to `https://example.com/privacy`. The original tab stays on the current page."
+**Example:** "Clicking 'Privacy Policy' opens a **new browser tab** to `https://mysite.com/privacy`. The original tab stays on the current page."
 
 **Example:** "Clicking 'Export CSV' triggers a **download** of `report.csv`. No URL change occurs."
 

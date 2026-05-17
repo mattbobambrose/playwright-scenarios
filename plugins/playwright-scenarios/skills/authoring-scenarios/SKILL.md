@@ -115,7 +115,7 @@ A visitor subscribes to the newsletter from the homepage footer.
 ```markdown
 # Order Confirmation
 
-**URL:** https://bookstore.example.com/order/confirm
+**URL:** https://mysite.com/order/confirm
 **Fixture:** fixtures/returning-customer
 **Prerequisite:** checkout-happy-path (Tests 1-3)
 
@@ -142,7 +142,7 @@ Verify the order confirmation page renders correctly after completing checkout.
 ```markdown
 # Checkout Happy Path
 
-**URL:** https://bookstore.example.com/checkout
+**URL:** https://mysite.com/checkout
 **Iframe:** #stripe-payment-iframe
 **Fixture:** fixtures/returning-customer
 
@@ -169,7 +169,7 @@ The payment form is hosted inside a cross-origin Stripe iframe.
 ```markdown
 # International Shipping Surcharge
 
-**URL:** https://bookstore.example.com/checkout
+**URL:** https://mysite.com/checkout
 **Iframe:** #stripe-payment-iframe
 **Fixture:** fixtures/returning-customer
 **Branch:** shipping.country = CA

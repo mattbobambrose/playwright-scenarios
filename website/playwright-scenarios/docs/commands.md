@@ -76,7 +76,7 @@ Most users hit this skill indirectly: when [`loading-config`](#loading-config) r
 
 1. Loads the project config and aborts if the language/framework combo isn't `kotlin` + `kotest-stringspec` (the only combo currently wired).
 2. Aborts if `base_test_class` is already set in the config — to regenerate, remove that line from `.claude/playwright-scenarios.local.md` first.
-3. Resolves where the file should go: inside `<test_dir>`, sibling to the partition subdirs (`crawl/`, `record/`, `convert/`). For example, `<test_dir> = src/test/kotlin/com/example/qa/scenarios` produces `src/test/kotlin/com/example/qa/scenarios/BasePageTest.kt` in package `com.example.qa.scenarios`.
+3. Resolves where the file should go: inside `<test_dir>`, sibling to the subfolders (`crawl/`, `record/`, `convert/`). For example, `<test_dir> = src/test/kotlin/com/example/qa/scenarios` produces `src/test/kotlin/com/example/qa/scenarios/BasePageTest.kt` in package `com.example.qa.scenarios`.
 4. Prompts for three customizations:
 
     | Prompt | Choices | Default |
@@ -128,9 +128,9 @@ Create a scenario by demonstrating a flow in a real browser. Launches Playwright
 ```
 /record-scenario
 /record-scenario checkout-flow
-/record-scenario http://localhost:8080
-/record-scenario http://localhost:8080 checkout-flow
-/record-scenario checkout-flow http://localhost:8080
+/record-scenario https://mysite.com
+/record-scenario https://mysite.com checkout-flow
+/record-scenario checkout-flow https://mysite.com
 ```
 
 **Prerequisites:** The host project must define a `recordScenario` Gradle task. The language template repos linked from the [Tutorial](tutorial.md) include this task pre-configured.
@@ -162,11 +162,11 @@ Crawl a site starting from a URL, identify plausible user flows, and write scena
 **Examples:**
 
 ```
-/crawl-site https://bookstore.example.com                 # bare URL → defaults
-/crawl-site https://bookstore.example.com --depth=3       # default crawl with depth override
-/crawl-site https://bookstore.example.com focus on the checkout flow for a first-time buyer
-/crawl-site https://bookstore.example.com thorough crawl of all product pages --max-scenarios=15
-/crawl-site https://bookstore.example.com shallow overview of the main navigation
+/crawl-site https://mysite.com                 # bare URL → defaults
+/crawl-site https://mysite.com --depth=3       # default crawl with depth override
+/crawl-site https://mysite.com focus on the checkout flow for a first-time buyer
+/crawl-site https://mysite.com thorough crawl of all product pages --max-scenarios=15
+/crawl-site https://mysite.com shallow overview of the main navigation
 ```
 
 **Prerequisites:** `playwright-cli` available on `PATH` or via `npx`.
@@ -201,7 +201,7 @@ Convert any document (test plan, requirements doc, meeting notes, acceptance cri
 ```
 
 !!! tip
-    For best results, paste [DOC_GUIDE.md](https://github.com/mattbobambrose/playwright-scenarios/blob/master/plugins/playwright-scenarios/DOC_GUIDE.md) into your authoring LLM's context before generating the document.
+    For best results, paste [TEST_DOC_GUIDE.md](https://github.com/mattbobambrose/playwright-scenarios/blob/master/plugins/playwright-scenarios/TEST_DOC_GUIDE.md) into your authoring LLM's context before generating the document.
 
 ---
 
@@ -247,7 +247,7 @@ Audit one or more scenario files across `<SCENARIO_DIR>/{crawl,record,convert}/`
 
 | Argument | Type | Description |
 |---|---|---|
-| `name1 name2 ...` | optional, zero or more | Scenario names without `.md`, or a partition name (`crawl`, `record`, `convert`) to scope the review to that partition. Empty = review every scenario across all three partitions. If a name matches in multiple partitions, you'll be prompted to disambiguate or use the `partition/name` form. |
+| `name1 name2 ...` | optional, zero or more | Scenario names without `.md`, or a folder name (`crawl`, `record`, `convert`) to scope the review to that folder. Empty = review every scenario across all three folders. If a name matches in multiple folders, you'll be prompted to disambiguate or use the `folder/name` form. |
 
 **Flags:** none.
 
@@ -271,13 +271,13 @@ Audit one or more scenario files across `<SCENARIO_DIR>/{crawl,record,convert}/`
 /scenario-to-tests [name1 name2 ...] [--dry-run]
 ```
 
-Generate test code from reviewed scenarios. The output language and framework come from `.claude/playwright-scenarios.local.md`. Currently fully wired for **Kotlin + Kotest StringSpec**. Tests are written to `<TEST_DIR>/<command>/<scenario-name>/<ClassName>.kt`, partitioned by source command and by scenario.
+Generate test code from reviewed scenarios. The output language and framework come from `.claude/playwright-scenarios.local.md`. Currently fully wired for **Kotlin + Kotest StringSpec**. Tests are written to `<TEST_DIR>/<command>/<scenario-name>/<ClassName>.kt`, organized into folders by source command and by scenario.
 
 **Arguments:**
 
 | Argument | Type | Description |
 |---|---|---|
-| `name1 name2 ...` | optional, zero or more | Scenario names without `.md`, or a partition name (`crawl`, `record`, `convert`) to scope generation to that partition. Empty = generate tests for every scenario across all three partitions. |
+| `name1 name2 ...` | optional, zero or more | Scenario names without `.md`, or a folder name (`crawl`, `record`, `convert`) to scope generation to that folder. Empty = generate tests for every scenario across all three folders. |
 
 **Flags:**
 
@@ -305,9 +305,9 @@ Generate test code from reviewed scenarios. The output language and framework co
 
 Single-view health dashboard for every scenario and its generated tests, plus crawl-derived coverage metrics.
 
-**Arguments:** optional free-form English description that biases the rendering. Examples: `/scenario-status focus on what's broken`, `/scenario-status one-paragraph executive summary`, `/scenario-status only the checkout-related scenarios`. Without it, the full default dashboard is rendered. With it, the command leads with a tailored prose summary, condenses or skips tangential sections, may filter per-partition tables, and reorders the recommended actions to match the focus. Phases 1–5 still gather the full picture either way.
+**Arguments:** optional free-form English description that biases the rendering. Examples: `/scenario-status focus on what's broken`, `/scenario-status one-paragraph executive summary`, `/scenario-status only the checkout-related scenarios`. Without it, the full default dashboard is rendered. With it, the command leads with a tailored prose summary, condenses or skips tangential sections, may filter per-folder tables, and reorders the recommended actions to match the focus. Phases 1–5 still gather the full picture either way.
 
-In every mode the output keeps each scenario partition-tagged (crawl / record / convert) so it's always clear which command produced a given scenario — partition headers are preserved, prose summaries name partitions when citing counts, and recommended actions qualify scenario names with their partition.
+In every mode the output keeps each scenario folder-tagged (crawl / record / convert) so it's always clear which command produced a given scenario — folder headers are preserved, prose summaries name folders when citing counts, and recommended actions qualify scenario names with their folder.
 
 **Reports:**
 
