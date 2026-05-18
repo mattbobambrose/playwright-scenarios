@@ -204,7 +204,7 @@ make clean tests
 
 ---
 
-## Step 4: Convert a doc → tests
+## Step 4: Convert a test doc → tests
 
 The third path starts from a written test document — a test plan, requirements, a user story, acceptance criteria — and converts it into scenarios.
 
