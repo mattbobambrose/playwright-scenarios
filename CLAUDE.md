@@ -42,6 +42,10 @@ When adding or changing a command, skill, or config field, update all of: README
 
 **Generated command tables.** The command table in `README.md` is auto-generated from each command's frontmatter (`summary`, `signature` fields) by `scripts/gen-command-table.py`. After editing any of those frontmatter fields, regenerate with `python3 scripts/gen-command-table.py --inplace README.md`. Don't hand-edit the content between `<!-- COMMANDS:BEGIN -->` / `<!-- COMMANDS:END -->` markers — it gets clobbered on the next run. The script also has a `--check` flag for CI ("exit 1 if the file would change") — combine with `--inplace`, e.g. `python3 scripts/gen-command-table.py --inplace README.md --check`. Other table-shaped surfaces (USAGE.md's intent-keyed table, llms.txt's bullet list, the website `commands.md` quick reference) still need hand-editing — they have different shapes; migrate them by adding the right frontmatter fields and a corresponding renderer to the script.
 
+## Kotlin template coupling
+
+The website tutorial (`website/playwright-scenarios/docs/tutorial.md`) walks through the separate `mattbobambrose/playwright-scenarios-kotlin-template` repo and cites its concrete details — directory paths (`src/test/kotlin/com/bookshelf/scenarios/`, `src/test/docs/`), `make` targets (`make clean tests`), and shipped example files. Changes on either side must be mirrored: a renamed `make` target, moved/renamed sample file, or layout change in the template breaks the tutorial.
+
 ## Example URLs in docs
 
 Use `https://mysite.com` as the placeholder host in command examples and scenario `**URL:**` lines. Leave functional or illustrative URLs alone: the tutorial's `http://localhost:8080` (the bundled demo's real address), `troubleshooting.md`'s `localhost:3000` entry, `debugging-scenarios`'s cross-origin `auth.provider.com` example, and `@example.com` example email addresses.

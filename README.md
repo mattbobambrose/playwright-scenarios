@@ -12,7 +12,7 @@ Start with the **[step-by-step tutorial](https://mattbobambrose.github.io/playwr
 
 Two reference documents ship with the plugin for different stages of the workflow:
 
-- **[TEST_DOC_GUIDE.md](plugins/playwright-scenarios/TEST_DOC_GUIDE.md)** — Paste into any LLM's system prompt (ChatGPT, Claude, Gemini, Copilot) when writing test documents. LLM-agnostic. Covers what the test framework can and can't handle, 10 authoring rules, a document template, and a self-evaluation checklist. Use this *before* testing, when generating the docs that eventually become scenarios.
+- **[TEST_DOC_GUIDE.md](plugins/playwright-scenarios/TEST_DOC_GUIDE.md)** — Paste into any LLM's system prompt (ChatGPT, Claude, Gemini, Copilot) when writing test documents. LLM-agnostic. Covers what the test framework can and can't handle, 14 authoring rules, a document template, and a self-evaluation checklist. Use this *before* testing, when generating the docs that eventually become scenarios.
 
 - **[USAGE.md](plugins/playwright-scenarios/USAGE.md)** — Add to your project's CLAUDE.md so Claude Code knows how to use the plugin. Covers all 9 commands, 13 tags, workflow, do's/don'ts, and troubleshooting. Use this *during* testing, when running the plugin commands.
 

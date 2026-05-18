@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.2] - 2026-05-18
+
 ### Added
 
 - The website "Commands & Skills" page (`commands.md`) now opens with a short explanation of how commands and skills differ: commands are the slash commands you invoke explicitly; skills are supporting capabilities Claude loads and runs on its own, inside a command or when a request matches the skill's purpose.
@@ -231,6 +233,7 @@ Initial release.
 - Host-project setup documentation covering the required Gradle `recordScenario` and `installPlaywrightBrowsers` tasks, Playwright / Kotest dependencies, `scenarios/` directory convention, and base test class pattern.
 - MIT license.
 
+[0.9.2]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.9.1...0.9.2
 [0.9.1]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.9.0...0.9.1
 [0.9.0]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.8.0...0.9.0
 [0.8.0]: https://github.com/mattbobambrose/playwright-scenarios/compare/0.7.0...0.8.0

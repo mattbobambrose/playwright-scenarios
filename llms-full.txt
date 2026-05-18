@@ -106,6 +106,10 @@ Skills return short structured error codes (e.g. `MALFORMED_CONFIG: <reason>`, `
 
 When adding or changing a command, skill, or config field, update all of: README.md, CHANGELOG.md, llms.txt, llms-full.txt, plus the matching page under `website/playwright-scenarios/docs/` (e.g. `commands.md`, `terminology.md`). When adding a new command, also extend the explicit trigger list inside `loading-config`'s SKILL `description` field — the skill keeps working without it (fuzzy match), but the list is what other docs cite as the canonical command roster.
 
+## Kotlin template coupling
+
+The website tutorial (`website/playwright-scenarios/docs/tutorial.md`) walks through the separate `mattbobambrose/playwright-scenarios-kotlin-template` repo and cites its concrete details — directory paths, `make` targets, and shipped example files. Changes on either side must be mirrored: a renamed `make` target, moved/renamed sample file, or layout change in the template breaks the tutorial.
+
 ## Example URLs in docs
 
 Use `https://mysite.com` as the placeholder host in command examples and scenario `**URL:**` lines. Leave functional or illustrative URLs alone: the tutorial's `http://localhost:8080` (the bundled demo's real address), `troubleshooting.md`'s `localhost:3000` entry, `debugging-scenarios`'s cross-origin `auth.provider.com` example, and `@example.com` example emails.
@@ -144,7 +148,7 @@ Scenario creation commands write to one of three folders: `<scenario_dir>/{crawl
       "name": "playwright-scenarios",
       "source": "./plugins/playwright-scenarios",
       "description": "Author browser-driven scenarios as markdown, audit them against the live site, and generate JVM Playwright + Kotest tests",
-      "version": "0.9.1",
+      "version": "0.9.2",
       "author": { "name": "mattbobambrose" },
       "category": "testing",
       "keywords": ["playwright", "testing", "kotest", "jvm", "kotlin", "e2e", "codegen"],
@@ -160,7 +164,7 @@ Scenario creation commands write to one of three folders: `<scenario_dir>/{crawl
 ```json
 {
   "name": "playwright-scenarios",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "description": "Author browser-driven scenarios as markdown, audit them against the live site, and generate JVM Playwright + Kotest tests",
   "author": { "name": "mattbobambrose" }
 }
