@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tutorial Step 1: reordered the setup steps so the Docker demo app is started before the template repo is created (the clone step now follows repo creation), and noted where to find the clone URL on GitHub (**Code → Clone → HTTPS**).
 - Dropped the word "autonomous"/"autonomously" from the `/crawl-site` descriptions — the `workflow.md` Path A heading and comparison table, plus `llms.txt` and `llms-full.txt`.
 - Tutorial Step 4 reworked and retitled "Generate docs with an LLM → tests" → "Convert a doc → tests". The step now leads with the two example input documents the kotlin template ships under `src/test/docs/` (`checkout-user-story.md` and `checkout-test-spec.md`) and converts a ready-made sample, rather than walking through LLM doc-generation first. The doc-generation guidance shrank to a single `For your project:` note that hands the LLM a *link* to `TEST_DOC_GUIDE.md` instead of its pasted contents; the long placement/anti-critique tip was dropped in favor of the existing Writing Test Docs page.
+- Tutorial Steps 3 and 4 split their combined "Review and generate" subsection into separate "Review the scenarios" and "Generate tests" subsections, matching Step 2's structure so all three authoring paths read the same way.
 
 ### Removed
 

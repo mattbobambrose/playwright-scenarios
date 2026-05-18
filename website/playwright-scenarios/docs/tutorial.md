@@ -166,16 +166,25 @@ Claude converts the recorded actions into a scenario markdown file at `src/test/
 
 **For your project:** Drive the browser to whichever flow you actually care about — login, checkout, a multi-step form, anything you'd test by hand. The recorded flow is whatever you do in the window; there's no fixed script.
 
-### Review and generate
+### Review the scenarios
 
 **Claude Code:**
 
 ```
 /review-scenario record
+```
+
+Same as Step 2, scoped to the `record` folder — Claude verifies each scenario against the live site and rewrites the markdown in place.
+
+### Generate tests
+
+**Claude Code:**
+
+```
 /scenario-to-tests record
 ```
 
-Same shape as Step 2 — scoped this time to the `record` folder. The new tests land at `src/test/kotlin/com/bookshelf/scenarios/record/<scenario-name>/<ClassName>.kt`, alongside the crawl tests from earlier.
+The new tests land at `src/test/kotlin/com/bookshelf/scenarios/record/<scenario-name>/<ClassName>.kt`, alongside the crawl tests from earlier.
 
 ### Run tests
 
@@ -198,7 +207,9 @@ Two example input documents live under `src/test/docs/`, both describing the boo
 - **`checkout-user-story.md`** — the flow framed as a user story with acceptance criteria.
 - **`checkout-test-spec.md`** — the checkout page covered exhaustively: every element that should render, every interaction a user can perform, and the expected outcome of each.
 
-Both are written to the conventions in [`TEST_DOC_GUIDE.md`](https://github.com/mattbobambrose/playwright-scenarios/blob/master/plugins/playwright-scenarios/TEST_DOC_GUIDE.md) and convert as-is — no editing needed.
+Both are written to the conventions in [`TEST_DOC_GUIDE.md`](https://github.com/mattbobambrose/playwright-scenarios/blob/master/plugins/playwright-scenarios/TEST_DOC_GUIDE.md), so you can convert as-is — no editing needed.
+
+**For your project:** To convert your own flows, write a document that follows the rules that [`TEST_DOC_GUIDE.md`](https://github.com/mattbobambrose/playwright-scenarios/blob/master/plugins/playwright-scenarios/TEST_DOC_GUIDE.md) describes and pass its path to `/doc-to-scenarios` — the command accepts any path. You can write it yourself, or have an LLM (ChatGPT, Claude, Gemini) draft it: give the LLM a link to that guide plus a description of what to test. Existing test plans, requirements docs, meeting notes, and acceptance criteria also work directly as input. See [Writing Test Docs](writing-test-docs.md) for full guidance.
 
 ### Convert to scenarios
 
@@ -210,20 +221,31 @@ Both are written to the conventions in [`TEST_DOC_GUIDE.md`](https://github.com/
 
 Claude runs `evaluate-doc` first (a sanity check that the doc is well-formed for conversion), pauses for your approval, then writes one scenario per flow to `src/test/scenarios/convert/`.
 
-Run the same command on `src/test/docs/checkout-test-spec.md` to convert the second sample too.
+```
+/doc-to-scenarios src/test/docs/checkout-test-spec.md
+```
 
-**For your project:** To convert your own flows, write a document in the shape [`TEST_DOC_GUIDE.md`](https://github.com/mattbobambrose/playwright-scenarios/blob/master/plugins/playwright-scenarios/TEST_DOC_GUIDE.md) describes and pass its path to `/doc-to-scenarios` — the command accepts any path. You can write it yourself, or have an LLM (ChatGPT, Claude, Gemini) draft it: give the LLM a link to that guide plus a description of what to test. Existing test plans, requirements docs, meeting notes, and acceptance criteria also work directly as input. See [Writing Test Docs](writing-test-docs.md) for full guidance.
+You'll find the resulting scenarios at `src/test/scenarios/convert/`.
 
-### Review and generate
+### Review the scenarios
 
 **Claude Code:**
 
 ```
 /review-scenario convert
+```
+
+Same as Step 2, scoped to the `convert` folder — Claude verifies each scenario against the live site and rewrites the markdown in place.
+
+### Generate tests
+
+**Claude Code:**
+
+```
 /scenario-to-tests convert
 ```
 
-The third batch of tests lands at `src/test/kotlin/com/bookshelf/scenarios/convert/<scenario-name>/<ClassName>.kt`.
+You'll find the resulting tests at `src/test/kotlin/com/bookshelf/scenarios/convert/<scenario-name>/<ClassName>.kt`.
 
 ### Run tests
 
