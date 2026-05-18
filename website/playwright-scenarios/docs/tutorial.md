@@ -231,6 +231,8 @@ Now do the same with the test spec:
 
 Both runs write their scenarios to `src/test/scenarios/convert/`.
 
+Because both sample documents include a **Test data** table, the generated scenarios reference a *fixture* — a small JSON file of shared test data (the customer persona and form inputs) that the generated tests read from instead of hard-coding values in each test. When Claude offers to create it with `/generate-fixture`, accept it.
+
 ### Review the scenarios
 
 **Claude Code:**
