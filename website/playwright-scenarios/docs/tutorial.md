@@ -4,14 +4,7 @@ icon: lucide/graduation-cap
 
 # Tutorial
 
-A linear walkthrough from a fresh machine to a growing test suite. We'll set up the environment once, then exercise each of the three authoring paths in turn — **crawl**, **record**, and **doc-driven** — running the full review/generate pipeline after each so you end up with three batches of executable tests.
-
-By the end you'll have:
-
-- Tests under `src/test/kotlin/com/bookshelf/scenarios/crawl/` from a `/crawl-site` run.
-- Tests under `src/test/kotlin/com/bookshelf/scenarios/record/` from a `/record-scenario` run.
-- Tests under `src/test/kotlin/com/bookshelf/scenarios/convert/` from a `/doc-to-scenarios` run.
-- A health dashboard view via `/scenario-status` that ties them all together.
+A linear walkthrough from a fresh machine to a growing test suite. We'll set up the environment once, then exercise each of the three authoring paths in turn — **crawl**, **record**, and **doc-driven** — running the full review/generate pipeline after each so you end up with three batches of executable tests and scenarios.
 
 **Bring your own site.** This tutorial points at the bundled bookstore demo on `http://localhost:8080` so every step has a concrete target. Anything tied to the demo is swappable: the Docker container, the start URL, the doc path, the recorded flow. Each step calls out what to substitute under a **For your project:** note. If you already have a dev or staging server you want to test, you can replace `http://localhost:8080` with its URL throughout and skip the Docker container in Step 1.
 
@@ -194,37 +187,32 @@ make clean tests
 
 ---
 
-## Step 4: Generate docs with an LLM → tests
+## Step 4: Convert a doc → tests
 
-The third path starts from a written description. You can hand it to any LLM (ChatGPT, Claude, Gemini), have it produce a test document in the plugin's expected shape, and convert that document into scenarios.
+The third path starts from a written document — a test plan, requirements, a user story, acceptance criteria — and converts it into scenarios. The template ships two ready-made example documents, so you can run this path without writing anything first.
 
-### Generate a document
+### The sample documents
 
-**Browser (external LLM):** Paste the following into your LLM, substituting the full contents of [`TEST_DOC_GUIDE.md`](https://github.com/mattbobambrose/playwright-scenarios/blob/master/plugins/playwright-scenarios/TEST_DOC_GUIDE.md) where indicated:
+Two example input documents live under `src/test/docs/`, both describing the bookstore demo's checkout flow from different angles:
 
-```
-These are the rules for writing a test document that converts cleanly to scenarios. Follow them as closely as possible. Don't critique the rules or suggest improvements; just apply them and write the document.
+- **`checkout-user-story.md`** — the flow framed as a user story with acceptance criteria.
+- **`checkout-test-spec.md`** — the checkout page covered exhaustively: every element that should render, every interaction a user can perform, and the expected outcome of each.
 
-[Paste the full contents of TEST_DOC_GUIDE.md here]
-
-Create a user story for the checkout flow, then write a test document covering every element that should appear on the checkout page, every interaction a user can perform, and the expected outcome of each. Apply the rules above for formatting and content, and be as thorough as you can.
-```
-
-**Tip:** Paste the contents of [`TEST_DOC_GUIDE.md`](https://github.com/mattbobambrose/playwright-scenarios/blob/master/plugins/playwright-scenarios/TEST_DOC_GUIDE.md) as a **system prompt or custom instructions** rather than a mid-conversation message — system-prompt placement anchors the framing most reliably and the LLM is more likely to apply the rules than to critique them. If you do paste mid-conversation, include your request in the same message (e.g. "here are the rules, now draft a test document for the checkout flow") instead of pasting the guide alone and waiting. If the LLM still responds with suggestions for improving the guide instead of drafting a document, reply once with "Apply the rules; don't critique them. Draft a test document for [your flow]." and it will correct course. The guide's "How to use this guide" section anchors this, but LLM behavior is probabilistic — these tips compound.
-
-Then ask it to draft a document covering the flows you care about. Save the output to a file in your repo, e.g. `docs/checkout-tests.md`.
+Both are written to the conventions in [`TEST_DOC_GUIDE.md`](https://github.com/mattbobambrose/playwright-scenarios/blob/master/plugins/playwright-scenarios/TEST_DOC_GUIDE.md) and convert as-is — no editing needed.
 
 ### Convert to scenarios
 
 **Claude Code:**
 
 ```
-/doc-to-scenarios docs/checkout-tests.md
+/doc-to-scenarios src/test/docs/checkout-user-story.md
 ```
 
-**For your project:** `docs/checkout-tests.md` is illustrative — pass any path to your own document. Existing test plans, requirements docs, meeting notes, and acceptance criteria all work as input.
-
 Claude runs `evaluate-doc` first (a sanity check that the doc is well-formed for conversion), pauses for your approval, then writes one scenario per flow to `src/test/scenarios/convert/`.
+
+Run the same command on `src/test/docs/checkout-test-spec.md` to convert the second sample too.
+
+**For your project:** To convert your own flows, write a document in the shape [`TEST_DOC_GUIDE.md`](https://github.com/mattbobambrose/playwright-scenarios/blob/master/plugins/playwright-scenarios/TEST_DOC_GUIDE.md) describes and pass its path to `/doc-to-scenarios` — the command accepts any path. You can write it yourself, or have an LLM (ChatGPT, Claude, Gemini) draft it: give the LLM a link to that guide plus a description of what to test. Existing test plans, requirements docs, meeting notes, and acceptance criteria also work directly as input. See [Writing Test Docs](writing-test-docs.md) for full guidance.
 
 ### Review and generate
 
