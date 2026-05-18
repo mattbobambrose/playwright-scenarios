@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Website `writing-test-docs.md` gained a lead section, "Including the guide in a prompt" — an example prompt that hands an LLM the **raw** `TEST_DOC_GUIDE.md` URL (so the model fetches plain Markdown), with a note pointing human readers at the rendered GitHub page and a tip for models that can't fetch URLs.
+
+### Changed
+
+- Tutorial revisions: Step 1's setup was renumbered and split into finer-grained steps (prerequisites, `playwright-cli`, and the Docker demo as separate items), with rewording through Steps 1–5. The `/create-base-test` customization prompt is now called the "reset endpoint question", and Step 2's crawl-description example shows three natural-language variants instead of one.
+
 ## [0.9.2] - 2026-05-18
 
 ### Added
