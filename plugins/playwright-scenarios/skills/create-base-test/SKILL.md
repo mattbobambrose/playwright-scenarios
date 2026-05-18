@@ -178,6 +178,12 @@ Created BasePageTest at <target_file>
   Browser: <Chromium|Firefox|Webkit>
 ```
 
+Then direct the user to their next step: authoring a scenario for `/scenario-to-tests` to turn into tests. Tell them to pick one of the three authoring commands:
+
+- `/crawl-site <url>` — **crawl** a site to discover user flows.
+- `/record-scenario <url>` — **record** a flow by driving a browser.
+- `/doc-to-scenarios <path>` — **convert** a written document into scenarios.
+
 ## What this skill does NOT do
 
 - Does not write to `.claude/playwright-scenarios.local.md` — the caller persists `base_test_class`.
