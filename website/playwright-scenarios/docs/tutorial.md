@@ -102,7 +102,9 @@ The first authoring path is the most hands-off: tell `/crawl-site` where to star
 
 Claude inventories the start page, ranks candidate flows, walks each (read-only — no form submits), and writes one scenario per flow to `src/test/scenarios/crawl/`. Respond to any prompts Claude shows along the way — accepting the recommended option each time is fine for a first run.
 
-Review the generated scenarios at `src/test/scenarios/crawl`.
+You'll find the generated scenarios at `src/test/scenarios/crawl`.
+
+Open one and skim it — this human-readable markdown is the scenario format the rest of the pipeline reviews and turns into tests.
 
 **For your project:** Replace `http://localhost:8080` with any URL Claude can reach — your dev server, a staging environment, a public site. You can also append a natural-language description to focus the crawl, e.g.:
 
@@ -215,17 +217,19 @@ Both are written to the conventions in [`TEST_DOC_GUIDE.md`](https://github.com/
 
 **Claude Code:**
 
+Start with the user story. Claude runs `evaluate-doc` first (a sanity check that the doc is well-formed for conversion), pauses for your approval, then writes one scenario per flow:
+
 ```
 /doc-to-scenarios src/test/docs/checkout-user-story.md
 ```
 
-Claude runs `evaluate-doc` first (a sanity check that the doc is well-formed for conversion), pauses for your approval, then writes one scenario per flow to `src/test/scenarios/convert/`.
+Now do the same with the test spec:
 
 ```
 /doc-to-scenarios src/test/docs/checkout-test-spec.md
 ```
 
-You'll find the resulting scenarios at `src/test/scenarios/convert/`.
+Both runs write their scenarios to `src/test/scenarios/convert/`.
 
 ### Review the scenarios
 
@@ -265,7 +269,7 @@ make clean tests
 /scenario-status
 ```
 
-You'll see all three batches grouped by folder — review dates, test file existence, pass/fail, plus coverage signals (crawl depth reached, flow types covered, conversion rate). Run this any time you want a single view of what's reviewed, what's tested, what's stale, and what's missing.
+You'll see all three test batches grouped by folder — review dates, test file existence, pass/fail, plus coverage signals (crawl depth reached, flow types covered, conversion rate). Run this any time you want a single view of what's reviewed, what's tested, what's stale, and what's missing.
 
 ---
 
