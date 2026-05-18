@@ -8,25 +8,20 @@ If you're writing a document that will feed into this plugin (either hand-author
 
 ## Including the guide in a prompt
 
-When you have an LLM draft a test document, give it the authoring rules together with a description of the flow to document. Most LLMs can read `TEST_DOC_GUIDE.md` straight from its URL, so reference the link rather than pasting the whole file into the prompt:
+When you have an LLM draft a test document, give it the authoring rules together with a description of the flow to document. Most LLMs can read [TEST_DOC_GUIDE.md](https://github.com/mattbobambrose/playwright-scenarios/blob/master/plugins/playwright-scenarios/TEST_DOC_GUIDE.md) straight from its URL, so reference the link rather than pasting the whole file into the prompt:
 
 ```
 Read the test-document authoring rules at
 https://raw.githubusercontent.com/mattbobambrose/playwright-scenarios/master/plugins/playwright-scenarios/TEST_DOC_GUIDE.md
 
 Follow those rules as closely as you can — don't critique them or suggest
-improvements, just apply them. Then write a test document for the checkout
-flow of my app, covering the cart, shipping and payment entry, order
-placement, and the confirmation page.
+improvements, just apply them. Then write a test document called "checkout-flow"
+for the checkout flow of my app, covering the cart, shipping and payment entry,
+order placement, and the confirmation page.
 ```
 
 !!! note "Link to the raw Markdown"
-    The URL above is the **raw** file (`raw.githubusercontent.com`) so an LLM fetching it gets the guide's plain Markdown, not GitHub's rendered HTML page. To read the guide yourself, the rendered page is friendlier: [TEST_DOC_GUIDE.md on GitHub](https://github.com/mattbobambrose/playwright-scenarios/blob/master/plugins/playwright-scenarios/TEST_DOC_GUIDE.md).
-
-Keep the request in the same message as the link: the guide tells the LLM to apply its rules to a flow you name, so it works best when that flow is right there alongside it.
-
-!!! tip "If your LLM can't fetch URLs"
-    Some models can't open links. Paste the full contents of `TEST_DOC_GUIDE.md` into the prompt in place of the URL — the rest of the prompt is unchanged.
+    The URL above is for the **raw** file (`raw.githubusercontent.com`) so an LLM fetching it will get plain Markdown, not [GitHub's HTML page](https://github.com/mattbobambrose/playwright-scenarios/blob/master/plugins/playwright-scenarios/TEST_DOC_GUIDE.md). If your LLM can't fetch URLs, paste the full contents of `TEST_DOC_GUIDE.md` into the prompt in place of the URL — the rest of the prompt is unchanged.
 
 ## What works well
 
