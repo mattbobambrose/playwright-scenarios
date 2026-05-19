@@ -88,8 +88,6 @@ Do this once before working through any of the authoring sections. Each command 
 
     This is your first plugin command. Two prompts will fire in sequence: first the config bootstrap (`scenario_dir`, `test_dir`, `test_language`, `test_framework`), then three customizations: the **reset** endpoint question (whether the dev server exposes a `POST /reset` endpoint), lifecycle scope, and browser. When prompted for preferences, accept the defaults, with the exception of the **reset** endpoint question, where you should answer `Yes`. This is because the bookstore demo exposes a reset endpoint, so `BasePageTest` can reset its state between tests.
 
-    **For your project:** The defaults match the kotlin template's layout. If you're applying the plugin to your own project, see the [Configuration table in the README](https://github.com/mattbobambrose/playwright-scenarios#configuration) for what each field controls and override the prompts as needed. You can re-prompt later with `/playwright-scenarios-config`.
-
 ---
 
 ## Step 2: Crawl a site → tests
