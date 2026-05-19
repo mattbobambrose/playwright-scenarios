@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Tutorial revisions: Step 1's setup was renumbered and split into finer-grained steps (prerequisites, `playwright-cli`, and the Docker demo as separate items), with rewording through Steps 1–5. The `/create-base-test` customization prompt is now called the "reset endpoint question", and Step 2's crawl-description example shows three natural-language variants instead of one.
+- README restructured and trimmed: the release badge moved above the title, the one-line description generalized to "Playwright tests", and the install/update sections reworked (the update steps now include `/reload-plugins`). The `LLM Guide`, `Host Project Setup`, and `Configuration` sections were removed — the kotlin template ships the host-project wiring pre-configured and the tutorial walks through it, so the README defers setup detail to the tutorial and website. The tutorial's Step 1 "For your project" note, which linked the now-removed README `#configuration` anchor, was dropped.
+
+### Removed
+
+- Removed `plugins/playwright-scenarios/USAGE.md`. The host-project usage reference duplicated content already served on demand by the plugin's self-describing commands and auto-loading skills (`authoring-scenarios`, `debugging-scenarios`, `loading-config`) and by the website docs, while adding another hand-synced surface to the doc-propagation checklist. References dropped from `README.md` (the "LLM Guides" section is now "LLM Guide", carrying only `TEST_DOC_GUIDE.md`), `llms.txt`, and the `CLAUDE.md` doc-propagation list.
 
 ## [0.9.2] - 2026-05-18
 

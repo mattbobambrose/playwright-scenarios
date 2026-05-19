@@ -8,9 +8,9 @@ Claude Code plugin for scenario-driven Playwright testing — crawl, record, eva
 
 ## What is it?
 
-`playwright-scenarios` is a Claude Code plugin that lets you author browser-driven test scenarios as flat markdown files, audit those scenarios against the live site, and translate them into test classes. The plugin ships 9 commands, 6 skills, and 13 extended tags.
+[playwright-scenarios](https://github.com/mattbobambrose/playwright-scenarios) is a Claude Code plugin that lets you author browser-driven test scenarios as flat markdown files, audit those scenarios against the live site, and translate them into test classes. The plugin ships 9 commands, 6 skills, and 13 extended tags.
 
-`playwright-scenarios` works with any project that supports Playwright for browser automation. The default test generation stack is Kotlin + Kotest StringSpec + Playwright-for-Java, with support for TypeScript and Python planned.
+[playwright-scenarios](https://github.com/mattbobambrose/playwright-scenarios) works with any project that supports Playwright for browser automation. The default test generation stack is Kotlin + Kotest StringSpec + Playwright-for-Java, with support for TypeScript and Python planned.
 
 ## How it works
 

@@ -8,7 +8,6 @@ This repository is a Claude Code plugin marketplace (no application source). It 
 
 - [README](README.md): Installation, host-project setup, workflow, capabilities/limitations, and input-document guidance.
 - [CLAUDE.md](CLAUDE.md): Repo orientation for Claude — layout, version-bump rule, doc propagation checklist, single-writer config-file rule, skill error contract, website slug-disambiguation pattern, external dependency, source folders, tag list.
-- [USAGE.md](plugins/playwright-scenarios/USAGE.md): In-project reference — paste into a host project's CLAUDE.md so Claude Code knows how to use the plugin.
 - [TEST_DOC_GUIDE.md](plugins/playwright-scenarios/TEST_DOC_GUIDE.md): For LLMs authoring test documents — what the framework can/can't handle, 14 authoring rules, document template, self-evaluation checklist.
 - [CHANGELOG](CHANGELOG.md): Release notes.
 
