@@ -86,7 +86,7 @@ Do this once before working through any of the authoring sections. Each command 
 
     This command writes `BasePageTest.kt` next to your scenarios package and persists `base_test_class` in the config.
 
-    This is your first plugin command. Two prompts will fire in sequence: first the config bootstrap (`scenario_dir`, `test_dir`, `test_language`, `test_framework`), then three customizations: the **reset** endpoint question (whether the dev server exposes a `POST /reset` endpoint), lifecycle scope, and browser. When prompted for preferences, accept the defaults, with the exception of the **reset** endpoint question, where you should answer `Yes`. This is because the bookstore demo exposes a reset endpoint, so `BasePageTest` can reset its state between tests.
+    Two prompts will fire in sequence. When asked the **reset** endpoint question, answer `Yes`. Otherwise, when prompted for preferences, accept the defaults. This is because the bookstore demo exposes a reset endpoint, so `BasePageTest` can reset its state between tests.
 
 ---
 
@@ -95,6 +95,8 @@ Do this once before working through any of the authoring sections. Each command 
 The `/crawl-site` command lets Claude discover user flows on its own.
 
 ### Run the crawl
+
+Run the crawl with:
 
 **Claude Code:**
 
@@ -118,15 +120,19 @@ Additionally, you can append a natural-language description to focus the crawl, 
 
 ### Review the scenarios
 
+`/review-scenario` audits your scenarios against the live site — verifying each claim, tightening loose assertions, and rewriting the markdown in place.
+
 **Claude Code:**
 
 ```
 /review-scenario crawl
 ```
 
-The `crawl` argument scopes the review to scenarios in the crawl folder. You can provide `/review-scenario` with either the name of a folder (`crawl`, `record`, `convert`), the name of a file, or no name. Claude opens each one against the live site, verifies the claims, tightens vague assertions, and rewrites the markdown in place. You'll see a summary table of what changed.
+The `crawl` argument scopes the review to scenarios in the crawl folder. You can provide `/review-scenario` with either the name of a folder (`crawl`, `record`, `convert`), the name of a file, or no name. You'll see a summary table of what changed.
 
 ### Generate tests
+
+Generate the tests with:
 
 **Claude Code:**
 
@@ -144,6 +150,8 @@ You now have your first batch of tests in `src/test/kotlin/com/bookshelf/scenari
 
 ### Run tests
 
+Run the tests with:
+
 **Terminal:**
 
 ```
@@ -160,6 +168,8 @@ For interactive flows (logins, form fills, multi-step purchases) it's easier to 
 
 ### Record a scenario
 
+Record a scenario with:
+
 **Claude Code:**
 
 ```
@@ -174,15 +184,17 @@ Claude converts the recorded actions into a scenario markdown file at `src/test/
 
 ### Review the scenario
 
+`/review-scenario` audits your scenarios against the live site — verifying each claim, tightening loose assertions, and rewriting the markdown in place.
+
 **Claude Code:**
 
 ```
 /review-scenario record
 ```
 
-Same as Step 2, scoped to the `record` folder — Claude verifies each scenario against the live site and rewrites the markdown in place.
-
 ### Generate tests
+
+Generate the tests with:
 
 **Claude Code:**
 
@@ -190,9 +202,11 @@ Same as Step 2, scoped to the `record` folder — Claude verifies each scenario 
 /scenario-to-tests record
 ```
 
-The new tests will be at `src/test/kotlin/com/bookshelf/scenarios/record/`, alongside the crawl tests from earlier.
+You'll find the resulting tests at `src/test/kotlin/com/bookshelf/scenarios/record/`.
 
 ### Run tests
+
+Run the tests with:
 
 **Terminal:**
 
@@ -204,11 +218,11 @@ make clean tests
 
 ## Step 4: Convert a test doc → tests
 
-The third path starts from a written test document — a test plan, requirements, a user story, acceptance criteria — and converts it into scenarios.
+The third path starts from a written test document and converts it into scenarios. The test document could be a test plan, requirements, a user story, or acceptance criteria.
 
-### The sample documents
+### Sample test documents
 
-Two example test documents are in `src/test/docs/`, both describing the bookstore demo's checkout flow from different angles:
+Two sample test documents are in `src/test/docs/`. They describe the bookstore demo's checkout flow from different angles:
 
 - **`checkout-user-story.md`** — the flow framed as a user story with acceptance criteria.
 - **`checkout-test-spec.md`** — the checkout page covered exhaustively: every element that should render, every interaction a user can perform, and the expected outcome of each.
@@ -241,15 +255,17 @@ Because both sample documents include a **Test data** table, the generated scena
 
 ### Review the scenarios
 
+`/review-scenario` audits your scenarios against the live site — verifying each claim, tightening loose assertions, and rewriting the markdown in place.
+
 **Claude Code:**
 
 ```
 /review-scenario convert
 ```
 
-Same as Step 2, scoped to the `convert` folder — Claude verifies each scenario against the live site and rewrites the markdown in place.
-
 ### Generate tests
+
+Generate the tests with:
 
 **Claude Code:**
 
@@ -261,6 +277,8 @@ You'll find the resulting tests at `src/test/kotlin/com/bookshelf/scenarios/conv
 
 ### Run tests
 
+Run the tests with:
+
 **Terminal:**
 
 ```
@@ -270,6 +288,8 @@ make clean tests
 ---
 
 ## Step 5: Check the dashboard
+
+Check the dashboard with:
 
 **Claude Code:**
 
