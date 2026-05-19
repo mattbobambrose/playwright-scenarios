@@ -96,7 +96,7 @@ The `/crawl-site` command lets Claude discover user flows on its own.
 
 ### Run the crawl
 
-Run the crawl with:
+`/crawl-site` inventories the start page, ranks candidate flows, walks each (read-only — no form submits), and writes one scenario per flow to `src/test/scenarios/crawl/`.
 
 **Claude Code:**
 
@@ -104,7 +104,7 @@ Run the crawl with:
 /crawl-site http://localhost:8080
 ```
 
-`/crawl-site` inventories the start page, ranks candidate flows, walks each (read-only — no form submits), and writes one scenario per flow to `src/test/scenarios/crawl/`. Respond to any prompts Claude shows along the way — accepting the recommended option each time is fine for a first run.
+Respond to any prompts Claude shows along the way — accepting the recommended option each time is fine for a first run.
 
 You'll find the generated scenarios at `src/test/scenarios/crawl`. Open one and skim it — this human-readable markdown is the scenario format the rest of the pipeline reviews and turns into tests.
 
