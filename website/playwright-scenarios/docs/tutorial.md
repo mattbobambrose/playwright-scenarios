@@ -16,6 +16,32 @@ Do this once before working through any of the authoring sections. Each command 
 
 1. Install Git, Docker, Node.js, and Claude.
 
+    On macOS, [Homebrew](https://brew.sh) gives you the first three. Install Homebrew if you don't have it:
+
+    **Terminal:**
+
+    ```
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    ```
+
+    Then install Git, Docker, and Node.js:
+
+    **Terminal:**
+
+    ```
+    brew install git
+    brew install --cask docker
+    brew install node
+    ```
+
+    Claude Code installs via npm (provided by the Node install above):
+
+    **Terminal:**
+
+    ```
+    npm install -g @anthropic-ai/claude-code
+    ```
+
 2. Install `playwright-cli` (used by `/crawl-site`, `/review-scenario`, and `/scenario-to-tests` for live-site exploration):
 
     **Terminal:**
